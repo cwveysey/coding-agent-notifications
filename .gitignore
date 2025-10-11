@@ -1,0 +1,18 @@
+# Logs
+*.log
+
+# PID files
+*.pid
+
+# Runtime flags
+.sounds-enabled
+
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
