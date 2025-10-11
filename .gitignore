@@ -6,6 +6,10 @@
 
 # Runtime flags
 .sounds-enabled
+.last-activity
+
+# Configuration (user-specific)
+audio-notifier.yaml
 
 # macOS
 .DS_Store

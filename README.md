@@ -7,9 +7,15 @@ Get audio notifications when Claude Code asks you questions during your session.
 This tool monitors your Claude Code terminal output in real-time and plays a sound notification whenever Claude asks you a question. Perfect for when you're multitasking or working in another window.
 
 **Features:**
-- 🎵 Plays a sound (Submarine.aiff) when Claude asks questions
+- 🎵 Multiple notification types (audio, visual, remote)
+- 🎨 **Per-project sounds** - Different sound for each project (auto-detected)
+- 🎲 **Random sound selection** - Consistent sound per project from a pool
+- 🎧 **Custom audio support** - Use your own .mp3/.wav/.aiff files
+- 🛡️ **Anti-spam protection** - Configurable cooldown between notifications
+- ⏱️ **Inactivity detection** - Backup notification if Claude waits too long
 - 🤖 Smart pattern matching to detect conversational questions
 - 📝 Logs all detected questions with timestamps
+- 🔧 YAML configuration file for easy customization
 - 🔇 Easy toggle to enable/disable sounds
 - 🚀 Runs silently in the background
 - 🧹 Simple start/stop management
@@ -137,7 +143,130 @@ claude-watcher-toggle-sound
 
 Questions are still logged when sound is disabled.
 
-## 🎛️ Configuration Options
+## 🎛️ Configuration
+
+### Configuration File
+
+The tool uses `~/.claude/audio-notifier.yaml` for configuration. Copy the example on first run:
+
+```bash
+cp ~/.claude/scripts/audio-notifier.yaml.example ~/.claude/audio-notifier.yaml
+```
+
+### Per-Project Sounds 🎨
+
+**Different sounds for different projects!** Helps you instantly know which project needs attention.
+
+**Setup Option 1: Random sounds (automatic)**
+
+In `~/.claude/audio-notifier.yaml`:
+```yaml
+sound:
+  random: true  # Each project gets a consistent random sound
+```
+
+The tool automatically:
+- Detects your current project from working directory
+- Assigns a sound from the available pool
+- **Always uses the same sound for the same project**
+
+**Setup Option 2: Custom project mappings**
+
+Edit `~/.claude/project-sounds.conf`:
+```bash
+# Format: project_name=sound_file
+github-activity-summary-tool=/System/Library/Sounds/Hero.aiff
+my-portfolio=/System/Library/Sounds/Glass.aiff
+work-project=/Users/yourname/Music/work-alert.mp3
+```
+
+Project names are matched from your working directory.
+
+### Custom Audio Files 🎧
+
+Use your own audio files! Supported formats: `.mp3`, `.wav`, `.aiff`
+
+**As default sound:**
+```yaml
+sound:
+  file: /Users/yourname/Music/my-notification.mp3
+```
+
+**In available sounds pool:**
+```yaml
+sound:
+  available_sounds:
+    - /System/Library/Sounds/Glass.aiff
+    - ~/Downloads/custom-sound.mp3
+    - ~/Music/alert.wav
+```
+
+**For specific projects:**
+```bash
+# In project-sounds.conf
+my-project=/Users/yourname/Downloads/project-alert.mp3
+```
+
+### Anti-Spam Protection 🛡️
+
+Prevents annoying rapid-fire notifications:
+
+```yaml
+sound:
+  min_interval: 5  # Minimum seconds between notifications
+```
+
+**How it works:**
+- First question → Sound plays ✅
+- Second question 2s later → Skipped (too soon) ❌
+- Third question 6s after first → Sound plays ✅
+
+### Inactivity Detection ⏱️
+
+Backup notification if Claude is waiting but no question was detected:
+
+```yaml
+inactivity:
+  enabled: true
+  timeout: 30  # Seconds of no activity before notification
+  message: "Claude may be waiting for input"
+```
+
+**Use case:** If question detection misses something, you'll still get notified after 30s of inactivity.
+
+### Multiple Notification Types
+
+**Audio (macOS/Linux):**
+```yaml
+notifications:
+  audio:
+    enabled: true
+```
+
+**Visual (macOS - requires terminal-notifier):**
+```yaml
+notifications:
+  terminal_notifier:
+    enabled: true
+    title: "Claude Code"
+    subtitle: "Question Detected"
+```
+
+Install: `brew install terminal-notifier`
+
+**Remote (ntfy.sh - mobile notifications):**
+```yaml
+notifications:
+  ntfy:
+    enabled: true
+    topic: "my-claude-notifications"
+    server: "https://ntfy.sh"
+    priority: default
+```
+
+Setup: [ntfy.sh](https://ntfy.sh)
+
+## 🎛️ Shell Configuration
 
 ### Setup Modes
 

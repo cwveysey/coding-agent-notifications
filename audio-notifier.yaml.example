@@ -1,0 +1,106 @@
+# Audio Notifier Configuration for Claude Code
+# Location: ~/.claude/audio-notifier.yaml
+
+# Sound settings
+sound:
+  enabled: true
+
+  # Default sound (used if random is disabled and no project match)
+  file: /System/Library/Sounds/Submarine.aiff
+
+  # Random sound selection (picks different sound per project)
+  random: true
+
+  # Available sounds pool (for random selection)
+  # You can use system sounds or custom audio files (.aiff, .wav, .mp3)
+  available_sounds:
+    - /System/Library/Sounds/Submarine.aiff
+    - /System/Library/Sounds/Glass.aiff
+    - /System/Library/Sounds/Ping.aiff
+    - /System/Library/Sounds/Tink.aiff
+    - /System/Library/Sounds/Purr.aiff
+    - /System/Library/Sounds/Pop.aiff
+    - /System/Library/Sounds/Funk.aiff
+    - /System/Library/Sounds/Hero.aiff
+    - /System/Library/Sounds/Blow.aiff
+    - /System/Library/Sounds/Bottle.aiff
+    - /System/Library/Sounds/Frog.aiff
+    - /System/Library/Sounds/Basso.aiff
+    # Custom sounds:
+    # - ~/Downloads/custom-notification.mp3
+    # - ~/Music/alert-sound.wav
+
+  # Per-project sound mappings (project name → sound file)
+  # Project names are matched against working directory paths
+  project_sounds:
+    # Example: github-activity-summary-tool: /System/Library/Sounds/Hero.aiff
+    # Example: my-portfolio: /System/Library/Sounds/Glass.aiff
+    # Add your projects below:
+
+  # Minimum seconds between notifications (anti-spam)
+  min_interval: 5
+
+# Detection settings
+detection:
+  # Minimum question length to trigger notification
+  min_question_length: 15
+
+  # Question words that trigger detection
+  patterns:
+    - what
+    - when
+    - where
+    - why
+    - how
+    - would
+    - should
+    - can
+    - could
+    - do
+    - does
+    - did
+    - is
+    - are
+    - were
+    - was
+    - will
+    - shall
+
+# Notification types (multiple can be enabled)
+notifications:
+  # Local audio notification (macOS/Linux)
+  audio:
+    enabled: true
+
+  # macOS visual notification (requires terminal-notifier)
+  terminal_notifier:
+    enabled: true
+    title: "Claude Code"
+    subtitle: "Question Detected"
+    # Will show the actual question as the message
+
+  # Remote notification via ntfy.sh (optional)
+  ntfy:
+    enabled: false
+    topic: ""  # e.g., "my-claude-notifications"
+    server: "https://ntfy.sh"
+    priority: default  # min, low, default, high, max
+
+# Inactivity detection (backstop timer)
+# Sends notification if Claude has been idle for X seconds
+inactivity:
+  enabled: true
+  # Time in seconds before considering Claude "waiting"
+  timeout: 30
+  # Message to show for inactivity notifications
+  message: "Claude may be waiting for input"
+
+# Logging
+logging:
+  # Save all detected questions to log file
+  log_questions: true
+  log_file: ~/.claude/questions-detected.log
+
+  # Debug logging (verbose output)
+  debug: false
+  debug_file: ~/.claude/watcher-debug.log
