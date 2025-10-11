@@ -48,10 +48,23 @@ chmod +x ~/.claude/scripts/*.sh
 Add these to your `~/.zshrc` or `~/.bashrc`:
 
 ```bash
-# Claude Code question watcher aliases
+# --- Claude Code with logging & audio notifications ---
+# Save original claude command
+alias claude-silent='command claude'
+
+# Replace claude to always log output (for audio notifications)
+claude() {
+    if [[ "$CLAUDE_SILENT" == "1" ]]; then
+        command claude "$@"
+    else
+        command claude "$@" 2>&1 | tee -a ~/.claude/claude-output.log
+    fi
+}
+
+# Watcher controls
 alias claude-watcher-start='bash ~/.claude/scripts/start-question-watcher.sh'
 alias claude-watcher-stop='bash ~/.claude/scripts/stop-question-watcher.sh'
-alias claude-watcher-status='bash ~/.claude/scripts/check-watcher-status.sh'
+alias claude-watcher-status='ps aux | grep watch-claude-questions | grep -v grep && echo "✓ Watcher is running" || echo "Watcher is not running"'
 alias claude-watcher-toggle-sound='bash ~/.claude/scripts/toggle-sound.sh'
 ```
 
@@ -61,55 +74,118 @@ Then reload your shell:
 source ~/.zshrc  # or source ~/.bashrc
 ```
 
-### 4. Configure Claude Code Output Logging
+### 4. Start the Watcher
 
-The watcher monitors `~/.claude/claude-output.log`. You need to configure Claude Code to write to this file.
-
-Add this to your Claude Code settings (if available) or use shell redirection:
-
-```bash
-# Option 1: Redirect output when starting Claude Code
-claude | tee -a ~/.claude/claude-output.log
-
-# Option 2: Create an alias
-alias claude-watched='claude | tee -a ~/.claude/claude-output.log'
-```
-
-**Note:** The exact method depends on your Claude Code setup. The key is ensuring Claude's output gets written to `~/.claude/claude-output.log`.
-
-## 🎯 Usage
-
-### Start the Watcher
+Start the background watcher (only needs to be done once):
 
 ```bash
 claude-watcher-start
 ```
 
-This starts the background process that monitors for questions.
+**That's it!** Now every time you run `claude`, output will be logged and you'll hear sounds when Claude asks questions.
 
-### Stop the Watcher
+## 🎯 Usage
 
-```bash
-claude-watcher-stop
-```
+### Normal Usage (Audio Notifications Enabled)
 
-Stops all running watcher instances.
-
-### Check Status
+Just run Claude Code normally:
 
 ```bash
-claude-watcher-status
+claude
 ```
 
-Shows if the watcher is running and recent activity.
+Audio notifications are automatically enabled! You'll hear a sound when Claude asks questions.
 
-### Toggle Sound On/Off
+### Disable Audio Notifications Temporarily
 
+**Option 1: Run without logging** (no audio notifications for this session):
+```bash
+claude-silent
+```
+
+**Option 2: Use environment variable** (no audio notifications for this session):
+```bash
+CLAUDE_SILENT=1 claude
+```
+
+**Option 3: Toggle sound only** (logging continues, but no sound):
 ```bash
 claude-watcher-toggle-sound
 ```
 
-Disable/enable sound notifications while keeping the watcher running. Questions are still logged when sound is disabled.
+### Watcher Controls
+
+**Start the watcher** (run once, keeps running in background):
+```bash
+claude-watcher-start
+```
+
+**Stop the watcher** (disables audio notifications completely):
+```bash
+claude-watcher-stop
+```
+
+**Check watcher status**:
+```bash
+claude-watcher-status
+```
+
+**Toggle sound on/off** (keeps logging, just mutes/unmutes sound):
+```bash
+claude-watcher-toggle-sound
+```
+
+Questions are still logged when sound is disabled.
+
+## 🎛️ Configuration Options
+
+### Setup Modes
+
+**Mode 1: Always-On (Recommended)**
+- Claude Code always logs output
+- Audio notifications enabled by default
+- Use `claude-silent` when you want it quiet
+
+```bash
+# In ~/.zshrc (already configured if you followed installation)
+claude() {
+    if [[ "$CLAUDE_SILENT" == "1" ]]; then
+        command claude "$@"
+    else
+        command claude "$@" 2>&1 | tee -a ~/.claude/claude-output.log
+    fi
+}
+```
+
+**Mode 2: Opt-In**
+- Claude Code runs normally by default
+- Use special command when you want notifications
+
+```bash
+# In ~/.zshrc (alternative setup)
+alias claude-notify='claude 2>&1 | tee -a ~/.claude/claude-output.log'
+
+# Then use:
+claude-notify  # With audio notifications
+claude         # Without audio notifications
+```
+
+**Mode 3: Manual Wrapper**
+- Run with the wrapper script manually
+
+```bash
+bash ~/.claude/scripts/claude-with-logging.sh
+```
+
+### When to Use Each Option
+
+| Situation | Command | Effect |
+|-----------|---------|--------|
+| Normal work with notifications | `claude` | ✅ Logging + Sound |
+| Need quiet (calls, recording) | `claude-silent` | ❌ No logging, no sound |
+| Need quiet but keep logs | `CLAUDE_SILENT=1 claude` | ❌ No logging, no sound |
+| Mute sound, keep logging | `claude-watcher-toggle-sound` then `claude` | ✅ Logging, ❌ No sound |
+| Stop watcher completely | `claude-watcher-stop` then `claude` | ✅ Logging, ❌ No sound |
 
 ## 📁 File Structure
 
