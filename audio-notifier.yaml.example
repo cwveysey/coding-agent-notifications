@@ -37,6 +37,12 @@ sound:
     # Example: my-portfolio: /System/Library/Sounds/Glass.aiff
     # Add your projects below:
 
+  # Per-event sound mappings (override sounds for specific events)
+  event_sounds:
+    permission: /System/Library/Sounds/Ping.aiff      # When Claude needs permission
+    question: /System/Library/Sounds/Glass.aiff       # When Claude asks a question
+    inactivity: /System/Library/Sounds/Tink.aiff      # When Claude is idle 60s
+
   # Minimum seconds between notifications (anti-spam)
   min_interval: 5
 

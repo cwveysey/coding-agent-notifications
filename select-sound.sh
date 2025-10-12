@@ -6,11 +6,11 @@
 if [[ -n "$1" ]]; then
     PROJECT_NAME="$1"
 else
-    # Try to detect from claude-output.log last working directory
-    PROJECT_NAME=$(grep -o "Working directory: [^[:space:]]*" "$HOME/.claude/claude-output.log" 2>/dev/null | tail -1 | awk '{print $NF}' | xargs basename 2>/dev/null)
+    # Use PWD environment variable (current working directory)
+    PROJECT_NAME=$(basename "${PWD:-/tmp}" 2>/dev/null)
 
-    # Fallback to current directory
-    [[ -z "$PROJECT_NAME" ]] && PROJECT_NAME=$(basename "$PWD")
+    # If that fails, try to get it from parent process
+    [[ -z "$PROJECT_NAME" || "$PROJECT_NAME" == "/" ]] && PROJECT_NAME="claude-session"
 fi
 
 # Available sounds
@@ -38,12 +38,33 @@ if [[ -f "$PROJECT_SOUNDS_FILE" && -n "$PROJECT_NAME" ]]; then
     CUSTOM_SOUND=$(grep "^${PROJECT_NAME}=" "$PROJECT_SOUNDS_FILE" 2>/dev/null | cut -d= -f2)
 fi
 
-# Select sound
-if [[ -n "$CUSTOM_SOUND" && -f "$CUSTOM_SOUND" ]]; then
+# Check for event-specific sound first
+EVENT_SOUND=""
+if [[ -n "${EVENT_TYPE:-}" ]]; then
+    # Look for event_sounds in YAML config (simple parsing)
+    case "$EVENT_TYPE" in
+        permission)
+            EVENT_SOUND=$(grep "^\s*permission:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | sed 's/.*:\s*\([^#]*\).*/\1/' | tr -d ' ')
+            ;;
+        question)
+            EVENT_SOUND=$(grep "^\s*question:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | sed 's/.*:\s*\([^#]*\).*/\1/' | tr -d ' ')
+            ;;
+        inactivity)
+            EVENT_SOUND=$(grep "^\s*inactivity:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | sed 's/.*:\s*\([^#]*\).*/\1/' | tr -d ' ')
+            ;;
+    esac
+fi
+
+# Select sound (priority: event > custom project > random > default)
+if [[ -n "$EVENT_SOUND" && -f "$EVENT_SOUND" ]]; then
+    # Use event-specific sound
+    SELECTED_SOUND="$EVENT_SOUND"
+    SOUND_SOURCE="event (${EVENT_TYPE})"
+elif [[ -n "$CUSTOM_SOUND" && -f "$CUSTOM_SOUND" ]]; then
     # Use custom project sound
     SELECTED_SOUND="$CUSTOM_SOUND"
     SOUND_SOURCE="custom (${PROJECT_NAME})"
-elif [[ "$SOUND_RANDOM" == "true" && -n "$PROJECT_NAME" ]]; then
+elif [[ "${SOUND_RANDOM:-false}" == "true" && -n "$PROJECT_NAME" ]]; then
     # Use consistent random sound based on project name hash
     # This ensures same project always gets same sound
     PROJECT_HASH=$(echo -n "$PROJECT_NAME" | cksum | awk '{print $1}')
@@ -52,7 +73,7 @@ elif [[ "$SOUND_RANDOM" == "true" && -n "$PROJECT_NAME" ]]; then
     SOUND_SOURCE="random (${PROJECT_NAME})"
 else
     # Use default sound from config
-    SELECTED_SOUND="$SOUND_FILE"
+    SELECTED_SOUND="${SOUND_FILE:-/System/Library/Sounds/Submarine.aiff}"
     SOUND_SOURCE="default"
 fi
 

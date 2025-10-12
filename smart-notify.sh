@@ -12,7 +12,7 @@
 #   smart-notify.sh notification    # Called by Notification hook
 #   smart-notify.sh stop             # Called by Stop hook
 
-set -euo pipefail
+set -eo pipefail
 
 HOOK_TYPE="${1:-unknown}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -43,21 +43,55 @@ send_notification() {
 
     debug_log "Sending notification: $reason"
     debug_log "Message: ${message:0:100}"
+    debug_log "SCRIPT_DIR: $SCRIPT_DIR"
+    debug_log "SOUNDS_ENABLED: $SOUNDS_ENABLED"
 
-    # Select sound for current project
+    # Determine event type for sound selection
+    local event_type="default"
+    case "$reason" in
+        notification-hook)
+            # Check message content to determine if it's permission or inactivity
+            if [[ "$message" =~ "needs your permission" ]]; then
+                event_type="permission"
+            elif [[ "$message" =~ "waiting for" ]]; then
+                event_type="inactivity"
+            fi
+            ;;
+        stop-hook-question)
+            event_type="question"
+            ;;
+    esac
+    debug_log "Event type: $event_type"
+
+    # Select sound for current project and event
+    debug_log "About to select sound..."
+    local sound="/System/Library/Sounds/Submarine.aiff"
     if [[ -f "$SCRIPT_DIR/select-sound.sh" ]]; then
-        source "$SCRIPT_DIR/select-sound.sh"
-        local sound="$SELECTED_SOUND"
-        debug_log "Selected sound: $sound (source: $SOUND_SOURCE, project: $PROJECT_NAME)"
+        debug_log "select-sound.sh found, sourcing..."
+        if EVENT_TYPE="$event_type" source "$SCRIPT_DIR/select-sound.sh" 2>&1; then
+            sound="${SELECTED_SOUND:-$sound}"
+            debug_log "Selected sound: $sound (source: ${SOUND_SOURCE:-unknown}, project: ${PROJECT_NAME:-unknown}, event: $event_type)"
+        else
+            debug_log "ERROR: Failed to source select-sound.sh (exit $?), using fallback"
+        fi
     else
-        local sound="${SOUND_FILE:-/System/Library/Sounds/Submarine.aiff}"
+        debug_log "select-sound.sh NOT found, using default"
+        sound="${SOUND_FILE:-/System/Library/Sounds/Submarine.aiff}"
         debug_log "Using default sound: $sound"
     fi
 
+    debug_log "Sound variable set to: $sound"
+    debug_log "Checking if should play: SOUNDS_ENABLED=$SOUNDS_ENABLED, file exists=$([ -f "$sound" ] && echo yes || echo no)"
+
     # Audio notification
     if [[ "$SOUNDS_ENABLED" == "true" && -f "$sound" ]]; then
-        afplay "$sound" >/dev/null 2>&1 &
-        debug_log "Audio notification sent"
+        debug_log "About to play sound: $sound"
+        # Use osascript for better audio device access from hooks
+        osascript -e "do shell script \"afplay '$sound'\"" >/dev/null 2>&1 &
+        local pid=$!
+        debug_log "Audio notification sent (osascript PID: $pid)"
+    else
+        debug_log "Skipping audio: SOUNDS_ENABLED=$SOUNDS_ENABLED, sound file exists=$([ -f "$sound" ] && echo yes || echo no)"
     fi
 
     # Visual notification (if terminal-notifier available)

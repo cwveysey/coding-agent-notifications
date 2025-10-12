@@ -4,10 +4,11 @@ Get audio notifications when Claude Code needs your attention. Never miss when C
 
 ## 🔊 What This Does
 
-This tool uses Claude Code's official hooks system to provide reliable, intelligent notifications. It plays a sound (per-project) when Claude needs permission, asks questions, or has been idle.
+This tool uses Claude Code's official hooks system to provide reliable, intelligent notifications. It plays customizable sounds (per-event and per-project) when Claude needs permission, asks questions, or has been idle.
 
 **Features:**
 - 🎯 **Hooks-based detection** - Uses official Claude Code Notification and Stop hooks
+- 🔔 **Per-event sounds** - Different sounds for permissions, questions, and inactivity
 - 🎨 **Per-project sounds** - Different sound for each project (auto-detected)
 - 🎲 **Random sound selection** - Consistent sound per project from a pool
 - 🎧 **Custom audio support** - Use your own .mp3/.wav/.aiff files
@@ -200,6 +201,42 @@ work-project=/Users/yourname/Music/work-alert.mp3
 ```
 
 Project names are matched from your working directory.
+
+### Per-Event Sounds 🎯
+
+**Different sounds for different event types!** Know immediately whether Claude needs permission, is asking a question, or has been idle.
+
+Edit `~/.claude/audio-notifier.yaml`:
+```yaml
+sound:
+  # Per-event sound mappings (override sounds for specific events)
+  event_sounds:
+    permission: /System/Library/Sounds/Ping.aiff      # When Claude needs permission
+    question: /System/Library/Sounds/Glass.aiff       # When Claude asks a question
+    inactivity: /System/Library/Sounds/Tink.aiff      # When Claude is idle 60s
+```
+
+**Event types:**
+- **permission** - Fires when Claude needs permission to use a tool (Read, Write, Bash, etc.)
+- **question** - Fires when Claude's response ends with a question mark
+- **inactivity** - Fires after 60 seconds of Claude waiting for input
+
+**Priority order:** Event sounds override project sounds and random sounds.
+
+**Examples:**
+```yaml
+# Use dramatic sounds for permissions, subtle for questions
+event_sounds:
+  permission: /System/Library/Sounds/Sosumi.aiff
+  question: /System/Library/Sounds/Tink.aiff
+  inactivity: /System/Library/Sounds/Purr.aiff
+
+# Use custom MP3 files
+event_sounds:
+  permission: ~/Downloads/alert-urgent.mp3
+  question: ~/Music/notification-gentle.mp3
+  inactivity: ~/Music/reminder-soft.mp3
+```
 
 ### Custom Audio Files 🎧
 
