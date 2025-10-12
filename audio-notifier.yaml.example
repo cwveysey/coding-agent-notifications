@@ -85,6 +85,12 @@ notifications:
     subtitle: "Question Detected"
     # Will show the actual question as the message
 
+  # Custom notification messages per event type
+  messages:
+    permission: "Claude requires your permission"
+    question: "Claude has a question"
+    inactivity: "Claude requires your direction"
+
   # Remote notification via ntfy.sh (optional)
   ntfy:
     enabled: false

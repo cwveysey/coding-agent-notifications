@@ -2,14 +2,17 @@
 # Select appropriate sound based on current project
 # Usage: source select-sound.sh [project_name]
 
-# Get project name from working directory or parameter
-if [[ -n "$1" ]]; then
+# Get project name from environment, parameter, or working directory
+if [[ -n "${PROJECT_NAME:-}" ]]; then
+    # Use passed PROJECT_NAME from parent script
+    :  # no-op, already set
+elif [[ -n "$1" ]]; then
     PROJECT_NAME="$1"
 else
     # Use PWD environment variable (current working directory)
     PROJECT_NAME=$(basename "${PWD:-/tmp}" 2>/dev/null)
 
-    # If that fails, try to get it from parent process
+    # If that fails, use default
     [[ -z "$PROJECT_NAME" || "$PROJECT_NAME" == "/" ]] && PROJECT_NAME="claude-session"
 fi
 

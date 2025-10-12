@@ -63,12 +63,35 @@ send_notification() {
     esac
     debug_log "Event type: $event_type"
 
+    # Get custom message for this event type (if configured)
+    local custom_message=""
+    if [[ -n "$event_type" && "$event_type" != "default" ]]; then
+        # Look under the messages: section specifically
+        custom_message=$(awk '/^[[:space:]]*messages:[[:space:]]*$/{flag=1;next}/^[[:space:]]*[a-z_]+:[[:space:]]*$/{flag=0}flag && /^[[:space:]]*'"$event_type"':[[:space:]]*/{gsub(/^[[:space:]]*'"$event_type"':[[:space:]]*"|"[[:space:]]*$/,"");print;exit}' "$HOME/.claude/audio-notifier.yaml" 2>/dev/null)
+    fi
+    debug_log "Custom message for $event_type: ${custom_message:-none}"
+
+    # Detect project name from git repo toplevel or working directory
+    local detected_project=""
+
+    # Try to get git toplevel directory name
+    if command -v git >/dev/null 2>&1; then
+        detected_project=$(cd "${PWD:-/tmp}" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null | xargs basename 2>/dev/null)
+    fi
+
+    # Fallback to current directory name
+    if [[ -z "$detected_project" ]]; then
+        detected_project=$(basename "${PWD:-/tmp}" 2>/dev/null)
+    fi
+
+    [[ -z "$detected_project" || "$detected_project" == "/" ]] && detected_project="claude-session"
+
     # Select sound for current project and event
     debug_log "About to select sound..."
     local sound="/System/Library/Sounds/Submarine.aiff"
     if [[ -f "$SCRIPT_DIR/select-sound.sh" ]]; then
         debug_log "select-sound.sh found, sourcing..."
-        if EVENT_TYPE="$event_type" source "$SCRIPT_DIR/select-sound.sh" 2>&1; then
+        if EVENT_TYPE="$event_type" PROJECT_NAME="$detected_project" source "$SCRIPT_DIR/select-sound.sh" 2>&1; then
             sound="${SELECTED_SOUND:-$sound}"
             debug_log "Selected sound: $sound (source: ${SOUND_SOURCE:-unknown}, project: ${PROJECT_NAME:-unknown}, event: $event_type)"
         else
@@ -79,6 +102,9 @@ send_notification() {
         sound="${SOUND_FILE:-/System/Library/Sounds/Submarine.aiff}"
         debug_log "Using default sound: $sound"
     fi
+
+    # Ensure PROJECT_NAME is available for notification
+    PROJECT_NAME="${PROJECT_NAME:-$detected_project}"
 
     debug_log "Sound variable set to: $sound"
     debug_log "Checking if should play: SOUNDS_ENABLED=$SOUNDS_ENABLED, file exists=$([ -f "$sound" ] && echo yes || echo no)"
@@ -96,12 +122,32 @@ send_notification() {
 
     # Visual notification (if terminal-notifier available)
     if command -v terminal-notifier >/dev/null 2>&1; then
+        # Determine title and message based on custom message availability
+        local display_title
+        local display_message
+
+        if [[ -n "$custom_message" ]]; then
+            # Use custom message as title (no project appended)
+            display_title="$custom_message"
+
+            # Message includes project and original message
+            if [[ -n "${PROJECT_NAME:-}" && "$PROJECT_NAME" != "claude-session" ]]; then
+                display_message="$PROJECT_NAME: ${message:0:180}"
+            else
+                display_message="${message:0:200}"
+            fi
+        else
+            # Fallback to original behavior
+            display_title="$title"
+            display_message="${message:0:200}"
+        fi
+
         terminal-notifier \
-            -title "$title" \
-            -message "${message:0:200}" \
+            -title "$display_title" \
+            -message "$display_message" \
             -sound default \
             >/dev/null 2>&1 &
-        debug_log "Visual notification sent"
+        debug_log "Visual notification sent: title='$display_title', message='${display_message:0:50}'"
     fi
 
     # Log the notification
@@ -192,7 +238,8 @@ handle_stop_hook() {
     debug_log "Last message: ${last_message:0:100}"
 
     # Check if message ends with question mark (indicates question)
-    if [[ "$last_message" =~ \?[[:space:]]*$ ]]; then
+    # Handle markdown formatting (**, *, etc.) at the end
+    if [[ "$last_message" =~ \?[[:space:]\*]*$ ]]; then
         debug_log "Question detected in last message"
 
         # Check anti-spam
@@ -202,7 +249,7 @@ handle_stop_hook() {
 
         # Send notification with question preview
         local preview="${last_message:0:100}"
-        send_notification "$preview" "Claude Code Question" "stop-hook-question"
+        send_notification "$preview" "Question from Claude" "stop-hook-question"
 
         debug_log "Stop hook question notification sent"
     else
