@@ -1,24 +1,23 @@
 # Audio Notifications for Claude Code Activity
 
-Get audio notifications when Claude Code asks you questions during your session. Never miss when Claude is waiting for your input!
+Get audio notifications when Claude Code needs your attention. Never miss when Claude is waiting for your input!
 
 ## 🔊 What This Does
 
-This tool monitors your Claude Code terminal output in real-time and plays a sound notification whenever Claude asks you a question. Perfect for when you're multitasking or working in another window.
+This tool uses Claude Code's official hooks system to provide reliable, intelligent notifications. It plays a sound (per-project) when Claude needs permission, asks questions, or has been idle.
 
 **Features:**
-- 🎵 Multiple notification types (audio, visual, remote)
+- 🎯 **Hooks-based detection** - Uses official Claude Code Notification and Stop hooks
 - 🎨 **Per-project sounds** - Different sound for each project (auto-detected)
 - 🎲 **Random sound selection** - Consistent sound per project from a pool
 - 🎧 **Custom audio support** - Use your own .mp3/.wav/.aiff files
 - 🛡️ **Anti-spam protection** - Configurable cooldown between notifications
-- ⏱️ **Inactivity detection** - Backup notification if Claude waits too long
-- 🤖 Smart pattern matching to detect conversational questions
-- 📝 Logs all detected questions with timestamps
+- ⏱️ **Inactivity detection** - Automatic notification after 60s idle (built into Notification hook)
+- 🎵 Multiple notification types (audio, visual, remote)
+- 📝 Logs all notifications with timestamps
 - 🔧 YAML configuration file for easy customization
 - 🔇 Easy toggle to enable/disable sounds
-- 🚀 Runs silently in the background
-- 🧹 Simple start/stop management
+- ✅ No false positives/negatives - relies on Claude's own signals
 
 ## 📋 Prerequisites
 
@@ -49,29 +48,59 @@ cp ~/temp-audio-notif/*.sh ~/.claude/scripts/
 chmod +x ~/.claude/scripts/*.sh
 ```
 
-### 3. Add Aliases to Your Shell
+### 3. Copy Configuration Files
+
+```bash
+# Copy example configs
+cp ~/.claude/scripts/audio-notifier.yaml.example ~/.claude/audio-notifier.yaml
+cp ~/.claude/scripts/project-sounds.conf.example ~/.claude/project-sounds.conf
+
+# Enable sounds (create flag file)
+touch ~/.claude/.sounds-enabled
+```
+
+### 4. Configure Claude Code Hooks
+
+Edit `~/.claude/settings.json` and add (or merge with existing hooks):
+
+```json
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/smart-notify.sh notification"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/smart-notify.sh stop"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### 5. Add Shell Aliases (Optional)
 
 Add these to your `~/.zshrc` or `~/.bashrc`:
 
 ```bash
-# --- Claude Code with logging & audio notifications ---
-# Save original claude command
-alias claude-silent='command claude'
-
-# Replace claude to always log output (for audio notifications)
-claude() {
-    if [[ "$CLAUDE_SILENT" == "1" ]]; then
-        command claude "$@"
-    else
-        command claude "$@" 2>&1 | tee -a ~/.claude/claude-output.log
-    fi
-}
-
-# Watcher controls
-alias claude-watcher-start='bash ~/.claude/scripts/start-question-watcher.sh'
-alias claude-watcher-stop='bash ~/.claude/scripts/stop-question-watcher.sh'
-alias claude-watcher-status='ps aux | grep watch-claude-questions | grep -v grep && echo "✓ Watcher is running" || echo "Watcher is not running"'
-alias claude-watcher-toggle-sound='bash ~/.claude/scripts/toggle-sound.sh'
+# Audio notification controls
+alias claude-sounds-on='touch ~/.claude/.sounds-enabled && echo "✅ Audio notifications enabled"'
+alias claude-sounds-off='rm -f ~/.claude/.sounds-enabled && echo "🔇 Audio notifications disabled"'
+alias claude-sounds-status='[[ -f ~/.claude/.sounds-enabled ]] && echo "✅ Enabled" || echo "🔇 Disabled"'
 ```
 
 Then reload your shell:
@@ -80,19 +109,11 @@ Then reload your shell:
 source ~/.zshrc  # or source ~/.bashrc
 ```
 
-### 4. Start the Watcher
-
-Start the background watcher (only needs to be done once):
-
-```bash
-claude-watcher-start
-```
-
-**That's it!** Now every time you run `claude`, output will be logged and you'll hear sounds when Claude asks questions.
+**That's it!** The next time Claude Code runs, hooks will fire automatically when Claude needs your attention.
 
 ## 🎯 Usage
 
-### Normal Usage (Audio Notifications Enabled)
+### Normal Usage
 
 Just run Claude Code normally:
 
@@ -100,48 +121,46 @@ Just run Claude Code normally:
 claude
 ```
 
-Audio notifications are automatically enabled! You'll hear a sound when Claude asks questions.
+You'll automatically get notifications when:
+- ✅ **Permission needed** - Claude asks to run a tool (Notification hook)
+- ✅ **Question asked** - Claude's response ends with ? (Stop hook)
+- ✅ **Idle timeout** - No activity for 60+ seconds (Notification hook)
 
-### Disable Audio Notifications Temporarily
+Each notification:
+- 🔊 Plays a project-specific sound
+- 📱 Shows visual notification (if terminal-notifier installed)
+- 📝 Logs to `~/.claude/notifications.log`
 
-**Option 1: Run without logging** (no audio notifications for this session):
+### Disable Audio Notifications
+
+**Temporarily disable sounds:**
 ```bash
-claude-silent
+claude-sounds-off
 ```
 
-**Option 2: Use environment variable** (no audio notifications for this session):
+**Re-enable sounds:**
 ```bash
-CLAUDE_SILENT=1 claude
+claude-sounds-on
 ```
 
-**Option 3: Toggle sound only** (logging continues, but no sound):
+**Check status:**
 ```bash
-claude-watcher-toggle-sound
+claude-sounds-status
 ```
 
-### Watcher Controls
+### How It Works
 
-**Start the watcher** (run once, keeps running in background):
-```bash
-claude-watcher-start
+The hooks system automatically fires at key events:
+
+```
+Claude needs permission → Notification hook fires → 🔔 Sound plays
+Claude finishes response → Stop hook fires → Checks for "?" → 🔔 Sound plays
+60 seconds idle → Notification hook fires → 🔔 Sound plays
 ```
 
-**Stop the watcher** (disables audio notifications completely):
-```bash
-claude-watcher-stop
-```
+No background processes, no log watching, no pattern matching!
 
-**Check watcher status**:
-```bash
-claude-watcher-status
-```
-
-**Toggle sound on/off** (keeps logging, just mutes/unmutes sound):
-```bash
-claude-watcher-toggle-sound
-```
-
-Questions are still logged when sound is disabled.
+**Note:** If you find cases where you wanted a notification but didn't get one, see the [Alternative Approaches](#-alternative-approaches) section for the pattern-matching approach.
 
 ## 🎛️ Configuration
 
@@ -477,8 +496,57 @@ ps aux | grep watch-claude-questions | grep -v grep
 
 - All logs are stored locally in `~/.claude/`
 - No data is sent to external services
-- The watcher only reads Claude Code output
-- Questions are logged with timestamps but no other identifying information
+- Hooks only process Claude Code's structured JSON data
+- Notifications are logged with timestamps but no other identifying information
+
+---
+
+## 🔄 Alternative Approaches
+
+The hooks-only approach (recommended above) should cover most notification needs. However, if you find cases where you wanted a notification but didn't get one, consider the pattern-matching approach.
+
+### Pattern-Matching Log Watcher (watch-claude-questions.sh)
+
+This alternative approach watches terminal output in real-time and uses regex patterns to detect questions.
+
+**When to consider this:**
+- You've tested hooks and found missing notifications
+- You need to catch specific phrasings not detected by hooks
+- You want verbose logging for debugging
+- You're researching different notification approaches
+
+**Setup:**
+1. Configure your shell to log Claude output:
+   ```bash
+   # Add to ~/.zshrc
+   claude() {
+       command claude "$@" 2>&1 | tee -a ~/.claude/claude-output.log
+   }
+   ```
+
+2. Start the watcher:
+   ```bash
+   bash ~/.claude/scripts/start-question-watcher.sh
+   ```
+
+3. Stop when done:
+   ```bash
+   bash ~/.claude/scripts/stop-question-watcher.sh
+   ```
+
+**Trade-offs:**
+- ✅ Real-time pattern detection
+- ✅ Detailed logging for debugging
+- ❌ High false positive rate (matches code, URLs)
+- ❌ High false negative rate (misses unconventional questions)
+- ❌ Requires maintenance (regex patterns)
+- ❌ May duplicate notifications from hooks
+
+**Recommendation:** Try hooks-only first. Only add pattern matching if you identify specific gaps in notification coverage after real-world testing.
+
+See the header comment in `watch-claude-questions.sh` for full documentation of this approach.
+
+---
 
 ## 🤝 Contributing
 

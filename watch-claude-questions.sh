@@ -1,5 +1,48 @@
 #!/bin/bash
-# Watch Claude Code terminal output for questions and send notifications
+# ============================================================================
+# ALTERNATIVE APPROACH: Pattern-Matching Question Watcher
+# ============================================================================
+#
+# ⚠️  NOTE: This is an ALTERNATIVE notification approach using log-watching
+#    and pattern matching. Most users should use the hooks-only approach
+#    (smart-notify.sh + settings.json hooks) instead.
+#
+# WHEN TO USE THIS APPROACH:
+# - You've tested the hooks-only system (smart-notify.sh) and found cases
+#   where you wanted a notification but didn't get one
+# - You need notifications for specific patterns not caught by hooks
+# - You're debugging notification behavior and want verbose logging
+# - You're researching/comparing different notification approaches
+#
+# TRADE-OFFS:
+# ✅ Pros:
+#   - Real-time pattern detection as text appears
+#   - Can catch specific phrasings hooks might miss
+#   - Provides detailed logs for debugging
+#   - Independent of hooks configuration
+#
+# ❌ Cons:
+#   - High false positive rate (matches code, URLs, non-questions)
+#   - High false negative rate (misses questions without patterns)
+#   - Case sensitivity bugs (misses capitalized questions)
+#   - No semantic understanding (can't distinguish question intent)
+#   - Requires maintenance when patterns change
+#   - More complexity (additional process, log parsing)
+#   - May conflict with hooks (duplicate notifications)
+#
+# RECOMMENDED APPROACH:
+# Use smart-notify.sh with Notification and Stop hooks configured in
+# ~/.claude/settings.json. This provides:
+# - Official API integration (stable, won't break)
+# - Notification hook: Fires when Claude needs permission or after 60s idle
+# - Stop hook: Fires when Claude finishes, checks for questions
+# - Per-project sounds
+# - Anti-spam protection
+#
+# See README.md for setup instructions.
+#
+# ============================================================================
+
 # Usage: bash ~/.claude/scripts/watch-claude-questions.sh
 
 # Load configuration
