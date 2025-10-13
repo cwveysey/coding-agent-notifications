@@ -1,0 +1,22 @@
+# Build artifacts
+menu-bar-app/ClaudeSoundsMenuBar
+*.o
+*.dSYM
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+*.swp
+*.swo
+
+# User config (don't commit actual configs, only examples)
+audio-notifier.yaml
+project-sounds.conf
+
+# IDE
+.vscode/
+.idea/
+*.xcodeproj
+*.xcworkspace
