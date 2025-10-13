@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Simple bot head + sound waves -->
+
+  <!-- Bot head (rounded rectangle) -->
+  <rect x="160" y="200" width="140" height="160" rx="20" fill="#C15F3C"/>
+
+  <!-- Bot eyes -->
+  <circle cx="200" cy="250" r="15" fill="#FFFFFF"/>
+  <circle cx="260" cy="250" r="15" fill="#FFFFFF"/>
+
+  <!-- Bot antenna -->
+  <line x1="230" y1="200" x2="230" y2="160" stroke="#C15F3C" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="230" cy="150" r="12" fill="#C15F3C"/>
+
+  <!-- Bot mouth (smile) -->
+  <path d="M 190 300 Q 230 320, 270 300" stroke="#FFFFFF" stroke-width="8" fill="none" stroke-linecap="round"/>
+
+  <!-- Sound waves emanating from the right side -->
+  <g stroke="#C15F3C" stroke-linecap="round" fill="none">
+    <!-- Small wave -->
+    <path d="M 310 265 Q 330 280, 310 295" stroke-width="10"/>
+
+    <!-- Medium wave -->
+    <path d="M 335 250 Q 365 280, 335 310" stroke-width="9"/>
+
+    <!-- Large wave -->
+    <path d="M 360 235 Q 400 280, 360 325" stroke-width="8"/>
+  </g>
+</svg>

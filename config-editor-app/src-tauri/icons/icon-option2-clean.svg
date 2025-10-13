@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clean "C" for Claude + speaker waves -->
+
+  <!-- Background circle for better app icon appearance -->
+  <circle cx="256" cy="256" r="240" fill="#F5F5F5"/>
+
+  <!-- Large "C" for Claude -->
+  <path d="M 340 256
+           Q 340 160, 256 135
+           Q 172 160, 172 256
+           Q 172 352, 256 377
+           Q 315 360, 340 310"
+        stroke="#C15F3C"
+        stroke-width="42"
+        fill="none"
+        stroke-linecap="round"/>
+
+  <!-- Speaker waves emanating from the "C" opening -->
+  <g stroke="#C15F3C" stroke-linecap="round" fill="none">
+    <!-- Small wave -->
+    <path d="M 350 238 Q 368 256, 350 274" stroke-width="10"/>
+
+    <!-- Medium wave -->
+    <path d="M 375 218 Q 403 256, 375 294" stroke-width="9"/>
+
+    <!-- Large wave -->
+    <path d="M 400 198 Q 438 256, 400 314" stroke-width="8"/>
+  </g>
+</svg>

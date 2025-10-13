@@ -46,32 +46,6 @@ sound:
   # Minimum seconds between notifications (anti-spam)
   min_interval: 2
 
-# Detection settings
-detection:
-  # Minimum question length to trigger notification
-  min_question_length: 15
-
-  # Question words that trigger detection
-  patterns:
-    - what
-    - when
-    - where
-    - why
-    - how
-    - would
-    - should
-    - can
-    - could
-    - do
-    - does
-    - did
-    - is
-    - are
-    - were
-    - was
-    - will
-    - shall
-
 # Notification types (multiple can be enabled)
 notifications:
   # Local audio notification (macOS/Linux)
