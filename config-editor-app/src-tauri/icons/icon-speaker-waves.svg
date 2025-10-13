@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Starburst Speaker: Claude starburst with sound waves emanating -->
+
+  <!-- Main starburst center circle -->
+  <circle cx="256" cy="256" r="45" fill="#C15F3C" stroke="#C15F3C" stroke-width="2.5"/>
+
+  <!-- Claude-style radiating rays (all directions) -->
+  <!-- Top -->
+  <line x1="256" y1="211" x2="256" y2="100" stroke="#C15F3C" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Top right diagonal -->
+  <line x1="288" y1="224" x2="370" y2="142" stroke="#C15F3C" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Right -->
+  <line x1="301" y1="256" x2="420" y2="256" stroke="#C15F3C" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Bottom right diagonal -->
+  <line x1="288" y1="288" x2="370" y2="370" stroke="#C15F3C" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Bottom -->
+  <line x1="256" y1="301" x2="256" y2="412" stroke="#C15F3C" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Bottom left diagonal -->
+  <line x1="224" y1="288" x2="142" y2="370" stroke="#C15F3C" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Left -->
+  <line x1="211" y1="256" x2="92" y2="256" stroke="#C15F3C" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Top left diagonal -->
+  <line x1="224" y1="224" x2="142" y2="142" stroke="#C15F3C" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Sound wave arcs emanating from right side (like speaker) -->
+  <!-- Small wave -->
+  <path d="M 320 256 Q 350 230, 350 256 Q 350 282, 320 256"
+        stroke="#C15F3C"
+        stroke-width="2.5"
+        fill="none"
+        stroke-linecap="round"
+        opacity="0.9"/>
+
+  <!-- Medium wave -->
+  <path d="M 340 256 Q 385 215, 385 256 Q 385 297, 340 256"
+        stroke="#C15F3C"
+        stroke-width="2.5"
+        fill="none"
+        stroke-linecap="round"
+        opacity="0.7"/>
+
+  <!-- Large wave -->
+  <path d="M 360 256 Q 420 190, 420 256 Q 420 322, 360 256"
+        stroke="#C15F3C"
+        stroke-width="2"
+        fill="none"
+        stroke-linecap="round"
+        opacity="0.5"/>
+
+  <!-- Sound wave arcs emanating from left side (symmetry) -->
+  <!-- Small wave -->
+  <path d="M 192 256 Q 162 230, 162 256 Q 162 282, 192 256"
+        stroke="#C15F3C"
+        stroke-width="2.5"
+        fill="none"
+        stroke-linecap="round"
+        opacity="0.9"/>
+
+  <!-- Medium wave -->
+  <path d="M 172 256 Q 127 215, 127 256 Q 127 297, 172 256"
+        stroke="#C15F3C"
+        stroke-width="2.5"
+        fill="none"
+        stroke-linecap="round"
+        opacity="0.7"/>
+
+  <!-- Large wave -->
+  <path d="M 152 256 Q 92 190, 92 256 Q 92 322, 152 256"
+        stroke="#C15F3C"
+        stroke-width="2"
+        fill="none"
+        stroke-linecap="round"
+        opacity="0.5"/>
+
+  <!-- Optional: Inner circle detail -->
+  <circle cx="256" cy="256" r="38" fill="none" stroke="#C15F3C" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Optional: Smaller inner rays for depth -->
+  <line x1="256" y1="226" x2="256" y2="201" stroke="#C15F3C" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <line x1="286" y1="256" x2="311" y2="256" stroke="#C15F3C" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <line x1="256" y1="286" x2="256" y2="311" stroke="#C15F3C" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <line x1="226" y1="256" x2="201" y2="256" stroke="#C15F3C" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+</svg>

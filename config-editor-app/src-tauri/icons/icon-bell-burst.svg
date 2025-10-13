@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bell-Burst Hybrid: Claude starburst where bottom rays form a bell -->
+
+  <!-- Main starburst center circle -->
+  <circle cx="256" cy="240" r="40" fill="#C15F3C" stroke="#C15F3C" stroke-width="2"/>
+
+  <!-- Top rays (radiating outward - classic Claude style) -->
+  <!-- Top center -->
+  <line x1="256" y1="200" x2="256" y2="80" stroke="#C15F3C" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Top left -->
+  <line x1="230" y1="208" x2="160" y2="100" stroke="#C15F3C" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Top right -->
+  <line x1="282" y1="208" x2="352" y2="100" stroke="#C15F3C" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Far top left -->
+  <line x1="220" y1="220" x2="100" y2="140" stroke="#C15F3C" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Far top right -->
+  <line x1="292" y1="220" x2="412" y2="140" stroke="#C15F3C" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Side rays (middle) -->
+  <!-- Left -->
+  <line x1="216" y1="240" x2="80" y2="240" stroke="#C15F3C" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Right -->
+  <line x1="296" y1="240" x2="432" y2="240" stroke="#C15F3C" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Bottom rays (curve inward to form bell shape) -->
+  <!-- These use curved paths to create the bell silhouette -->
+
+  <!-- Left bell curve -->
+  <path d="M 220 260 Q 180 320, 190 380" stroke="#C15F3C" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Right bell curve -->
+  <path d="M 292 260 Q 332 320, 322 380" stroke="#C15F3C" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Bottom left diagonal -->
+  <path d="M 230 268 Q 160 340, 150 400" stroke="#C15F3C" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Bottom right diagonal -->
+  <path d="M 282 268 Q 352 340, 362 400" stroke="#C15F3C" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Bell bottom rim (connecting the curves) -->
+  <path d="M 190 380 Q 256 390, 322 380" stroke="#C15F3C" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Bell clapper -->
+  <line x1="256" y1="280" x2="256" y2="360" stroke="#C15F3C" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="256" cy="370" r="8" fill="#C15F3C"/>
+
+  <!-- Optional: subtle inner glow effect -->
+  <circle cx="256" cy="240" r="35" fill="none" stroke="#C15F3C" stroke-width="1" opacity="0.3"/>
+</svg>

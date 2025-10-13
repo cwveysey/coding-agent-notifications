@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Notifier Config</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="app-icon">🔔</div>
+                <h1>Audio Notifier</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-section="sound">
+                    Sound Settings
+                </button>
+                <button class="nav-item" data-section="notifications">
+                    Notifications
+                </button>
+                <button class="nav-item" data-section="inactivity">
+                    Inactivity
+                </button>
+                <button class="nav-item" data-section="logging">
+                    Logging
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-secondary" id="resetBtn">Reset to defaults</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <div class="content-header">
+                <h2 id="sectionTitle">Sound Settings</h2>
+                <div class="header-actions">
+                    <button class="btn-secondary" id="importBtn">Import YAML</button>
+                    <button class="btn-primary" id="saveBtn">Save configuration</button>
+                </div>
+            </div>
+
+            <!-- Sound Settings Section -->
+            <section id="sound-section" class="config-section active">
+                <div class="form-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="soundEnabled">
+                        <span>Enable sounds</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="defaultSound">Default Sound</label>
+                    <div class="sound-selector">
+                        <select id="defaultSound"></select>
+                        <button class="btn-icon" id="previewDefault">▶️</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="randomEnabled">
+                        <span>Random Sound Selection</span>
+                    </label>
+                    <p class="help-text">Picks different sound per project</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Available Sounds Pool</label>
+                    <div class="sound-list" id="availableSounds"></div>
+                    <button class="btn-secondary" id="addSoundBtn">+ Add sound</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Event Sounds</label>
+                    <div class="event-sounds">
+                        <div class="event-sound-item">
+                            <span>Permission</span>
+                            <div class="sound-selector">
+                                <select id="permissionSound"></select>
+                                <button class="btn-icon preview-btn" data-event="permission">▶️</button>
+                            </div>
+                        </div>
+                        <div class="event-sound-item">
+                            <span>Question</span>
+                            <div class="sound-selector">
+                                <select id="questionSound"></select>
+                                <button class="btn-icon preview-btn" data-event="question">▶️</button>
+                            </div>
+                        </div>
+                        <div class="event-sound-item">
+                            <span>Inactivity</span>
+                            <div class="sound-selector">
+                                <select id="inactivitySound"></select>
+                                <button class="btn-icon preview-btn" data-event="inactivity">▶️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="minInterval">Minimum Interval Between Notifications (seconds)</label>
+                    <input type="number" id="minInterval" min="0" max="60" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Project-Specific Sounds</label>
+                    <div class="project-sounds" id="projectSounds"></div>
+                    <button class="btn-secondary" id="addProjectBtn">+ Add Project Mapping</button>
+                </div>
+            </section>
+
+            <!-- Notifications Section -->
+            <section id="notifications-section" class="config-section">
+                <div class="form-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="audioNotifEnabled">
+                        <span>Enable Audio Notifications</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="terminalNotifEnabled">
+                        <span>Enable macOS Visual Notifications</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="notifTitle">Notification Title</label>
+                    <input type="text" id="notifTitle">
+                </div>
+
+                <div class="form-group">
+                    <label for="notifSubtitle">Notification Subtitle</label>
+                    <input type="text" id="notifSubtitle">
+                </div>
+
+                <div class="form-group">
+                    <label>Custom Messages</label>
+                    <div class="custom-messages">
+                        <div class="message-item">
+                            <label for="permissionMsg">Permission</label>
+                            <input type="text" id="permissionMsg">
+                        </div>
+                        <div class="message-item">
+                            <label for="questionMsg">Question</label>
+                            <input type="text" id="questionMsg">
+                        </div>
+                        <div class="message-item">
+                            <label for="inactivityMsg">Inactivity</label>
+                            <input type="text" id="inactivityMsg">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="ntfyEnabled">
+                        <span>Enable Remote Notifications (ntfy.sh)</span>
+                    </label>
+                </div>
+
+                <div id="ntfySettings" class="nested-settings">
+                    <div class="form-group">
+                        <label for="ntfyTopic">Topic</label>
+                        <input type="text" id="ntfyTopic" placeholder="my-claude-notifications">
+                    </div>
+                    <div class="form-group">
+                        <label for="ntfyServer">Server</label>
+                        <input type="text" id="ntfyServer" placeholder="https://ntfy.sh">
+                    </div>
+                    <div class="form-group">
+                        <label for="ntfyPriority">Priority</label>
+                        <select id="ntfyPriority">
+                            <option value="min">Minimum</option>
+                            <option value="low">Low</option>
+                            <option value="default">Default</option>
+                            <option value="high">High</option>
+                            <option value="max">Maximum</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Inactivity Section -->
+            <section id="inactivity-section" class="config-section">
+                <div class="form-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="inactivityEnabled">
+                        <span>Enable Inactivity Detection</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="inactivityTimeout">Timeout (seconds)</label>
+                    <input type="number" id="inactivityTimeout" min="10" max="300">
+                    <p class="help-text">Alert if Claude has been idle for this duration</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="inactivityMessage">Inactivity Message</label>
+                    <input type="text" id="inactivityMessage">
+                </div>
+            </section>
+
+            <!-- Logging Section -->
+            <section id="logging-section" class="config-section">
+                <div class="form-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="logQuestionsEnabled">
+                        <span>Log Detected Questions</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="logFile">Log File Path</label>
+                    <input type="text" id="logFile">
+                </div>
+
+                <div class="form-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="debugEnabled">
+                        <span>Enable Debug Mode</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="debugFile">Debug Log File</label>
+                    <input type="text" id="debugFile">
+                </div>
+
+                <div class="form-group">
+                    <button class="btn-secondary" id="viewLogBtn">View Log File</button>
+                    <button class="btn-secondary" id="viewDebugBtn">View Debug Log</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+</body>
+</html>

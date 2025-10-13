@@ -11,7 +11,6 @@ SOUND_RANDOM=false
 SOUND_AVAILABLE_SOUNDS=()
 SOUND_PROJECT_SOUNDS=()
 MIN_INTERVAL=5
-MIN_LENGTH=15
 AUDIO_ENABLED=true
 TERMINAL_NOTIFIER_ENABLED=true
 TERMINAL_NOTIFIER_TITLE="Claude Code"
@@ -57,7 +56,6 @@ if [[ -f "$CONFIG_FILE" ]]; then
             file) SOUND_FILE=$value ;;
             random) SOUND_RANDOM=$value ;;
             min_interval) MIN_INTERVAL=$value ;;
-            min_question_length) MIN_LENGTH=$value ;;
             title) TERMINAL_NOTIFIER_TITLE=$value ;;
             subtitle) TERMINAL_NOTIFIER_SUBTITLE=$value ;;
             topic) NTFY_TOPIC=$value ;;
@@ -72,7 +70,6 @@ if [[ -f "$CONFIG_FILE" ]]; then
 
             # Track which section we're in
             sound) CURRENT_SECTION="sound" ;;
-            detection) CURRENT_SECTION="detection" ;;
             audio) CURRENT_SECTION="audio" ;;
             terminal_notifier) CURRENT_SECTION="terminal_notifier" ;;
             ntfy) CURRENT_SECTION="ntfy" ;;
@@ -83,7 +80,7 @@ if [[ -f "$CONFIG_FILE" ]]; then
 fi
 
 # Export variables for use in other scripts
-export SOUND_ENABLED SOUND_FILE SOUND_RANDOM MIN_INTERVAL MIN_LENGTH
+export SOUND_ENABLED SOUND_FILE SOUND_RANDOM MIN_INTERVAL
 export AUDIO_ENABLED TERMINAL_NOTIFIER_ENABLED TERMINAL_NOTIFIER_TITLE TERMINAL_NOTIFIER_SUBTITLE
 export NTFY_ENABLED NTFY_TOPIC NTFY_SERVER NTFY_PRIORITY
 export INACTIVITY_ENABLED INACTIVITY_TIMEOUT INACTIVITY_MESSAGE

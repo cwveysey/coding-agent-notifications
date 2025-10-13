@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Centered bot with clean design -->
+
+  <!-- Background circle for dock appearance -->
+  <circle cx="256" cy="256" r="240" fill="#F5F5F5"/>
+
+  <!-- Bot head (centered) -->
+  <rect x="176" y="206" width="160" height="180" rx="30" fill="#C15F3C"/>
+
+  <!-- Bot antenna -->
+  <line x1="256" y1="206" x2="256" y2="156" stroke="#C15F3C" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="256" cy="145" r="16" fill="#C15F3C"/>
+
+  <!-- Bot eyes -->
+  <circle cx="216" cy="266" r="20" fill="#FFFFFF"/>
+  <circle cx="296" cy="266" r="20" fill="#FFFFFF"/>
+
+  <!-- Pupils (looking straight) -->
+  <circle cx="216" cy="266" r="10" fill="#C15F3C"/>
+  <circle cx="296" cy="266" r="10" fill="#C15F3C"/>
+
+  <!-- Bot smile -->
+  <path d="M 206 330 Q 256 355, 306 330" stroke="#FFFFFF" stroke-width="12" fill="none" stroke-linecap="round"/>
+
+  <!-- Sound waves on right side -->
+  <g stroke="#C15F3C" stroke-linecap="round" fill="none">
+    <path d="M 346 276 Q 366 296, 346 316" stroke-width="11"/>
+    <path d="M 371 261 Q 401 296, 371 331" stroke-width="10"/>
+    <path d="M 396 246 Q 436 296, 396 346" stroke-width="9"/>
+  </g>
+</svg>

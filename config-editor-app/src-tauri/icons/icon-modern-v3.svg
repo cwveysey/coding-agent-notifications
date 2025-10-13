@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ultra minimal - monochrome professional -->
+
+  <defs>
+    <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Clean background -->
+  <rect width="512" height="512" fill="white"/>
+
+  <!-- Bot icon - simple geometric -->
+  <circle cx="220" cy="256" r="80" fill="url(#gradient3)"/>
+
+  <!-- Bot details -->
+  <circle cx="200" cy="246" r="10" fill="white"/>
+  <circle cx="240" cy="246" r="10" fill="white"/>
+  <path d="M 200 280 Q 220 290, 240 280" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+  <!-- Antenna -->
+  <circle cx="220" cy="165" r="8" fill="url(#gradient3)"/>
+  <line x1="220" y1="173" x2="220" y2="176" stroke="url(#gradient3)" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Sound waves - gradient -->
+  <g stroke="url(#gradient3)" stroke-width="10" fill="none" stroke-linecap="round">
+    <path d="M 315 241 Q 333 256, 315 271"/>
+    <path d="M 340 226 Q 368 256, 340 286"/>
+    <path d="M 365 211 Q 403 256, 365 301"/>
+  </g>
+</svg>
