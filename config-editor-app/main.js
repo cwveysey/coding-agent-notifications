@@ -163,30 +163,82 @@ function setupEventListeners() {
     });
 
     // Event enabled toggles
-    document.getElementById('notificationEnabled').addEventListener('change', (e) => {
+    document.getElementById('notificationEnabled').addEventListener('change', async (e) => {
         if (config.global_mode) {
             config.global_settings.event_enabled.notification = e.target.checked;
+
+            // If turning on a hook while global is disabled, enable global
+            if (e.target.checked && !config.global_settings.enabled) {
+                config.global_settings.enabled = true;
+                const globalToggle = document.getElementById('globalEnabled');
+                if (globalToggle) globalToggle.checked = true;
+                updateEnabledLabel(true);
+                try {
+                    await invoke('set_sounds_enabled', { enabled: true });
+                } catch (error) {
+                    console.error('Failed to set sounds enabled:', error);
+                }
+            }
         }
         markChanged();
     });
 
-    document.getElementById('stopEnabled').addEventListener('change', (e) => {
+    document.getElementById('stopEnabled').addEventListener('change', async (e) => {
         if (config.global_mode) {
             config.global_settings.event_enabled.stop = e.target.checked;
+
+            // If turning on a hook while global is disabled, enable global
+            if (e.target.checked && !config.global_settings.enabled) {
+                config.global_settings.enabled = true;
+                const globalToggle = document.getElementById('globalEnabled');
+                if (globalToggle) globalToggle.checked = true;
+                updateEnabledLabel(true);
+                try {
+                    await invoke('set_sounds_enabled', { enabled: true });
+                } catch (error) {
+                    console.error('Failed to set sounds enabled:', error);
+                }
+            }
         }
         markChanged();
     });
 
-    document.getElementById('postToolUseEnabled').addEventListener('change', (e) => {
+    document.getElementById('postToolUseEnabled').addEventListener('change', async (e) => {
         if (config.global_mode) {
             config.global_settings.event_enabled.post_tool_use = e.target.checked;
+
+            // If turning on a hook while global is disabled, enable global
+            if (e.target.checked && !config.global_settings.enabled) {
+                config.global_settings.enabled = true;
+                const globalToggle = document.getElementById('globalEnabled');
+                if (globalToggle) globalToggle.checked = true;
+                updateEnabledLabel(true);
+                try {
+                    await invoke('set_sounds_enabled', { enabled: true });
+                } catch (error) {
+                    console.error('Failed to set sounds enabled:', error);
+                }
+            }
         }
         markChanged();
     });
 
-    document.getElementById('subagentStopEnabled').addEventListener('change', (e) => {
+    document.getElementById('subagentStopEnabled').addEventListener('change', async (e) => {
         if (config.global_mode) {
             config.global_settings.event_enabled.subagent_stop = e.target.checked;
+
+            // If turning on a hook while global is disabled, enable global
+            if (e.target.checked && !config.global_settings.enabled) {
+                config.global_settings.enabled = true;
+                const globalToggle = document.getElementById('globalEnabled');
+                if (globalToggle) globalToggle.checked = true;
+                updateEnabledLabel(true);
+                try {
+                    await invoke('set_sounds_enabled', { enabled: true });
+                } catch (error) {
+                    console.error('Failed to set sounds enabled:', error);
+                }
+            }
         }
         markChanged();
     });

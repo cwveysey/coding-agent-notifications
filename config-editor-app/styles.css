@@ -511,6 +511,11 @@ details.card > summary:hover h2::before {
     margin: 0;
 }
 
+.getting-started-text li {
+    margin-left: 24px;
+    margin-bottom: 8px;
+}
+
 /* Hooks Header (Option A) */
 .hooks-header {
     font-size: 20px;
