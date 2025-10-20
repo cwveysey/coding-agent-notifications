@@ -10,7 +10,7 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>Settings</h1>
+            <h1>Coding agent audio notifications</h1>
             <button class="btn-save" id="saveBtn" disabled title="Save your settings. Changes take effect immediately for new Claude sessions.">Save</button>
         </header>
 
@@ -18,22 +18,31 @@
         <main class="main">
             <!-- Getting Started -->
             <div class="getting-started">
-                <h2>Overview</h2>
+                <h2>What are the benefits of using this tool?</h2>
                 <p class="getting-started-text">
-                    Use this tool to receive audio alerts when designated Claude Code events occur. This tool is intended to ensure that you are alerted as early as possible when Claude Code requires your input in order to proceed.
-                    
-                    This tool relies on Claude Code hooks to trigger the aforementioned audio alerts. Via the GUI below 
-                    
-                    - Audio alerts can be enabled on a per hook event basis.
-                    - You have the ability to play different audio per hook event.
-                    - You have the ability to upload custom audio.
-
-                    At the time of this writing the following hooks are supported: 
-                    
-                    - Notification (fires when Claude needs permission)
-                    - Stop (fires when Claude finishes responding)
-                    - PostToolUse (fires after tool execution)
-                    - SubagentStop (fires when subagent completes). <a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Learn about hooks</a>
+                    Use this tool to receive audio alerts when designated Claude Code events occur. It is intended to 
+                    <br> </br>
+                    <li>Help ensure that you are alerted as early as possible whenever Claude Code might benefit from your input. </li>
+                    <li>Free you from having to actively monitor Claude Code for updates.</li>
+                    <br> </br>
+                    </p>
+                <h2>Some consequential architecture details</h2>
+                <p class="getting-started-text">
+                    This tool relies on <a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Claude Code hooks</a> to trigger audio alerts. At the time of this writing the following hooks are supported:
+                    <br> </br>
+                    <li><strong>Notification</strong> - runs when Claude Code sends notifications</li>
+                    <li><strong>Stop</strong> - runs when Claude Code finishes responding</li>
+                    <li><strong>PostToolUse</strong> - runs after tool calls complete</li>
+                    <li><strong>SubagentStop</strong> - runs when subagent tasks complete</li>
+                    <br> </br>
+                    </p>
+                <h2>Customization options</h2>
+                <p class="getting-started-text">
+                    Using the controls below 
+                    <br> </br>
+                    <li>You can turn audio alerts on and off on per hook type basis.</li>
+                    <li>You can arrange for different audio to play on a per hook type basis.</li>
+                    <li>You can upload and use custom audio for your audio alerts.</li>
                 </p>
             </div>
 
@@ -49,7 +58,7 @@
                     </div>
                 </div>
 
-                <h2 class="hooks-header"><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link hooks-link">Hooks</a> that are eligible for audio notifications</h2>
+                <h2 class="hooks-header">Hooks that are eligible for audio notifications</h2>
                 <p class="hint" style="margin-bottom: 16px;">Claude Code hooks are user-defined shell commands that execute at various points in Claude Code's lifecycle (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide" target="_blank" class="inline-link hooks-guide-link">documentation</a>)</p>
 
                 <div class="card">
