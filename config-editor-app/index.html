@@ -23,7 +23,7 @@
                     Use this tool to receive audio alerts when designated Claude Code events occur. It is intended to 
                     <br> </br>
                     <li>Help ensure that you are alerted as early as possible whenever Claude Code might benefit from your input. </li>
-                    <li>Free you from having to actively monitor Claude Code for updates.</li>
+                    <li>Free you from having to actively monitor whether or not Claude Code requires your input.</li>
                     <br> </br>
                     </p>
                 <h2>Some consequential architecture details</h2>
@@ -59,7 +59,7 @@
                 </div>
 
                 <h2 class="hooks-header">Hooks that are eligible for audio notifications</h2>
-                <p class="hint" style="margin-bottom: 16px;">Claude Code hooks are user-defined shell commands that execute at various points in Claude Code's lifecycle (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide" target="_blank" class="inline-link hooks-guide-link">documentation</a>)</p>
+                <p class="hint" style="margin-bottom: 16px;">According to <a href="https://docs.claude.com/en/docs/claude-code/hooks-guide" target="_blank" class="inline-link hooks-guide-link">Anthropic's documentation</a>, Claude Code hooks are user-defined shell commands that execute at various points in Claude Code's lifecycle (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide" target="_blank" class="inline-link hooks-guide-link">source</a>).</p>
 
                 <div class="card">
                     <!-- Column headers -->
@@ -75,7 +75,7 @@
                     <div class="setting-row">
                         <div class="setting-label">
                             <label for="notificationSound">Notification</label>
-                            <p class="hint">Executes whenever Claude sends a notification (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">documentation</a>)</p>
+                            <p class="hint">Runs when Claude Code sends notifications (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">documentation</a>)</p>
                         </div>
                         <div class="sound-control">
                             <select id="notificationSound" class="sound-select"></select>
@@ -87,7 +87,7 @@
                     <div class="setting-row">
                         <div class="setting-label">
                             <label for="stopSound">Stop</label>
-                            <p class="hint">Executes when Claude finishes generating its response (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">documentation</a>)</p>
+                            <p class="hint">Runs when Claude Code finishes responding (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">documentation</a>)</p>
                         </div>
                         <div class="sound-control">
                             <select id="stopSound" class="sound-select"></select>
@@ -99,7 +99,7 @@
                     <div class="setting-row">
                         <div class="setting-label">
                             <label for="postToolUseSound">PostToolUse</label>
-                            <p class="hint">Executes after a tool has been used successfully (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">documentation</a>)</p>
+                            <p class="hint">Runs after tool calls complete (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">documentation</a>)</p>
                         </div>
                         <div class="sound-control">
                             <select id="postToolUseSound" class="sound-select"></select>
@@ -137,7 +137,7 @@
 
             <!-- Add Custom Audio -->
             <div class="card">
-                <h2>Add custom audio</h2>
+                <h2>Upload custom audio</h2>
                 <p class="hint">Manage custom sounds. System sounds are available in the dropdowns above. Supported formats: .aiff, .wav, .mp3</p>
 
                 <div id="customSounds" class="sound-library">
