@@ -1,12 +1,12 @@
-# Claude Sounds Menu Bar App
+# Claude Code Notifier - Menu Bar App
 
-A lightweight macOS menu bar application to control Claude Code notification sounds.
+A lightweight macOS menu bar application to control Claude Code notifications.
 
 ## Features
 
 - 🎨 Custom icon: Bell + "C" for Claude (white, adapts to light/dark mode)
 - 🔔 Quick toggle for enabling/disabling sounds
-- 🎵 GUI controls for event sounds (Permission, Question, Inactivity)
+- 🎵 GUI controls for event sounds (Permission, Response Complete, Inactivity)
 - 🔊 Sound preview - hear sounds before selecting
 - 📊 Visual status indicator (bell icon when enabled, bell with slash when disabled)
 - 📝 Quick access to config file and debug logs
@@ -78,11 +78,11 @@ Once running, you'll see a custom bell icon in your menu bar with a small "C" fo
 - **🔔/🔕 Enabled/Disabled** - Click to toggle sounds on/off
 - **Event Sounds** - Configure sounds for each event type:
   - Permission Sound - Plays when Claude needs your permission
-  - Question Sound - Plays when Claude asks a question
+  - Response Complete Sound - Plays when Claude finishes responding
   - Inactivity Sound - Plays when Claude is idle for 60s
   - Click any sound to hear a preview before selecting
 - **Open Config File** - Edit advanced settings in your text editor
-- **View Debug Log** - Troubleshoot notification issues
+- **View debug log** - Troubleshoot notification issues
 - **Quit** - Close the app
 
 ## Uninstall

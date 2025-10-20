@@ -1,4 +1,4 @@
-# Audio Notifier Configuration for Claude Code
+# Claude Code audio notifications
 # Location: ~/.claude/audio-notifier.yaml
 
 # Sound settings
@@ -40,8 +40,7 @@ sound:
   # Per-event sound mappings (override sounds for specific events)
   event_sounds:
     permission: /System/Library/Sounds/Ping.aiff      # When Claude needs permission
-    question: /System/Library/Sounds/Ping.aiff        # When Claude asks a question
-    inactivity: /System/Library/Sounds/Ping.aiff      # When Claude is idle 60s
+    stop: /System/Library/Sounds/Ping.aiff            # When Claude finishes responding
 
   # Minimum seconds between notifications (anti-spam)
   min_interval: 2
@@ -56,36 +55,19 @@ notifications:
   terminal_notifier:
     enabled: true
     title: "Claude Code"
-    subtitle: "Question Detected"
-    # Will show the actual question as the message
+    subtitle: "Notification"
+    # Will show the actual message preview
 
   # Custom notification messages per event type
   messages:
     permission: "Claude requires your permission"
-    question: "Claude has a question"
-    inactivity: "Claude requires your direction"
-
-  # Remote notification via ntfy.sh (optional)
-  ntfy:
-    enabled: false
-    topic: ""  # e.g., "my-claude-notifications"
-    server: "https://ntfy.sh"
-    priority: default  # min, low, default, high, max
-
-# Inactivity detection (backstop timer)
-# Sends notification if Claude has been idle for X seconds
-inactivity:
-  enabled: true
-  # Time in seconds before considering Claude "waiting"
-  timeout: 30
-  # Message to show for inactivity notifications
-  message: "Claude may be waiting for input"
+    stop: "Claude finished responding"
 
 # Logging
 logging:
-  # Save all detected questions to log file
-  log_questions: true
-  log_file: ~/.claude/questions-detected.log
+  # Save all notifications to log file
+  log_notifications: true
+  log_file: ~/.claude/notifications.log
 
   # Debug logging (verbose output)
   debug: true

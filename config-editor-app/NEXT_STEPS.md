@@ -68,7 +68,7 @@ npm run tauri:dev
 - [ ] Reset to defaults works
 - [ ] Form validation works (try invalid values)
 
-### Sound Settings
+### Sound settings
 - [ ] Toggle sound enabled/disabled
 - [ ] Change default sound
 - [ ] Toggle random mode
@@ -78,19 +78,11 @@ npm run tauri:dev
 - [ ] Remove project mapping
 - [ ] Change event sounds
 
-### Detection Settings
-- [ ] Adjust min question length
-- [ ] Add new pattern keyword
-- [ ] Remove pattern keyword
-- [ ] Keywords save correctly
-
 ### Notifications
 - [ ] Toggle audio notifications
 - [ ] Toggle terminal notifications
 - [ ] Edit notification title/subtitle
 - [ ] Edit custom messages
-- [ ] Enable ntfy settings
-- [ ] Configure ntfy options
 
 ### Inactivity
 - [ ] Toggle inactivity detection
@@ -98,11 +90,11 @@ npm run tauri:dev
 - [ ] Edit inactivity message
 
 ### Logging
-- [ ] Toggle question logging
+- [ ] Toggle notification logging
 - [ ] Toggle debug mode
 - [ ] Edit log file paths
-- [ ] Click "View Log File" button
-- [ ] Click "View Debug Log" button
+- [ ] Click "View log file" button
+- [ ] Click "View debug log" button
 
 ## Building for Production
 

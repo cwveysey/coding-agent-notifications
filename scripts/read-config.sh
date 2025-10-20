@@ -14,7 +14,7 @@ MIN_INTERVAL=5
 AUDIO_ENABLED=true
 TERMINAL_NOTIFIER_ENABLED=true
 TERMINAL_NOTIFIER_TITLE="Claude Code"
-TERMINAL_NOTIFIER_SUBTITLE="Question Detected"
+TERMINAL_NOTIFIER_SUBTITLE="Notification"
 NTFY_ENABLED=false
 NTFY_TOPIC=""
 NTFY_SERVER="https://ntfy.sh"
@@ -22,8 +22,8 @@ NTFY_PRIORITY="default"
 INACTIVITY_ENABLED=true
 INACTIVITY_TIMEOUT=30
 INACTIVITY_MESSAGE="Claude may be waiting for input"
-LOG_QUESTIONS=true
-LOG_FILE="$HOME/.claude/questions-detected.log"
+LOG_NOTIFICATIONS=true
+LOG_FILE="$HOME/.claude/notifications.log"
 DEBUG=false
 DEBUG_FILE="$HOME/.claude/watcher-debug.log"
 
@@ -63,7 +63,7 @@ if [[ -f "$CONFIG_FILE" ]]; then
             priority) NTFY_PRIORITY=$value ;;
             timeout) INACTIVITY_TIMEOUT=$value ;;
             message) INACTIVITY_MESSAGE=$value ;;
-            log_questions) LOG_QUESTIONS=$value ;;
+            log_notifications) LOG_NOTIFICATIONS=$value ;;
             log_file) LOG_FILE="${value/#\~/$HOME}" ;;
             debug) DEBUG=$value ;;
             debug_file) DEBUG_FILE="${value/#\~/$HOME}" ;;
@@ -84,4 +84,4 @@ export SOUND_ENABLED SOUND_FILE SOUND_RANDOM MIN_INTERVAL
 export AUDIO_ENABLED TERMINAL_NOTIFIER_ENABLED TERMINAL_NOTIFIER_TITLE TERMINAL_NOTIFIER_SUBTITLE
 export NTFY_ENABLED NTFY_TOPIC NTFY_SERVER NTFY_PRIORITY
 export INACTIVITY_ENABLED INACTIVITY_TIMEOUT INACTIVITY_MESSAGE
-export LOG_QUESTIONS LOG_FILE DEBUG DEBUG_FILE
+export LOG_NOTIFICATIONS LOG_FILE DEBUG DEBUG_FILE

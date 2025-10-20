@@ -14,7 +14,6 @@ A modern, TalkTastic-inspired macOS application for editing Claude Code's audio-
   - Manage available sounds pool
   - Configure event-specific sounds
   - Add project-specific sound mappings
-- **Pattern Management**: Add/remove question detection keywords
 - **Responsive Design**: TalkTastic-inspired aesthetic with macOS look and feel
 
 ### Backend (Rust)
@@ -32,7 +31,7 @@ A modern, TalkTastic-inspired macOS application for editing Claude Code's audio-
 ✅ Project-specific sound mappings
 ✅ Event sound configuration
 ✅ Pattern keyword management
-✅ All notification settings (audio, visual, ntfy)
+✅ All notification settings (audio, visual)
 ✅ Inactivity detection settings
 ✅ Logging configuration
 ✅ Access to log files
@@ -74,7 +73,7 @@ config-editor-app/
 
 The app exposes ALL fields from audio-notifier.yaml:
 
-### Sound Settings
+### Sound settings
 - `sound.enabled` - Master toggle
 - `sound.file` - Default sound
 - `sound.random` - Random selection mode
@@ -83,15 +82,10 @@ The app exposes ALL fields from audio-notifier.yaml:
 - `sound.event_sounds{}` - Per-event sounds
 - `sound.min_interval` - Anti-spam cooldown
 
-### Detection Settings
-- `detection.min_question_length` - Minimum characters
-- `detection.patterns[]` - Question keywords
-
 ### Notification Settings
 - `notifications.audio.enabled` - Audio toggle
 - `notifications.terminal_notifier.*` - macOS notifications
 - `notifications.messages.*` - Custom messages
-- `notifications.ntfy.*` - Remote notifications
 
 ### Inactivity Settings
 - `inactivity.enabled` - Enable detection
@@ -99,8 +93,8 @@ The app exposes ALL fields from audio-notifier.yaml:
 - `inactivity.message` - Notification text
 
 ### Logging Settings
-- `logging.log_questions` - Question logging
-- `logging.log_file` - Questions log path
+- `logging.log_notifications` - Notification logging
+- `logging.log_file` - Notifications log path
 - `logging.debug` - Debug mode
 - `logging.debug_file` - Debug log path
 
@@ -152,7 +146,7 @@ npm run tauri:dev
 | File | Location |
 |------|----------|
 | Config | `~/.claude/audio-notifier.yaml` |
-| Questions Log | `~/.claude/questions-detected.log` |
+| Notifications Log | `~/.claude/notifications.log` |
 | Debug Log | `~/.claude/smart-notify-debug.log` |
 | Enable Flag | `~/.claude/.sounds-enabled` |
 

@@ -119,7 +119,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
 
         // Header
-        let headerItem = NSMenuItem(title: "Claude Sounds", action: nil, keyEquivalent: "")
+        let headerItem = NSMenuItem(title: "Claude Code audio notifications", action: nil, keyEquivalent: "")
         headerItem.isEnabled = false
         menu.addItem(headerItem)
 
@@ -129,6 +129,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let statusText = soundsEnabled() ? "Enabled" : "Disabled"
         let toggleItem = NSMenuItem(title: statusText, action: #selector(toggleSounds), keyEquivalent: "t")
         toggleItem.state = soundsEnabled() ? .on : .off
+        toggleItem.toolTip = "Enable or disable audio notifications for Claude Code. When disabled, no sounds will play."
         menu.addItem(toggleItem)
 
         menu.addItem(NSMenuItem.separator())
@@ -138,38 +139,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Permission sound
         let permissionMenu = createSoundSelectionMenu(eventType: "permission", currentSound: getCurrentEventSound("permission"))
-        let permissionItem = NSMenuItem(title: "Permission Sound", action: nil, keyEquivalent: "")
+        let permissionItem = NSMenuItem(title: "Permission sound", action: nil, keyEquivalent: "")
         permissionItem.submenu = permissionMenu
+        permissionItem.toolTip = "Sound played when Claude needs your permission to run a command."
         eventSoundsMenu.addItem(permissionItem)
 
-        // Question sound
-        let questionMenu = createSoundSelectionMenu(eventType: "question", currentSound: getCurrentEventSound("question"))
-        let questionItem = NSMenuItem(title: "Question Sound", action: nil, keyEquivalent: "")
-        questionItem.submenu = questionMenu
-        eventSoundsMenu.addItem(questionItem)
+        // Stop sound
+        let stopMenu = createSoundSelectionMenu(eventType: "stop", currentSound: getCurrentEventSound("stop"))
+        let stopItem = NSMenuItem(title: "Response complete sound", action: nil, keyEquivalent: "")
+        stopItem.submenu = stopMenu
+        stopItem.toolTip = "Sound played when Claude finishes responding and is ready for your input."
+        eventSoundsMenu.addItem(stopItem)
 
-        // Inactivity sound
-        let inactivityMenu = createSoundSelectionMenu(eventType: "inactivity", currentSound: getCurrentEventSound("inactivity"))
-        let inactivityItem = NSMenuItem(title: "Inactivity Sound", action: nil, keyEquivalent: "")
-        inactivityItem.submenu = inactivityMenu
-        eventSoundsMenu.addItem(inactivityItem)
-
-        let eventSoundsItem = NSMenuItem(title: "Event Sounds", action: nil, keyEquivalent: "")
+        let eventSoundsItem = NSMenuItem(title: "Event sounds", action: nil, keyEquivalent: "")
         eventSoundsItem.submenu = eventSoundsMenu
+        eventSoundsItem.toolTip = "Configure which sounds play for different notification events."
         menu.addItem(eventSoundsItem)
 
         menu.addItem(NSMenuItem.separator())
 
         // Advanced config
-        menu.addItem(NSMenuItem(title: "Open Config File...", action: #selector(openConfig), keyEquivalent: "c"))
+        let configItem = NSMenuItem(title: "Open config file...", action: #selector(openConfig), keyEquivalent: "c")
+        configItem.toolTip = "Open the audio-notifier.yaml configuration file to customize advanced settings."
+        menu.addItem(configItem)
 
         // View logs
-        menu.addItem(NSMenuItem(title: "View Debug Log...", action: #selector(openDebugLog), keyEquivalent: "l"))
+        let debugLogItem = NSMenuItem(title: "View debug log...", action: #selector(openDebugLog), keyEquivalent: "l")
+        debugLogItem.toolTip = "View the debug log file to troubleshoot notification issues."
+        menu.addItem(debugLogItem)
 
         menu.addItem(NSMenuItem.separator())
 
         // Quit
-        menu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q"))
+        let quitItem = NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q")
+        quitItem.toolTip = "Quit the Claude Code audio notifications menu bar app."
+        menu.addItem(quitItem)
 
         statusItem.menu = menu
     }
@@ -180,6 +184,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         for (name, path) in systemSounds.sorted(by: { $0.key < $1.key }) {
             let item = NSMenuItem(title: name, action: #selector(soundSelected(_:)), keyEquivalent: "")
             item.representedObject = ["event": eventType, "sound": path, "name": name]
+            item.toolTip = "Click to select this sound and preview it."
 
             // Check if this is the current sound
             if let current = currentSound, current.contains(name) {

@@ -1,4 +1,4 @@
-# Audio Notifier Configuration Editor
+# Claude Code audio notifications
 
 A beautiful, native macOS application for editing the `audio-notifier.yaml` configuration file with an intuitive GUI interface.
 
@@ -61,11 +61,10 @@ The built application will be in `src-tauri/target/release/bundle/macos/`
 
 Use the sidebar to navigate between configuration sections:
 
-- **Sound Settings** - Configure default sounds, random mode, event sounds, and project mappings
-- **Detection** - Set up question detection patterns and minimum length
+- **Sound settings** - Configure default sounds, random mode, event sounds, and project mappings
 - **Notifications** - Configure audio, visual, and remote notifications
 - **Inactivity** - Set up idle detection and timeouts
-- **Logging** - Manage debug logs and question logging
+- **Logging** - Manage debug logs and notification logging
 
 ### Sound Preview
 

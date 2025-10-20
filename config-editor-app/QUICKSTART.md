@@ -24,7 +24,6 @@ npm run start
 
 A GUI editor for `~/.claude/audio-notifier.yaml` configuration file. Provides forms for:
 - Sound settings (event sounds, project mappings, random mode)
-- Detection settings (question patterns, min length)
 - Notification types (audio, visual, remote)
 - Inactivity detection
 - Debug logging

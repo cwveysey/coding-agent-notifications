@@ -49,8 +49,8 @@ if [[ -n "${EVENT_TYPE:-}" ]]; then
         permission)
             EVENT_SOUND=$(grep "^\s*permission:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | sed 's/.*:\s*\([^#]*\).*/\1/' | tr -d ' ')
             ;;
-        question)
-            EVENT_SOUND=$(grep "^\s*question:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | sed 's/.*:\s*\([^#]*\).*/\1/' | tr -d ' ')
+        stop)
+            EVENT_SOUND=$(grep "^\s*stop:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | sed 's/.*:\s*\([^#]*\).*/\1/' | tr -d ' ')
             ;;
         inactivity)
             EVENT_SOUND=$(grep "^\s*inactivity:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | sed 's/.*:\s*\([^#]*\).*/\1/' | tr -d ' ')
