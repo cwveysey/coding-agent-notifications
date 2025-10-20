@@ -2,7 +2,7 @@
 # Smart notification system for Claude Code (Hooks-Only Approach)
 #
 # This script handles both Notification and Stop hooks to provide
-# comprehensive notification coverage without brittle pattern matching.
+# comprehensive notification coverage.
 #
 # Hook Types:
 # - Notification: Fires when Claude needs permission OR after 60s idle
@@ -54,11 +54,13 @@ send_notification() {
             if [[ "$message" =~ "needs your permission" ]]; then
                 event_type="permission"
             elif [[ "$message" =~ "waiting for" ]]; then
-                event_type="inactivity"
+                # Skip inactivity notifications - we're notified on Stop already
+                debug_log "Skipping inactivity notification (already notified on Stop)"
+                return 0
             fi
             ;;
-        stop-hook-question)
-            event_type="question"
+        stop-hook)
+            event_type="stop"
             ;;
     esac
     debug_log "Event type: $event_type"
@@ -126,16 +128,7 @@ send_notification() {
         local display_title
         local display_message
 
-        # Special handling for inactivity - use original title, not custom message
-        if [[ "$event_type" == "inactivity" ]]; then
-            display_title="Claude is waiting for your input"
-            # Message includes project and Claude's last actual message
-            if [[ -n "${PROJECT_NAME:-}" && "$PROJECT_NAME" != "claude-session" ]]; then
-                display_message="$PROJECT_NAME: ${message:0:180}"
-            else
-                display_message="${message:0:200}"
-            fi
-        elif [[ -n "$custom_message" ]]; then
+        if [[ -n "$custom_message" ]]; then
             # Use custom message as title (no project appended)
             display_title="$custom_message"
 
@@ -226,26 +219,6 @@ handle_notification_hook() {
         fi
     fi
 
-    # For inactivity notifications, try to get Claude's last actual message
-    if [[ "$message" =~ "waiting for" ]]; then
-        local transcript_path=$(echo "$input" | jq -r '.transcript_path' 2>/dev/null | sed "s|^~|$HOME|")
-
-        if [[ -f "$transcript_path" ]]; then
-            # Get last assistant message from transcript
-            local last_assistant_message=$(tail -n 200 "$transcript_path" 2>/dev/null | \
-                jq -r 'select(.message.role == "assistant") | .message.content[]? | select(.type=="text") | .text' 2>/dev/null | \
-                tail -n 1 | \
-                tr '\n' ' ' | \
-                sed 's/[[:space:]]\+/ /g')
-
-            # Use last assistant message if found
-            if [[ -n "$last_assistant_message" ]]; then
-                message="${last_assistant_message:0:200}"
-                debug_log "Using last assistant message for inactivity: ${message:0:100}"
-            fi
-        fi
-    fi
-
     # Check anti-spam
     if ! check_spam; then
         return 0
@@ -286,24 +259,16 @@ handle_stop_hook() {
 
     debug_log "Last message: ${last_message:0:100}"
 
-    # Check if message ends with question mark (indicates question)
-    # Handle markdown formatting (**, *, etc.) at the end
-    if [[ "$last_message" =~ \?[[:space:]\*]*$ ]]; then
-        debug_log "Question detected in last message"
-
-        # Check anti-spam
-        if ! check_spam; then
-            return 0
-        fi
-
-        # Send notification with question preview
-        local preview="${last_message:0:100}"
-        send_notification "$preview" "Question from Claude" "stop-hook-question"
-
-        debug_log "Stop hook question notification sent"
-    else
-        debug_log "No question detected (last message doesn't end with ?)"
+    # Check anti-spam
+    if ! check_spam; then
+        return 0
     fi
+
+    # Send notification with message preview
+    local preview="${last_message:0:100}"
+    send_notification "$preview" "Claude finished" "stop-hook"
+
+    debug_log "Stop hook notification sent"
 }
 
 # Main execution
@@ -326,24 +291,8 @@ esac
 
 debug_log "Script completed successfully"
 
-# NOTE: Pattern-Matching Alternative
+# NOTE: Event Types
 #
 # This hooks-only approach provides reliable notifications for:
-# - Permission requests (Notification hook)
-# - Questions in responses (Stop hook + "?" detection)
-# - Idle timeout (Notification hook at 60s)
-#
-# If you find cases where you wanted a notification but didn't get one,
-# consider the log-watching pattern-matching approach as documented in
-# watch-claude-questions.sh (marked as ALTERNATIVE APPROACH).
-#
-# The pattern matcher watches terminal output in real-time and can catch
-# edge cases the hooks might miss, but comes with trade-offs:
-# - False positives (matches code, URLs, non-questions)
-# - False negatives (misses questions without obvious patterns)
-# - Higher maintenance (regex patterns need updates)
-# - More complexity (additional process, log parsing)
-#
-# For most users, the hooks-only approach is recommended for reliability
-# and simplicity. Enable pattern matching only if you identify specific
-# notification gaps after testing the hooks system.
+# - Permission requests (Notification hook - when Claude needs permission to run a tool)
+# - Response complete (Stop hook - when Claude finishes responding)

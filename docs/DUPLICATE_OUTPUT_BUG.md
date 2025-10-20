@@ -14,11 +14,11 @@ Terminal output is being printed multiple times (2-6x) when it should only print
      - PID 30136 (started 7:13AM current day)
    - Each session has hooks that fire, causing duplicate notifications/output
 
-2. **Multiple Watcher Processes (FIXED)**
-   - Previously had 3 instances of `watch-claude-questions.sh` running
-   - Fixed by running: `pkill -f "watch-claude-questions.sh"`
-   - Verified fixed with: `ps aux | grep "watch-claude" | grep -v grep`
-   - Status: ✅ **RESOLVED**
+2. **Hook-Based Approach (Current Implementation)**
+   - Now uses Claude Code's official Notification and Stop hooks
+   - No background watcher processes needed
+   - Hooks fire directly from Claude Code
+   - Status: ✅ **SIMPLIFIED**
 
 3. **Hooks Configuration**
    - Location: `~/.config/claude/settings.json` or `~/.claude/settings.json`

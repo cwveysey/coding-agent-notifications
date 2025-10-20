@@ -310,18 +310,6 @@ notifications:
 
 Install: `brew install terminal-notifier`
 
-**Remote (ntfy.sh - mobile notifications):**
-```yaml
-notifications:
-  ntfy:
-    enabled: true
-    topic: "my-claude-notifications"
-    server: "https://ntfy.sh"
-    priority: default
-```
-
-Setup: [ntfy.sh](https://ntfy.sh)
-
 ## 🎛️ Shell Configuration
 
 ### Setup Modes

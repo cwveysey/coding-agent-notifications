@@ -3,241 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Notifier Config</title>
+    <title>Coding Agent Audio Notifications</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="app-icon">🔔</div>
-                <h1>Audio Notifier</h1>
-            </div>
-            <nav class="sidebar-nav">
-                <button class="nav-item active" data-section="sound">
-                    Sound Settings
-                </button>
-                <button class="nav-item" data-section="notifications">
-                    Notifications
-                </button>
-                <button class="nav-item" data-section="inactivity">
-                    Inactivity
-                </button>
-                <button class="nav-item" data-section="logging">
-                    Logging
-                </button>
-            </nav>
-            <div class="sidebar-footer">
-                <button class="btn-secondary" id="resetBtn">Reset to defaults</button>
-            </div>
-        </aside>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Settings</h1>
+            <button class="btn-save" id="saveBtn" disabled title="Save your settings. Changes take effect immediately for new Claude sessions.">Save</button>
+        </header>
 
-        <!-- Main Content Area -->
-        <main class="content">
-            <div class="content-header">
-                <h2 id="sectionTitle">Sound Settings</h2>
-                <div class="header-actions">
-                    <button class="btn-secondary" id="importBtn">Import YAML</button>
-                    <button class="btn-primary" id="saveBtn">Save configuration</button>
-                </div>
+        <!-- Main Settings -->
+        <main class="main">
+            <!-- Getting Started -->
+            <div class="getting-started">
+                <h2>Overview</h2>
+                <p class="getting-started-text">
+                    Use this tool to receive audio alerts when designated Claude Code events occur. This tool is intended to ensure that you are alerted as early as possible when Claude Code requires your input in order to proceed.
+                    
+                    This tool relies on Claude Code hooks to trigger the aforementioned audio alerts. Via the GUI below 
+                    
+                    - Audio alerts can be enabled on a per hook event basis.
+                    - You have the ability to play different audio per hook event.
+                    - You have the ability to upload custom audio.
+
+                    At the time of this writing the following hooks are supported: 
+                    
+                    - Notification (fires when Claude needs permission)
+                    - Stop (fires when Claude finishes responding)
+                    - PostToolUse (fires after tool execution)
+                    - SubagentStop (fires when subagent completes). <a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Learn about hooks</a>
+                </p>
             </div>
 
-            <!-- Sound Settings Section -->
-            <section id="sound-section" class="config-section active">
-                <div class="form-group">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="soundEnabled">
-                        <span>Enable sounds</span>
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <label for="defaultSound">Default Sound</label>
-                    <div class="sound-selector">
-                        <select id="defaultSound"></select>
-                        <button class="btn-icon" id="previewDefault">▶️</button>
+            <!-- Global Settings (shown when globalMode = true) -->
+            <div id="globalSettings" class="settings-section">
+                <div class="card">
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <label for="globalEnabled" id="globalEnabledLabel">Coding agent audio notifications are currently enabled</label>
+                            <p class="hint" id="globalEnabledHint">To disable notifications, please set this row's toggle to the "off" position.</p>
+                        </div>
+                        <input type="checkbox" id="globalEnabled" class="toggle">
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="randomEnabled">
-                        <span>Random Sound Selection</span>
-                    </label>
-                    <p class="help-text">Picks different sound per project</p>
-                </div>
+                <h2 class="hooks-header"><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link hooks-link">Hooks</a> that are eligible for audio notifications</h2>
+                <p class="hint" style="margin-bottom: 16px;">Claude Code hooks are user-defined shell commands that execute at various points in Claude Code's lifecycle (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide" target="_blank" class="inline-link hooks-guide-link">documentation</a>)</p>
 
-                <div class="form-group">
-                    <label>Available Sounds Pool</label>
-                    <div class="sound-list" id="availableSounds"></div>
-                    <button class="btn-secondary" id="addSoundBtn">+ Add sound</button>
-                </div>
+                <div class="card">
+                    <!-- Column headers -->
+                    <div class="table-header">
+                        <div class="table-header-cell">Event</div>
+                        <div class="table-header-controls">
+                            <div class="table-header-cell" style="min-width: 160px; text-align: left;">Sound</div>
+                            <div class="table-header-cell" style="min-width: 36px;"></div>
+                            <div class="table-header-cell" style="min-width: 44px; text-align: center;">Enabled</div>
+                        </div>
+                    </div>
 
-                <div class="form-group">
-                    <label>Event Sounds</label>
-                    <div class="event-sounds">
-                        <div class="event-sound-item">
-                            <span>Permission</span>
-                            <div class="sound-selector">
-                                <select id="permissionSound"></select>
-                                <button class="btn-icon preview-btn" data-event="permission">▶️</button>
-                            </div>
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <label for="notificationSound">Notification</label>
+                            <p class="hint">Executes whenever Claude sends a notification (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">documentation</a>)</p>
                         </div>
-                        <div class="event-sound-item">
-                            <span>Question</span>
-                            <div class="sound-selector">
-                                <select id="questionSound"></select>
-                                <button class="btn-icon preview-btn" data-event="question">▶️</button>
-                            </div>
+                        <div class="sound-control">
+                            <select id="notificationSound" class="sound-select"></select>
+                            <button class="btn-play" data-sound="notification" title="Preview this sound">▶</button>
+                            <input type="checkbox" id="notificationEnabled" class="toggle" checked>
                         </div>
-                        <div class="event-sound-item">
-                            <span>Inactivity</span>
-                            <div class="sound-selector">
-                                <select id="inactivitySound"></select>
-                                <button class="btn-icon preview-btn" data-event="inactivity">▶️</button>
-                            </div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <label for="stopSound">Stop</label>
+                            <p class="hint">Executes when Claude finishes generating its response (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">documentation</a>)</p>
+                        </div>
+                        <div class="sound-control">
+                            <select id="stopSound" class="sound-select"></select>
+                            <button class="btn-play" data-sound="stop" title="Preview this sound">▶</button>
+                            <input type="checkbox" id="stopEnabled" class="toggle" checked>
+                        </div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <label for="postToolUseSound">PostToolUse</label>
+                            <p class="hint">Executes after a tool has been used successfully (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">documentation</a>)</p>
+                        </div>
+                        <div class="sound-control">
+                            <select id="postToolUseSound" class="sound-select"></select>
+                            <button class="btn-play" data-sound="postToolUse" title="Preview this sound">▶</button>
+                            <input type="checkbox" id="postToolUseEnabled" class="toggle" checked>
+                        </div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <label for="subagentStopSound">SubagentStop</label>
+                            <p class="hint">Runs when subagent tasks complete (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">documentation</a>)</p>
+                        </div>
+                        <div class="sound-control">
+                            <select id="subagentStopSound" class="sound-select"></select>
+                            <button class="btn-play" data-sound="subagentStop" title="Preview this sound">▶</button>
+                            <input type="checkbox" id="subagentStopEnabled" class="toggle" checked>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="minInterval">Minimum Interval Between Notifications (seconds)</label>
-                    <input type="number" id="minInterval" min="0" max="60" step="1">
+            <!-- Per-Project Settings (shown when globalMode = false) -->
+            <div id="projectSettings" class="settings-section" style="display: none;">
+                <div class="info-banner">
+                    Notifications will only play for projects you enable below.
                 </div>
 
-                <div class="form-group">
-                    <label>Project-Specific Sounds</label>
-                    <div class="project-sounds" id="projectSounds"></div>
-                    <button class="btn-secondary" id="addProjectBtn">+ Add Project Mapping</button>
-                </div>
-            </section>
-
-            <!-- Notifications Section -->
-            <section id="notifications-section" class="config-section">
-                <div class="form-group">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="audioNotifEnabled">
-                        <span>Enable Audio Notifications</span>
-                    </label>
+                <div id="projectList" class="project-list">
+                    <!-- Projects will be inserted here dynamically -->
                 </div>
 
-                <div class="form-group">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="terminalNotifEnabled">
-                        <span>Enable macOS Visual Notifications</span>
-                    </label>
-                </div>
+                <button class="btn-add" id="addProjectBtn">+ Enable coding agent audio notifications for a new project</button>
+            </div>
 
-                <div class="form-group">
-                    <label for="notifTitle">Notification Title</label>
-                    <input type="text" id="notifTitle">
-                </div>
+            <!-- Add Custom Audio -->
+            <div class="card">
+                <h2>Add custom audio</h2>
+                <p class="hint">Manage custom sounds. System sounds are available in the dropdowns above. Supported formats: .aiff, .wav, .mp3</p>
 
-                <div class="form-group">
-                    <label for="notifSubtitle">Notification Subtitle</label>
-                    <input type="text" id="notifSubtitle">
+                <div id="customSounds" class="sound-library">
+                    <!-- Custom sound items will be inserted here -->
                 </div>
+                <button class="btn-add" id="uploadSoundBtn">+ Upload audio</button>
+            </div>
 
-                <div class="form-group">
-                    <label>Custom Messages</label>
-                    <div class="custom-messages">
-                        <div class="message-item">
-                            <label for="permissionMsg">Permission</label>
-                            <input type="text" id="permissionMsg">
-                        </div>
-                        <div class="message-item">
-                            <label for="questionMsg">Question</label>
-                            <input type="text" id="questionMsg">
-                        </div>
-                        <div class="message-item">
-                            <label for="inactivityMsg">Inactivity</label>
-                            <input type="text" id="inactivityMsg">
-                        </div>
+            <!-- Global Toggle -->
+            <div class="card">
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <label for="globalMode">Apply to all projects</label>
+                        <p class="hint">When enabled, same sounds play everywhere. When disabled, configure sounds per project.</p>
                     </div>
+                    <input type="checkbox" id="globalMode" class="toggle">
                 </div>
-
-                <div class="form-group">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="ntfyEnabled">
-                        <span>Enable Remote Notifications (ntfy.sh)</span>
-                    </label>
-                </div>
-
-                <div id="ntfySettings" class="nested-settings">
-                    <div class="form-group">
-                        <label for="ntfyTopic">Topic</label>
-                        <input type="text" id="ntfyTopic" placeholder="my-claude-notifications">
-                    </div>
-                    <div class="form-group">
-                        <label for="ntfyServer">Server</label>
-                        <input type="text" id="ntfyServer" placeholder="https://ntfy.sh">
-                    </div>
-                    <div class="form-group">
-                        <label for="ntfyPriority">Priority</label>
-                        <select id="ntfyPriority">
-                            <option value="min">Minimum</option>
-                            <option value="low">Low</option>
-                            <option value="default">Default</option>
-                            <option value="high">High</option>
-                            <option value="max">Maximum</option>
-                        </select>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Inactivity Section -->
-            <section id="inactivity-section" class="config-section">
-                <div class="form-group">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="inactivityEnabled">
-                        <span>Enable Inactivity Detection</span>
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <label for="inactivityTimeout">Timeout (seconds)</label>
-                    <input type="number" id="inactivityTimeout" min="10" max="300">
-                    <p class="help-text">Alert if Claude has been idle for this duration</p>
-                </div>
-
-                <div class="form-group">
-                    <label for="inactivityMessage">Inactivity Message</label>
-                    <input type="text" id="inactivityMessage">
-                </div>
-            </section>
-
-            <!-- Logging Section -->
-            <section id="logging-section" class="config-section">
-                <div class="form-group">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="logQuestionsEnabled">
-                        <span>Log Detected Questions</span>
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <label for="logFile">Log File Path</label>
-                    <input type="text" id="logFile">
-                </div>
-
-                <div class="form-group">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="debugEnabled">
-                        <span>Enable Debug Mode</span>
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <label for="debugFile">Debug Log File</label>
-                    <input type="text" id="debugFile">
-                </div>
-
-                <div class="form-group">
-                    <button class="btn-secondary" id="viewLogBtn">View Log File</button>
-                    <button class="btn-secondary" id="viewDebugBtn">View Debug Log</button>
-                </div>
-            </section>
+            </div>
         </main>
     </div>
 

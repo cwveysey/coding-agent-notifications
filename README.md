@@ -1,4 +1,4 @@
-# Audio Notifications for Claude Code Activity
+# Claude Code Notifier
 
 Smart audio and visual notifications for [Claude Code](https://claude.com/claude-code) - never miss when Claude needs your attention.
 
@@ -6,8 +6,7 @@ Smart audio and visual notifications for [Claude Code](https://claude.com/claude
 
 ### 🔔 Smart Notifications
 - **Permission Requests** - Get notified when Claude needs permission to run commands
-- **Questions** - Hear when Claude asks you a question
-- **Inactivity Detection** - Alert when Claude has been idle for 60+ seconds
+- **Response Complete** - Hear when Claude finishes responding
 - **Tool Descriptions** - See exactly what Claude wants to do (not just "needs permission for Bash")
 
 ### 🎨 macOS Menu Bar App
@@ -19,7 +18,7 @@ Smart audio and visual notifications for [Claude Code](https://claude.com/claude
 - Quick access to config file and debug logs
 
 ### 🎵 Customizable Sounds
-- Per-event sound selection (Permission, Question, Inactivity)
+- Per-event sound selection (Permission, Response Complete)
 - Per-project sound mappings
 - Random sound mode (different sound per project)
 - Support for system sounds and custom audio files
@@ -105,7 +104,7 @@ cd audio-notifications-for-claude-code-activity
 Once the menu bar app is running, click the bell icon to:
 
 - **Toggle sounds on/off** - Click "Enabled" to toggle (shows checkmark when on)
-- **Select event sounds** - Choose sounds for Permission, Question, and Inactivity
+- **Select event sounds** - Choose sounds for Permission and Response Complete
 - **Preview sounds** - Click any sound to hear it before selecting
 - **Open config file** - Quick access to advanced settings
 - **View debug log** - Troubleshoot notification issues
@@ -137,7 +136,7 @@ claude-sounds-status   # Check current status
 
 Edit `~/.claude/audio-notifier.yaml` to customize:
 
-- **Event sounds** - Different sounds for permission, question, inactivity
+- **Event sounds** - Different sounds for permission and response complete
 - **Project sounds** - Per-project sound mappings
 - **Random mode** - Auto-assign sounds based on project
 - **Anti-spam settings** - Minimum interval between notifications
@@ -168,6 +167,10 @@ audio-notifications-for-claude-code-activity/
 │   ├── ClaudeSoundsMenuBar.swift
 │   ├── build.sh
 │   └── README.md
+├── config-editor-app/     # Tauri-based GUI config editor
+│   ├── src/               # Frontend (HTML/CSS/JS)
+│   ├── src-tauri/         # Rust backend
+│   └── package.json
 ├── config/                # Configuration files
 │   └── audio-notifier.yaml.example
 ├── docs/                  # Additional documentation
@@ -175,13 +178,30 @@ audio-notifications-for-claude-code-activity/
 └── README.md              # This file
 ```
 
+## Development
+
+### Config Editor App (Tauri)
+
+To develop the config editor app with **live preview** (hot reload):
+
+```bash
+cd config-editor-app
+npm run tauri:dev
+```
+
+This provides the same fast iteration as web development:
+- **Frontend changes** (HTML/CSS/JS): Hot reload automatically in the app window
+- **Rust backend changes** (src-tauri/src): Auto-rebuild and restart the app when saved
+
+No need for full rebuilds during development. Changes appear instantly just like a web dev server.
+
 ## How It Works
 
 ### Notification Flow
 
 1. **Hook Triggered** - Claude Code fires `Notification` or `Stop` hook
 2. **smart-notify.sh** - Receives hook data (message, transcript path, etc.)
-3. **Transcript Parsing** - Extracts tool description or question text
+3. **Transcript Parsing** - Extracts tool description and message preview
 4. **Sound Selection** - Chooses sound based on event type and project
 5. **Notification** - Plays audio + shows visual notification (if terminal-notifier installed)
 
@@ -193,7 +213,6 @@ audio-notifications-for-claude-code-activity/
 
 - **Stop Hook** - Fires when:
   - Claude finishes a response
-  - Used to detect questions (looks for `?` at end)
 
 ## Troubleshooting
 
@@ -216,17 +235,7 @@ audio-notifications-for-claude-code-activity/
 
 ### Multiple notifications
 
-Check for duplicate watch processes:
-
-```bash
-ps aux | grep "watch-claude" | grep -v grep
-```
-
-Kill duplicates:
-
-```bash
-pkill -f "watch-claude-questions.sh"
-```
+If you experience duplicate notifications, check your Claude Code hooks configuration to ensure the scripts are only registered once in `~/.config/claude/settings.json`.
 
 ### Menu bar app not showing
 

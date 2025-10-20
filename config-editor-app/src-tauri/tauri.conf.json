@@ -30,17 +30,21 @@
   "app": {
     "windows": [
       {
-        "title": "Audio Notifier Configuration",
-        "width": 1000,
-        "height": 700,
+        "title": "Coding agent audio notifications",
+        "width": 750,
+        "height": 850,
         "resizable": true,
         "fullscreen": false,
-        "minWidth": 800,
-        "minHeight": 600
+        "minWidth": 700,
+        "minHeight": 600,
+        "center": true,
+        "decorations": true,
+        "visible": true
       }
     ],
     "security": {
       "csp": null
-    }
+    },
+    "macOSPrivateApi": true
   }
 }
