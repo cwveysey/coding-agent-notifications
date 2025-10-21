@@ -90,6 +90,21 @@ function updateSaveButton() {
 // ===== Event Listeners =====
 
 function setupEventListeners() {
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(navItem => {
+        navItem.addEventListener('click', (e) => {
+            const targetView = e.target.dataset.view;
+
+            // Update navigation active state
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            e.target.classList.add('active');
+
+            // Update view visibility
+            document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+            document.querySelector(`.view[data-view="${targetView}"]`).classList.add('active');
+        });
+    });
+
     // Save button
     document.getElementById('saveBtn').addEventListener('click', saveConfig);
 

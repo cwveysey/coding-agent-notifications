@@ -7,46 +7,63 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <!-- Header -->
         <header class="header">
             <h1>Coding agent audio notifications</h1>
             <button class="btn-save" id="saveBtn" disabled title="Save your settings. Changes take effect immediately for new Claude sessions.">Save</button>
         </header>
 
-        <!-- Main Settings -->
-        <main class="main">
-            <!-- Getting Started -->
-            <div class="getting-started">
-                <h2>What are the benefits of using this tool?</h2>
-                <p class="getting-started-text">
-                    Use this tool to receive audio alerts when designated Claude Code events occur. It is intended to 
-                    <br> </br>
-                    <li>Help ensure that you are alerted as early as possible whenever Claude Code might benefit from your input. </li>
-                    <li>Free you from having to actively monitor whether or not Claude Code requires your input.</li>
-                    <br> </br>
-                    </p>
-                <h2>Some consequential architecture details</h2>
-                <p class="getting-started-text">
-                    This tool relies on <a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Claude Code hooks</a> to trigger audio alerts. At the time of this writing the following hooks are supported:
-                    <br> </br>
-                    <li><strong>Notification</strong> - runs when Claude Code sends notifications</li>
-                    <li><strong>Stop</strong> - runs when Claude Code finishes responding</li>
-                    <li><strong>PostToolUse</strong> - runs after tool calls complete</li>
-                    <li><strong>SubagentStop</strong> - runs when subagent tasks complete</li>
-                    <br> </br>
-                    </p>
-                <h2>Customization options</h2>
-                <p class="getting-started-text">
-                    Using the controls below 
-                    <br> </br>
-                    <li>You can turn audio alerts on and off on per hook type basis.</li>
-                    <li>You can arrange for different audio to play on a per hook type basis.</li>
-                    <li>You can upload and use custom audio for your audio alerts.</li>
-                </p>
-            </div>
+        <div class="layout">
+            <!-- Left Navigation -->
+            <nav class="sidebar">
+                <div class="nav-item active" data-view="overview">Overview</div>
+                <div class="nav-item" data-view="claude-code">Claude Code</div>
+                <div class="nav-item" data-view="faq">FAQ</div>
+                <div class="nav-item" data-view="support">Support</div>
+            </nav>
 
-            <!-- Global Settings (shown when globalMode = true) -->
+            <!-- Main Content Area -->
+            <main class="main">
+                <!-- Overview View -->
+                <div class="view active" data-view="overview">
+                    <div class="getting-started">
+                        <h2>What are the benefits of using this tool?</h2>
+                        <p class="getting-started-text">
+                            Use this tool to receive audio alerts when designated Claude Code events occur. It is intended to:
+                        </p>
+                        <ul class="getting-started-text">
+                            <li>Help ensure that you are alerted as early as possible whenever Claude Code might benefit from your input.</li>
+                            <li>Free you from having to actively monitor whether or not Claude Code requires your input.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Claude Code View -->
+                <div class="view" data-view="claude-code">
+                    <div class="getting-started">
+                        <h2>Some notable technical details</h2>
+                        <p class="getting-started-text">
+                            This tool relies on <a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Claude Code hooks</a> to trigger audio alerts. At the time of this writing the following hooks are supported:
+                        </p>
+                        <ul class="getting-started-text">
+                            <li><strong>Notification</strong> - runs when Claude Code sends notifications</li>
+                            <li><strong>Stop</strong> - runs when Claude Code finishes responding</li>
+                            <li><strong>PostToolUse</strong> - runs after tool calls complete</li>
+                            <li><strong>SubagentStop</strong> - runs when subagent tasks complete</li>
+                        </ul>
+                        <h2>Customization options</h2>
+                        <p class="getting-started-text">
+                            Using the controls below:
+                        </p>
+                        <ul class="getting-started-text">
+                            <li>You can turn audio alerts on and off on per hook type basis.</li>
+                            <li>You can arrange for different audio to play on a per hook type basis.</li>
+                            <li>You can upload and use custom audio for your audio alerts.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Global Settings (shown when globalMode = true) -->
             <div id="globalSettings" class="settings-section">
                 <div class="card">
                     <div class="setting-row">
@@ -66,9 +83,9 @@
                     <div class="table-header">
                         <div class="table-header-cell">Event</div>
                         <div class="table-header-controls">
-                            <div class="table-header-cell" style="min-width: 160px; text-align: left;">Sound</div>
-                            <div class="table-header-cell" style="min-width: 36px;"></div>
-                            <div class="table-header-cell" style="min-width: 44px; text-align: center;">Enabled</div>
+                            <div class="table-header-cell" style="min-width: 140px; text-align: left;">Sound</div>
+                            <div class="table-header-cell" style="min-width: 28px;"></div>
+                            <div class="table-header-cell" style="min-width: 38px; text-align: center;">Enabled</div>
                         </div>
                     </div>
 
@@ -156,7 +173,29 @@
                     <input type="checkbox" id="globalMode" class="toggle">
                 </div>
             </div>
-        </main>
+                </div>
+
+                <!-- FAQ View -->
+                <div class="view" data-view="faq">
+                    <div class="getting-started">
+                        <h2>Frequently Asked Questions</h2>
+                        <p class="getting-started-text">
+                            Coming soon.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Support View -->
+                <div class="view" data-view="support">
+                    <div class="getting-started">
+                        <h2>Support</h2>
+                        <p class="getting-started-text">
+                            Coming soon.
+                        </p>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
 
     <script type="module" src="/main.js"></script>
