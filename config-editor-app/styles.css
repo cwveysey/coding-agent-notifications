@@ -12,7 +12,7 @@
     --surface: #FFFFFF;
     --border: #E5E5E7;
     --text: #1D1D1F;
-    --text-secondary: #86868B;
+    --text-secondary: #6B6B6B;
     --accent: #007AFF;
     --success: #34C759;
     --shadow: rgba(0, 0, 0, 0.05);
@@ -124,7 +124,7 @@ body {
 }
 
 .card h2 {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     margin-bottom: 12px;
     color: var(--text);
@@ -140,7 +140,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 12px 0;
-    gap: 24px;
+    gap: 32px;
 }
 
 .setting-row:not(:last-child) {
@@ -148,7 +148,8 @@ body {
 }
 
 .setting-label {
-    flex: 1;
+    flex: 0 1 auto;
+    max-width: 600px;
 }
 
 .setting-label label {
@@ -158,12 +159,14 @@ body {
     margin-bottom: 3px;
     cursor: pointer;
     color: var(--text);
+    letter-spacing: -0.01em;
 }
 
 .hint {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--text-secondary);
     line-height: 1.5;
+    letter-spacing: 0.01em;
     margin-top: 2px;
 }
 
@@ -552,17 +555,23 @@ details.card > summary:hover h2::before {
 }
 
 .getting-started h2 {
-    font-size: 17px;
+    font-size: 19px;
     font-weight: 600;
     color: var(--text);
+    margin-top: 32px;
     margin-bottom: 10px;
     letter-spacing: -0.3px;
 }
 
+.getting-started h2:first-child {
+    margin-top: 0;
+}
+
 .getting-started-text {
     color: var(--text);
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
+    letter-spacing: 0.01em;
     margin: 0;
 }
 
@@ -578,7 +587,7 @@ ul.getting-started-text li {
 
 /* Hooks Header */
 .hooks-header {
-    font-size: 17px;
+    font-size: 19px;
     font-weight: 600;
     color: var(--text);
     margin-bottom: 12px;
@@ -592,6 +601,7 @@ ul.getting-started-text li {
     padding: 8px 0 10px;
     border-bottom: 1px solid var(--border);
     margin-bottom: 0;
+    margin-top: 16px;
     align-items: center;
     gap: 24px;
 }
@@ -617,6 +627,21 @@ ul.getting-started-text li {
     gap: 6px;
     align-items: center;
     flex-shrink: 0;
+}
+
+.sound-header {
+    width: 140px;
+    text-align: left;
+}
+
+.play-header {
+    width: 28px;
+}
+
+.enabled-header {
+    width: 38px;
+    text-align: center;
+    margin-right: 4px;
 }
 
 /* Documentation */
