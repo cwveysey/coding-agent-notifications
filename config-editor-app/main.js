@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadConfig();
     setupEventListeners();
     renderUI();
-    setupBackToTop();
 });
 
 // ===== Config Management =====
@@ -67,6 +66,14 @@ async function loadConfig() {
 
 async function saveConfig() {
     try {
+        // Derive global enabled state from individual hook states (for backend compatibility)
+        const anyHookEnabled =
+            config.global_settings.event_enabled.notification ||
+            config.global_settings.event_enabled.stop ||
+            config.global_settings.event_enabled.post_tool_use ||
+            config.global_settings.event_enabled.subagent_stop;
+        config.global_settings.enabled = anyHookEnabled;
+
         await invoke('save_config', { config });
         hasChanges = false;
         updateSaveButton();
@@ -115,39 +122,6 @@ function setupEventListeners() {
         renderUI();
     });
 
-    // Global settings
-    const globalEnabledToggle = document.getElementById('globalEnabled');
-    if (globalEnabledToggle) {
-        globalEnabledToggle.addEventListener('change', async (e) => {
-            const isEnabled = e.target.checked;
-            config.global_settings.enabled = isEnabled;
-
-            // Set all hook toggles to match global enabled state
-            config.global_settings.event_enabled.notification = isEnabled;
-            config.global_settings.event_enabled.stop = isEnabled;
-            config.global_settings.event_enabled.post_tool_use = isEnabled;
-            config.global_settings.event_enabled.subagent_stop = isEnabled;
-
-            // Update UI toggles
-            const notificationEnabled = document.getElementById('notificationEnabled');
-            const stopEnabled = document.getElementById('stopEnabled');
-            const postToolUseEnabled = document.getElementById('postToolUseEnabled');
-            const subagentStopEnabled = document.getElementById('subagentStopEnabled');
-
-            if (notificationEnabled) notificationEnabled.checked = isEnabled;
-            if (stopEnabled) stopEnabled.checked = isEnabled;
-            if (postToolUseEnabled) postToolUseEnabled.checked = isEnabled;
-            if (subagentStopEnabled) subagentStopEnabled.checked = isEnabled;
-
-            try {
-                await invoke('set_sounds_enabled', { enabled: isEnabled });
-            } catch (error) {
-                console.error('Failed to set sounds enabled:', error);
-            }
-            updateEnabledLabel(isEnabled);
-            markChanged();
-        });
-    }
 
     document.getElementById('notificationSound').addEventListener('change', (e) => {
         if (config.global_mode) {
@@ -178,82 +152,30 @@ function setupEventListeners() {
     });
 
     // Event enabled toggles
-    document.getElementById('notificationEnabled').addEventListener('change', async (e) => {
+    document.getElementById('notificationEnabled').addEventListener('change', (e) => {
         if (config.global_mode) {
             config.global_settings.event_enabled.notification = e.target.checked;
-
-            // If turning on a hook while global is disabled, enable global
-            if (e.target.checked && !config.global_settings.enabled) {
-                config.global_settings.enabled = true;
-                const globalToggle = document.getElementById('globalEnabled');
-                if (globalToggle) globalToggle.checked = true;
-                updateEnabledLabel(true);
-                try {
-                    await invoke('set_sounds_enabled', { enabled: true });
-                } catch (error) {
-                    console.error('Failed to set sounds enabled:', error);
-                }
-            }
         }
         markChanged();
     });
 
-    document.getElementById('stopEnabled').addEventListener('change', async (e) => {
+    document.getElementById('stopEnabled').addEventListener('change', (e) => {
         if (config.global_mode) {
             config.global_settings.event_enabled.stop = e.target.checked;
-
-            // If turning on a hook while global is disabled, enable global
-            if (e.target.checked && !config.global_settings.enabled) {
-                config.global_settings.enabled = true;
-                const globalToggle = document.getElementById('globalEnabled');
-                if (globalToggle) globalToggle.checked = true;
-                updateEnabledLabel(true);
-                try {
-                    await invoke('set_sounds_enabled', { enabled: true });
-                } catch (error) {
-                    console.error('Failed to set sounds enabled:', error);
-                }
-            }
         }
         markChanged();
     });
 
-    document.getElementById('postToolUseEnabled').addEventListener('change', async (e) => {
+    document.getElementById('postToolUseEnabled').addEventListener('change', (e) => {
         if (config.global_mode) {
             config.global_settings.event_enabled.post_tool_use = e.target.checked;
-
-            // If turning on a hook while global is disabled, enable global
-            if (e.target.checked && !config.global_settings.enabled) {
-                config.global_settings.enabled = true;
-                const globalToggle = document.getElementById('globalEnabled');
-                if (globalToggle) globalToggle.checked = true;
-                updateEnabledLabel(true);
-                try {
-                    await invoke('set_sounds_enabled', { enabled: true });
-                } catch (error) {
-                    console.error('Failed to set sounds enabled:', error);
-                }
-            }
         }
         markChanged();
     });
 
-    document.getElementById('subagentStopEnabled').addEventListener('change', async (e) => {
+    document.getElementById('subagentStopEnabled').addEventListener('change', (e) => {
         if (config.global_mode) {
             config.global_settings.event_enabled.subagent_stop = e.target.checked;
-
-            // If turning on a hook while global is disabled, enable global
-            if (e.target.checked && !config.global_settings.enabled) {
-                config.global_settings.enabled = true;
-                const globalToggle = document.getElementById('globalEnabled');
-                if (globalToggle) globalToggle.checked = true;
-                updateEnabledLabel(true);
-                try {
-                    await invoke('set_sounds_enabled', { enabled: true });
-                } catch (error) {
-                    console.error('Failed to set sounds enabled:', error);
-                }
-            }
         }
         markChanged();
     });
@@ -375,35 +297,11 @@ function renderUI() {
     renderSoundLibrary();
 }
 
-function updateEnabledLabel(enabled) {
-    const label = document.getElementById('globalEnabledLabel');
-    const hint = document.getElementById('globalEnabledHint');
-
-    if (label) {
-        label.textContent = enabled
-            ? 'Notifications are currently enabled'
-            : 'Notifications are currently disabled';
-    }
-
-    if (hint) {
-        hint.textContent = enabled
-            ? 'To disable notifications, please set this row\'s toggle to the "off" position.'
-            : 'To enable notifications, please set this row\'s toggle to the "on" position.';
-    }
-}
-
 function renderGlobalSettings() {
     if (!config || !config.global_settings) {
         console.error('Config not loaded properly');
         return;
     }
-
-    const enabled = config.global_settings.enabled;
-    const toggle = document.getElementById('globalEnabled');
-    if (toggle) {
-        toggle.checked = enabled;
-    }
-    updateEnabledLabel(enabled);
 
     const notificationSound = document.getElementById('notificationSound');
     const stopSound = document.getElementById('stopSound');
@@ -653,27 +551,3 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// ===== Back to Top Button =====
-
-function setupBackToTop() {
-    // Create back to top button
-    const backToTop = document.createElement('button');
-    backToTop.className = 'back-to-top';
-    backToTop.textContent = '↑';
-    backToTop.title = 'Back to top';
-    document.body.appendChild(backToTop);
-
-    // Show/hide based on scroll position
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 300) {
-            backToTop.classList.add('visible');
-        } else {
-            backToTop.classList.remove('visible');
-        }
-    });
-
-    // Scroll to top on click
-    backToTop.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-}
