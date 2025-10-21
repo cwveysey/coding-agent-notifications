@@ -279,10 +279,13 @@ function setupEventListeners() {
         });
     });
 
-    // Documentation button
-    document.getElementById('openDocsBtn').addEventListener('click', async () => {
-        await openUrl('https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview');
-    });
+    // Documentation button (if it exists)
+    const openDocsBtn = document.getElementById('openDocsBtn');
+    if (openDocsBtn) {
+        openDocsBtn.addEventListener('click', async () => {
+            await openUrl('https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview');
+        });
+    }
 
     // Handle all inline link clicks to open in browser
     document.querySelectorAll('.inline-link').forEach(link => {
@@ -359,6 +362,9 @@ function renderUI() {
     document.getElementById('globalSettings').style.display = globalMode ? 'block' : 'none';
     document.getElementById('projectSettings').style.display = globalMode ? 'none' : 'block';
 
+    // Populate all sound selectors FIRST so dropdowns have options
+    populateSoundSelectors();
+
     // Render components
     if (globalMode) {
         renderGlobalSettings();
@@ -367,9 +373,6 @@ function renderUI() {
     }
 
     renderSoundLibrary();
-
-    // Populate all sound selectors
-    populateSoundSelectors();
 }
 
 function updateEnabledLabel(enabled) {
