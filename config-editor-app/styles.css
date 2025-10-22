@@ -62,6 +62,9 @@ body {
     gap: 2px;
     padding: 0 24px 0 0;
     border-right: 1px solid var(--border);
+    position: sticky;
+    top: 90px;
+    align-self: flex-start;
 }
 
 .nav-item {
@@ -105,6 +108,12 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+    padding: 16px 0;
+    margin-top: -16px;
 }
 
 .header h1 {
@@ -752,3 +761,27 @@ button[title] {
     background: #FF3B30;
 }
 
+/* FAQ */
+.faq-item {
+    margin-bottom: 24px;
+}
+
+.faq-item:first-child {
+    margin-top: 16px;
+}
+
+.faq-question {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+}
+
+.faq-answer {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+    letter-spacing: 0.01em;
+    margin: 0;
+}
