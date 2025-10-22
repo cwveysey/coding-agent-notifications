@@ -4,7 +4,7 @@ import { open as openUrl } from '@tauri-apps/plugin-shell';
 
 // State
 let config = null;
-let hasChanges = false;
+let savedConfig = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadConfig() {
     try {
         config = await invoke('load_config');
-        hasChanges = false;
+        savedConfig = JSON.parse(JSON.stringify(config)); // Deep copy
         updateSaveButton();
         console.log('Config loaded:', config);
         console.log('Sound library:', config.sound_library);
@@ -61,6 +61,7 @@ async function loadConfig() {
             min_interval: 2,
             debug: false
         };
+        savedConfig = JSON.parse(JSON.stringify(config)); // Deep copy
     }
 }
 
@@ -75,7 +76,7 @@ async function saveConfig() {
         config.global_settings.enabled = anyHookEnabled;
 
         await invoke('save_config', { config });
-        hasChanges = false;
+        savedConfig = JSON.parse(JSON.stringify(config)); // Update saved state
         updateSaveButton();
         showToast('Settings saved successfully');
     } catch (error) {
@@ -85,13 +86,18 @@ async function saveConfig() {
 }
 
 function markChanged() {
-    hasChanges = true;
     updateSaveButton();
+}
+
+function hasUnsavedChanges() {
+    return JSON.stringify(config) !== JSON.stringify(savedConfig);
 }
 
 function updateSaveButton() {
     const saveBtn = document.getElementById('saveBtn');
-    saveBtn.disabled = !hasChanges;
+    if (saveBtn) {
+        saveBtn.disabled = !hasUnsavedChanges();
+    }
 }
 
 // ===== Event Listeners =====
@@ -109,6 +115,12 @@ function setupEventListeners() {
             // Update view visibility
             document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
             document.querySelector(`.view[data-view="${targetView}"]`).classList.add('active');
+
+            // Show/hide Save button based on view
+            const saveBtn = document.getElementById('saveBtn');
+            if (saveBtn) {
+                saveBtn.style.display = targetView === 'claude-code' ? 'block' : 'none';
+            }
         });
     });
 
