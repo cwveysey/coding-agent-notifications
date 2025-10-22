@@ -31,8 +31,8 @@
     "windows": [
       {
         "title": "Coding agent audio notifications",
-        "width": 750,
-        "height": 850,
+        "width": 900,
+        "height": 950,
         "resizable": true,
         "fullscreen": false,
         "minWidth": 700,

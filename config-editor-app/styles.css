@@ -650,7 +650,7 @@ ul.getting-started-text li {
 .enabled-header {
     width: 38px;
     text-align: center;
-    margin-right: 4px;
+    margin-right: 12px;
 }
 
 /* Documentation */
@@ -766,8 +766,8 @@ button[title] {
     margin-bottom: 24px;
 }
 
-.faq-item:first-child {
-    margin-top: 16px;
+.getting-started .faq-item:first-of-type {
+    margin-top: 20px;
 }
 
 .faq-question {
