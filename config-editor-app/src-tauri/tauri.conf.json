@@ -18,7 +18,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": [],
+    "resources": ["resources/voices/*", "resources/scripts/*"],
     "copyright": "",
     "category": "DeveloperTool",
     "shortDescription": "",
@@ -43,7 +43,17 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": [
+        {
+          "identifier": "main-capability",
+          "windows": ["main"],
+          "permissions": [
+            "dialog:allow-open",
+            "shell:allow-open"
+          ]
+        }
+      ]
     },
     "macOSPrivateApi": true
   }
