@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::{Deserialize, Serialize};
+use sha2::{Sha256, Digest};
 use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
@@ -20,10 +21,14 @@ struct EventSounds {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct ProjectConfig {
     path: String,
+    #[serde(default)]
+    display_name: Option<String>,
     enabled: bool,
     event_sounds: EventSounds,
     #[serde(default = "default_event_enabled")]
     event_enabled: EventEnabled,
+    #[serde(default = "default_event_voice_enabled")]
+    voice_enabled: EventEnabled,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -40,6 +45,16 @@ struct GlobalSettings {
     event_sounds: EventSounds,
     #[serde(default = "default_event_enabled")]
     event_enabled: EventEnabled,
+    #[serde(default = "default_event_voice_enabled")]
+    voice_enabled: EventEnabled,
+    #[serde(default = "default_voice_template")]
+    voice_template: String,
+    #[serde(default = "default_voice_provider")]
+    voice_provider: String,
+    #[serde(default)]
+    voice_id: Option<String>,
+    #[serde(default)]
+    fish_audio_api_key: Option<String>,
 }
 
 fn default_event_enabled() -> EventEnabled {
@@ -49,6 +64,23 @@ fn default_event_enabled() -> EventEnabled {
         post_tool_use: true,
         subagent_stop: true,
     }
+}
+
+fn default_event_voice_enabled() -> EventEnabled {
+    EventEnabled {
+        notification: true,
+        stop: true,
+        post_tool_use: true,
+        subagent_stop: true,
+    }
+}
+
+fn default_voice_template() -> String {
+    "{event} event".to_string()
+}
+
+fn default_voice_provider() -> String {
+    "system".to_string()
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -83,12 +115,17 @@ impl Default for Config {
             global_settings: GlobalSettings {
                 enabled: true,
                 event_sounds: EventSounds {
-                    notification: "/System/Library/Sounds/Glass.aiff".to_string(),
-                    stop: "/System/Library/Sounds/Glass.aiff".to_string(),
-                    post_tool_use: "/System/Library/Sounds/Glass.aiff".to_string(),
-                    subagent_stop: "/System/Library/Sounds/Glass.aiff".to_string(),
+                    notification: "voice:simple".to_string(),
+                    stop: "voice:simple".to_string(),
+                    post_tool_use: "voice:simple".to_string(),
+                    subagent_stop: "voice:simple".to_string(),
                 },
                 event_enabled: default_event_enabled(),
+                voice_enabled: default_event_voice_enabled(),
+                voice_template: default_voice_template(),
+                voice_provider: "fish_audio".to_string(),
+                voice_id: None,
+                fish_audio_api_key: None,
             },
             projects: vec![],
             sound_library: system_sounds,
@@ -113,6 +150,87 @@ fn get_sounds_enabled_path() -> PathBuf {
 fn get_custom_sounds_dir() -> PathBuf {
     let home = std::env::var("HOME").unwrap();
     PathBuf::from(home).join(".claude/sounds")
+}
+
+fn get_voice_cache_dir() -> PathBuf {
+    let home = std::env::var("HOME").unwrap();
+    PathBuf::from(home).join(".claude/voices")
+}
+
+fn hash_string(s: &str) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(s.as_bytes());
+    format!("{:x}", hasher.finalize())
+}
+
+// ===== Voice Generation =====
+
+async fn generate_voice_fish_audio(
+    text: &str,
+    api_key: &str,
+    voice_id: Option<&str>,
+) -> Result<Vec<u8>, String> {
+    let client = reqwest::Client::new();
+
+    let voice = voice_id.unwrap_or("af_bella"); // Default voice
+
+    let response = client
+        .post("https://api.fish.audio/v1/tts")
+        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Content-Type", "application/json")
+        .json(&serde_json::json!({
+            "text": text,
+            "reference_id": voice,
+            "format": "mp3",
+            "latency": "normal"
+        }))
+        .send()
+        .await
+        .map_err(|e| format!("Failed to call Fish Audio API: {}", e))?;
+
+    if !response.status().is_success() {
+        let status = response.status();
+        let error_text = response.text().await.unwrap_or_default();
+        return Err(format!("Fish Audio API error {}: {}", status, error_text));
+    }
+
+    response
+        .bytes()
+        .await
+        .map(|b| b.to_vec())
+        .map_err(|e| format!("Failed to read response: {}", e))
+}
+
+fn generate_voice_system_tts(text: &str) -> Result<Vec<u8>, String> {
+    #[cfg(target_os = "macos")]
+    {
+        // Use macOS 'say' command to generate audio file
+        let temp_path = std::env::temp_dir().join(format!("tts_{}.aiff", hash_string(text)));
+
+        let output = Command::new("say")
+            .arg("-o")
+            .arg(&temp_path)
+            .arg(text)
+            .output()
+            .map_err(|e| format!("Failed to run 'say' command: {}", e))?;
+
+        if !output.status.success() {
+            return Err(format!("'say' command failed: {}", String::from_utf8_lossy(&output.stderr)));
+        }
+
+        let bytes = fs::read(&temp_path)
+            .map_err(|e| format!("Failed to read generated audio: {}", e))?;
+
+        // Clean up temp file
+        let _ = fs::remove_file(&temp_path);
+
+        Ok(bytes)
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        Err("System TTS is only supported on macOS".to_string())
+    }
 }
 
 // ===== Tauri Commands =====
@@ -203,6 +321,239 @@ async fn preview_sound(sound_path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+async fn preview_voice(text: String, api_key: Option<String>, app_handle: tauri::AppHandle) -> Result<(), String> {
+    println!("preview_voice called with text: {}", text);
+
+    // Map text to bundled file name for basic events
+    let bundled_file_name = match text.as_str() {
+        "notification event" => Some("notification.mp3"),
+        "stop event" => Some("stop.mp3"),
+        "post tool use event" => Some("post_tool_use.mp3"),
+        "subagent stop event" => Some("subagent_stop.mp3"),
+        _ => None,
+    };
+
+    // Check for bundled voice file first (for basic events)
+    if let Some(filename) = bundled_file_name {
+        let resource_path = app_handle
+            .path()
+            .resource_dir()
+            .map_err(|e| format!("Failed to get resource dir: {}", e))?
+            .join("resources")
+            .join("voices")
+            .join(filename);
+
+        if resource_path.exists() {
+            println!("Playing bundled voice file: {:?}", resource_path);
+            #[cfg(target_os = "macos")]
+            {
+                Command::new("afplay")
+                    .arg(&resource_path)
+                    .spawn()
+                    .map_err(|e| format!("Failed to play bundled voice: {}", e))?;
+            }
+            return Ok(());
+        } else {
+            println!("Bundled file not found at {:?}", resource_path);
+        }
+    }
+
+    // Check for cached file (for project-specific voices)
+    let text_hash = hash_string(&text);
+    let voice_cache_dir = get_voice_cache_dir();
+    let cached_file = voice_cache_dir.join("previews").join(format!("{}.mp3", text_hash));
+
+    if cached_file.exists() {
+        println!("Playing cached voice file: {:?}", cached_file);
+        #[cfg(target_os = "macos")]
+        {
+            Command::new("afplay")
+                .arg(&cached_file)
+                .spawn()
+                .map_err(|e| format!("Failed to play cached voice: {}", e))?;
+        }
+        return Ok(());
+    }
+
+    println!("No bundled or cached file found, generating new voice");
+
+    // Generate voice file for project-specific text
+    let audio_bytes = if let Some(key) = api_key {
+        generate_voice_fish_audio(&text, &key, Some("af_bella")).await?
+    } else {
+        // Use system TTS as fallback
+        #[cfg(target_os = "macos")]
+        {
+            generate_voice_system_tts(&text)?
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            return Err("No API key provided and system TTS not available".to_string());
+        }
+    };
+
+    // Cache the generated file
+    fs::create_dir_all(cached_file.parent().unwrap())
+        .map_err(|e| format!("Failed to create cache directory: {}", e))?;
+    fs::write(&cached_file, &audio_bytes)
+        .map_err(|e| format!("Failed to cache voice file: {}", e))?;
+
+    // Play the file
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("afplay")
+            .arg(&cached_file)
+            .spawn()
+            .map_err(|e| format!("Failed to play voice: {}", e))?;
+    }
+
+    println!("Voice preview completed successfully");
+    Ok(())
+}
+
+#[tauri::command]
+async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
+    let home = std::env::var("HOME").map_err(|_| "Could not get HOME directory")?;
+    let claude_dir = PathBuf::from(&home).join(".claude");
+    let scripts_dir = claude_dir.join("scripts");
+
+    // Create directories
+    fs::create_dir_all(&scripts_dir)
+        .map_err(|e| format!("Failed to create .claude/scripts directory: {}", e))?;
+
+    // Copy scripts from bundled resources
+    let resource_dir = app_handle
+        .path()
+        .resource_dir()
+        .map_err(|e| format!("Failed to get resource dir: {}", e))?;
+
+    let bundled_scripts = resource_dir.join("resources").join("scripts");
+
+    if !bundled_scripts.exists() {
+        return Err(format!("Bundled scripts not found at {:?}", bundled_scripts));
+    }
+
+    // Copy each script file
+    for entry in fs::read_dir(&bundled_scripts)
+        .map_err(|e| format!("Failed to read bundled scripts: {}", e))? {
+        let entry = entry.map_err(|e| format!("Failed to read script entry: {}", e))?;
+        let src = entry.path();
+        if src.is_file() {
+            let filename = src.file_name().ok_or("Invalid filename")?;
+            let dest = scripts_dir.join(filename);
+            fs::copy(&src, &dest)
+                .map_err(|e| format!("Failed to copy {:?}: {}", filename, e))?;
+
+            // Make scripts executable
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let mut perms = fs::metadata(&dest)
+                    .map_err(|e| format!("Failed to get permissions: {}", e))?
+                    .permissions();
+                perms.set_mode(0o755);
+                fs::set_permissions(&dest, perms)
+                    .map_err(|e| format!("Failed to set permissions: {}", e))?;
+            }
+        }
+    }
+
+    // Copy bundled voice files to ~/.claude/voices/global/
+    let voices_dir = claude_dir.join("voices").join("global");
+    fs::create_dir_all(&voices_dir)
+        .map_err(|e| format!("Failed to create voices directory: {}", e))?;
+
+    let bundled_voices = resource_dir.join("resources").join("voices");
+    if bundled_voices.exists() {
+        for entry in fs::read_dir(&bundled_voices)
+            .map_err(|e| format!("Failed to read bundled voices: {}", e))? {
+            let entry = entry.map_err(|e| format!("Failed to read voice entry: {}", e))?;
+            let src = entry.path();
+            if src.is_file() {
+                let filename = src.file_name().ok_or("Invalid voice filename")?;
+                let dest = voices_dir.join(filename);
+                fs::copy(&src, &dest)
+                    .map_err(|e| format!("Failed to copy voice {:?}: {}", filename, e))?;
+            }
+        }
+    }
+
+    // Update settings.json with hooks
+    let settings_file = claude_dir.join("settings.json");
+    let mut settings: serde_json::Value = if settings_file.exists() {
+        let contents = fs::read_to_string(&settings_file)
+            .map_err(|e| format!("Failed to read settings.json: {}", e))?;
+        serde_json::from_str(&contents)
+            .map_err(|e| format!("Failed to parse settings.json: {}", e))?
+    } else {
+        serde_json::json!({})
+    };
+
+    // Add hooks configuration
+    let hooks_config = serde_json::json!({
+        "Notification": [{
+            "matcher": "",
+            "hooks": [{
+                "type": "command",
+                "command": format!("bash {}/.claude/scripts/smart-notify.sh notification", home)
+            }]
+        }],
+        "Stop": [{
+            "matcher": ".*",
+            "hooks": [
+                {
+                    "type": "command",
+                    "command": format!("jq -c -r '.' >> {}/.claude/stop-input.jsonl || cat >> {}/.claude/stop-input.jsonl", home, home)
+                },
+                {
+                    "type": "command",
+                    "command": format!("bash {}/.claude/scripts/smart-notify.sh stop", home)
+                }
+            ]
+        }],
+        "PostToolUse": [{
+            "matcher": "",
+            "hooks": [{
+                "type": "command",
+                "command": format!("bash {}/.claude/scripts/smart-notify.sh post_tool_use", home)
+            }]
+        }],
+        "SubagentStop": [{
+            "matcher": "",
+            "hooks": [{
+                "type": "command",
+                "command": format!("bash {}/.claude/scripts/smart-notify.sh subagent_stop", home)
+            }]
+        }]
+    });
+
+    settings["hooks"] = hooks_config;
+
+    // Save updated settings
+    let settings_str = serde_json::to_string_pretty(&settings)
+        .map_err(|e| format!("Failed to serialize settings: {}", e))?;
+    fs::write(&settings_file, settings_str)
+        .map_err(|e| format!("Failed to write settings.json: {}", e))?;
+
+    // Enable sounds
+    let sounds_enabled_file = claude_dir.join(".sounds-enabled");
+    fs::write(&sounds_enabled_file, "")
+        .map_err(|e| format!("Failed to enable sounds: {}", e))?;
+
+    // Create default config if it doesn't exist
+    let config_file = claude_dir.join("audio-notifier.yaml");
+    if !config_file.exists() {
+        let default_config = Config::default();
+        let yaml = serde_yaml::to_string(&default_config)
+            .map_err(|e| format!("Failed to serialize default config: {}", e))?;
+        fs::write(&config_file, yaml)
+            .map_err(|e| format!("Failed to create default config: {}", e))?;
+    }
+
+    Ok("Installation complete! Audio notifications are now active.".to_string())
+}
+
+#[tauri::command]
 async fn upload_sound() -> Result<Option<String>, String> {
     // This will be called from the frontend using the dialog plugin
     // For now, return None - the frontend will handle the dialog
@@ -288,6 +639,149 @@ async fn list_custom_sounds() -> Result<Vec<String>, String> {
     Ok(sounds)
 }
 
+#[tauri::command]
+async fn pregenerate_basic_voices(api_key: String) -> Result<String, String> {
+    let voice_cache_dir = get_voice_cache_dir();
+    let preview_dir = voice_cache_dir.join("previews");
+    fs::create_dir_all(&preview_dir)
+        .map_err(|e| format!("Failed to create preview directory: {}", e))?;
+
+    let basic_texts = vec![
+        "notification event",
+        "stop event",
+        "post tool use event",
+        "subagent stop event",
+    ];
+
+    for text in basic_texts {
+        let text_hash = hash_string(text);
+        let cached_file = preview_dir.join(format!("{}.mp3", text_hash));
+
+        if cached_file.exists() {
+            println!("Skipping {}, already cached", text);
+            continue;
+        }
+
+        println!("Generating voice for: {}", text);
+        let audio_bytes = generate_voice_fish_audio(text, &api_key, Some("af_bella")).await?;
+        fs::write(&cached_file, audio_bytes)
+            .map_err(|e| format!("Failed to write voice file: {}", e))?;
+    }
+
+    Ok("Pre-generated 4 basic voice files".to_string())
+}
+
+#[tauri::command]
+async fn generate_voice_notifications(config: Config, api_key: Option<String>) -> Result<String, String> {
+    let voice_cache_dir = get_voice_cache_dir();
+
+    // Create cache directories
+    fs::create_dir_all(&voice_cache_dir)
+        .map_err(|e| format!("Failed to create voice cache directory: {}", e))?;
+
+    let mut generated_count = 0;
+
+    // Generate global voice notifications
+    if config.global_mode {
+        let global_dir = voice_cache_dir.join("global");
+        fs::create_dir_all(&global_dir)
+            .map_err(|e| format!("Failed to create global voice directory: {}", e))?;
+
+        let events = vec![
+            ("notification", "notification"),
+            ("stop", "stop"),
+            ("post_tool_use", "post tool use"),
+            ("subagent_stop", "subagent stop"),
+        ];
+
+        for (event_key, event_name) in events {
+            let voice_enabled = match event_key {
+                "notification" => config.global_settings.voice_enabled.notification,
+                "stop" => config.global_settings.voice_enabled.stop,
+                "post_tool_use" => config.global_settings.voice_enabled.post_tool_use,
+                "subagent_stop" => config.global_settings.voice_enabled.subagent_stop,
+                _ => false,
+            };
+
+            if !voice_enabled {
+                continue;
+            }
+
+            let text = config.global_settings.voice_template
+                .replace("{event}", event_name)
+                .replace("{project}", "");
+
+            let audio_bytes = match config.global_settings.voice_provider.as_str() {
+                "fish-audio" => {
+                    let api_key = api_key.as_ref().ok_or("Fish Audio API key required")?;
+                    generate_voice_fish_audio(&text, api_key, config.global_settings.voice_id.as_deref()).await?
+                },
+                "system" | _ => {
+                    generate_voice_system_tts(&text)?
+                }
+            };
+
+            let file_path = global_dir.join(format!("{}.mp3", event_key));
+            fs::write(&file_path, audio_bytes)
+                .map_err(|e| format!("Failed to write voice file: {}", e))?;
+
+            generated_count += 1;
+        }
+    }
+
+    // Generate project-specific voice notifications
+    for project in &config.projects {
+        let project_hash = hash_string(&project.path);
+        let project_dir = voice_cache_dir.join("projects").join(&project_hash);
+        fs::create_dir_all(&project_dir)
+            .map_err(|e| format!("Failed to create project voice directory: {}", e))?;
+
+        let events = vec![
+            ("notification", "notification"),
+            ("stop", "stop"),
+            ("post_tool_use", "post tool use"),
+            ("subagent_stop", "subagent stop"),
+        ];
+
+        for (event_key, event_name) in events {
+            let voice_enabled = match event_key {
+                "notification" => project.voice_enabled.notification,
+                "stop" => project.voice_enabled.stop,
+                "post_tool_use" => project.voice_enabled.post_tool_use,
+                "subagent_stop" => project.voice_enabled.subagent_stop,
+                _ => false,
+            };
+
+            if !voice_enabled {
+                continue;
+            }
+
+            let display_name = project.display_name.as_ref().unwrap_or(&project.path);
+            let text = config.global_settings.voice_template
+                .replace("{event}", event_name)
+                .replace("{project}", display_name);
+
+            let audio_bytes = match config.global_settings.voice_provider.as_str() {
+                "fish-audio" => {
+                    let api_key = api_key.as_ref().ok_or("Fish Audio API key required")?;
+                    generate_voice_fish_audio(&text, api_key, config.global_settings.voice_id.as_deref()).await?
+                },
+                "system" | _ => {
+                    generate_voice_system_tts(&text)?
+                }
+            };
+
+            let file_path = project_dir.join(format!("{}.mp3", event_key));
+            fs::write(&file_path, audio_bytes)
+                .map_err(|e| format!("Failed to write voice file: {}", e))?;
+
+            generated_count += 1;
+        }
+    }
+
+    Ok(format!("Generated {} voice notifications", generated_count))
+}
+
 // ===== System Tray =====
 
 fn create_tray(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
@@ -352,10 +846,14 @@ fn main() {
             get_sounds_enabled,
             set_sounds_enabled,
             preview_sound,
+            preview_voice,
+            pregenerate_basic_voices,
+            install_hooks,
             upload_sound,
             get_recent_projects,
             open_log_file,
             list_custom_sounds,
+            generate_voice_notifications,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

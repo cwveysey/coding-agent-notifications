@@ -19,6 +19,7 @@
             <nav class="sidebar">
                 <div class="nav-item active" data-view="overview">Overview</div>
                 <div class="nav-item" data-view="claude-code">Claude Code</div>
+                <div class="nav-item" data-view="custom-sounds">Audio library</div>
                 <div class="nav-item" data-view="faq">FAQ</div>
                 <div class="nav-item" data-view="support">Support</div>
             </nav>
@@ -27,6 +28,18 @@
             <main class="main">
                 <!-- Overview View -->
                 <div class="view active" data-view="overview">
+                    <!-- Install Banner -->
+                    <div id="installBanner" class="info-banner" style="display: none; background: #e8f5e9; border-color: #4caf50;">
+                        <h3 style="margin-top: 0;">First time setup required</h3>
+                        <p>Click the button below to automatically install the audio notification system. This one-time setup will:</p>
+                        <ul style="margin: 12px 0; padding-left: 24px;">
+                            <li>Install notification scripts to <code>~/.claude/scripts/</code></li>
+                            <li>Configure Claude Code hooks</li>
+                            <li>Enable audio notifications</li>
+                        </ul>
+                        <button id="installBtn" class="btn btn-primary" style="background: #4caf50; margin-top: 12px;">Install Audio Notifications</button>
+                    </div>
+
                     <div class="getting-started">
                         <h2>What are the benefits of using this tool?</h2>
                         <p class="getting-started-text">
@@ -41,30 +54,256 @@
 
                 <!-- Claude Code View -->
                 <div class="view" data-view="claude-code">
+                    <!-- Prototype Selector (TEMPORARY) -->
+                    <div class="prototype-selector">
+                        <div class="prototype-label">PROTOTYPE PREVIEW:</div>
+                        <div class="prototype-buttons">
+                            <button class="prototype-btn active" data-prototype="2">Prototype A</button>
+                            <button class="prototype-btn" data-prototype="4">Prototype B</button>
+                        </div>
+                    </div>
+
                     <div class="getting-started">
-                        <h2>Notable technical details</h2>
+                        <h2>Some notable technical details</h2>
                         <p class="getting-started-text">
                             This tool relies on <a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Claude Code hooks</a> to trigger audio alerts. At the time of this writing the following hooks are supported:
                         </p>
                         <ul class="getting-started-text">
-                            <li><strong>Notification</strong> - runs when Claude Code sends notifications</li>
-                            <li><strong>Stop</strong> - runs when Claude Code finishes responding</li>
-                            <li><strong>PostToolUse</strong> - runs after tool calls complete</li>
-                            <li><strong>SubagentStop</strong> - runs when subagent tasks complete</li>
+                            <li><strong>Notification</strong> - runs when Claude Code sends notifications.</li>
+                            <li><strong>Stop</strong> - runs when Claude Code finishes responding.</li>
+                            <li><strong>PostToolUse</strong> - runs after tool calls complete.</li>
+                            <li><strong>SubagentStop</strong> - runs when subagent tasks complete.</li>
                         </ul>
-                        <h2>Customization options</h2>
+                        <h2>Some customization options</h2>
                         <p class="getting-started-text">
                             Using the controls below:
                         </p>
                         <ul class="getting-started-text">
-                            <li>You can turn audio alerts on and off on per hook type basis.</li>
+                            <li>You can turn audio alerts on and off on a per hook type basis.</li>
                             <li>You can arrange for different audio to play on a per hook type basis.</li>
-                            <li>You can upload and use custom audio for your audio alerts.</li>
+                            <li>You can arrange for custom audio to be used for alerts.</li>
+                            <li>You can customize what events you receive alerts for and what audio is used on a per project basis.</li>
                         </ul>
                     </div>
 
+                    <!-- PROTOTYPE 2: Simple Toggle -->
+                    <div data-prototype-view="2" class="prototype-view">
+                        <div class="settings-section">
+                            <div class="card">
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <label for="useGlobalSettings">Use the same sound and event settings across all projects</label>
+                                    </div>
+                                    <input type="checkbox" id="useGlobalSettings" class="toggle" checked>
+                                </div>
+                            </div>
+
+                            <div class="global-content" data-global-content>
+
+                            <div class="card">
+                                <div class="table-header">
+                                    <div class="table-header-cell">Event</div>
+                                    <div class="table-header-controls">
+                                        <div class="table-header-cell sound-header">Sound</div>
+                                        <div class="table-header-cell play-header"></div>
+                                        <div class="table-header-cell enabled-header">Enabled</div>
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <label>Notification</label>
+                                        <p class="hint">Runs when Claude Code sends notifications</p>
+                                    </div>
+                                    <div class="sound-control">
+                                        <select class="sound-select">
+                                            <option>Glass</option>
+                                            <option>Ping</option>
+                                        </select>
+                                        <button class="btn-play" title="Preview this sound">▶</button>
+                                        <input type="checkbox" class="toggle" checked>
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <label>Stop</label>
+                                        <p class="hint">Runs when Claude Code finishes responding</p>
+                                    </div>
+                                    <div class="sound-control">
+                                        <select class="sound-select">
+                                            <option>Glass</option>
+                                            <option>Ping</option>
+                                        </select>
+                                        <button class="btn-play" title="Preview this sound">▶</button>
+                                        <input type="checkbox" class="toggle" checked>
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <label>PostToolUse</label>
+                                        <p class="hint">Runs after tool calls complete</p>
+                                    </div>
+                                    <div class="sound-control">
+                                        <select class="sound-select">
+                                            <option>Glass</option>
+                                            <option>Ping</option>
+                                        </select>
+                                        <button class="btn-play" title="Preview this sound">▶</button>
+                                        <input type="checkbox" class="toggle" checked>
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <label>SubagentStop</label>
+                                        <p class="hint">Runs when subagent tasks complete</p>
+                                    </div>
+                                    <div class="sound-control">
+                                        <select class="sound-select">
+                                            <option>Glass</option>
+                                            <option>Ping</option>
+                                        </select>
+                                        <button class="btn-play" title="Preview this sound">▶</button>
+                                        <input type="checkbox" class="toggle" checked>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="project-content" data-project-content style="display: none;">
+                                <div class="empty-state" id="emptyStateSimple" style="display: none;">
+                                    <button class="btn-add" id="addProjectBtnSimple" title="Select the directory where you run Claude Code. This is typically your project's root directory">+ Customize audio notifications for a new project</button>
+                                </div>
+
+                                <div class="tabs-container" id="projectTabsSimple" style="display: none;">
+                                    <div class="tabs" id="projectTabsNavSimple">
+                                        <!-- Tabs will be inserted here dynamically -->
+                                    </div>
+                                </div>
+
+                                <div id="projectTabsContentSimple">
+                                    <!-- Project-specific tables will be inserted here dynamically -->
+                                </div>
+
+                                <div class="bottom-actions" style="margin-top: 24px; text-align: right;">
+                                    <button class="btn-save bottom-save-btn" id="saveBtnBottomSimple" disabled title="Save your settings. Changes take effect immediately for new Claude sessions.">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PROTOTYPE 4: Simple Toggle (Alt) -->
+                    <div data-prototype-view="4" class="prototype-view" style="display: none;">
+                        <div class="settings-section">
+                            <div class="card">
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <label for="useGlobalSettingsAlt">Use the same settings for all active Claude Code sessions</label>
+                                    </div>
+                                    <input type="checkbox" id="useGlobalSettingsAlt" class="toggle" checked>
+                                </div>
+                            </div>
+
+                            <div class="global-content" data-global-content-alt>
+
+                            <div class="card">
+                                <div class="table-header">
+                                    <div class="table-header-cell">Event</div>
+                                    <div class="table-header-controls">
+                                        <div class="table-header-cell sound-header">Sound</div>
+                                        <div class="table-header-cell play-header"></div>
+                                        <div class="table-header-cell enabled-header">Enabled</div>
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <label>Notification</label>
+                                        <p class="hint">Runs when Claude Code sends notifications</p>
+                                    </div>
+                                    <div class="sound-control">
+                                        <select class="sound-select">
+                                            <option>Glass</option>
+                                            <option>Ping</option>
+                                        </select>
+                                        <button class="btn-play" title="Preview this sound">▶</button>
+                                        <input type="checkbox" class="toggle" checked>
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <label>Stop</label>
+                                        <p class="hint">Runs when Claude Code finishes responding</p>
+                                    </div>
+                                    <div class="sound-control">
+                                        <select class="sound-select">
+                                            <option>Glass</option>
+                                            <option>Ping</option>
+                                        </select>
+                                        <button class="btn-play" title="Preview this sound">▶</button>
+                                        <input type="checkbox" class="toggle" checked>
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <label>PostToolUse</label>
+                                        <p class="hint">Runs after tool calls complete</p>
+                                    </div>
+                                    <div class="sound-control">
+                                        <select class="sound-select">
+                                            <option>Glass</option>
+                                            <option>Ping</option>
+                                        </select>
+                                        <button class="btn-play" title="Preview this sound">▶</button>
+                                        <input type="checkbox" class="toggle" checked>
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <label>SubagentStop</label>
+                                        <p class="hint">Runs when subagent tasks complete</p>
+                                    </div>
+                                    <div class="sound-control">
+                                        <select class="sound-select">
+                                            <option>Glass</option>
+                                            <option>Ping</option>
+                                        </select>
+                                        <button class="btn-play" title="Preview this sound">▶</button>
+                                        <input type="checkbox" class="toggle" checked>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="project-content" data-project-content-alt style="display: none;">
+                                <div class="empty-state" id="emptyStateAlt" style="display: none;">
+                                    <button class="btn-add" id="addProjectBtnAlt" title="Select the directory where you run Claude Code. This is typically your project's root directory">+ Customize audio notifications for a new project</button>
+                                </div>
+
+                                <div class="tabs-container" id="projectTabsAlt" style="display: none;">
+                                    <div class="tabs" id="projectTabsNavAlt">
+                                        <!-- Tabs will be inserted here dynamically -->
+                                    </div>
+                                </div>
+
+                                <div id="projectTabsContentAlt">
+                                    <!-- Project-specific tables will be inserted here dynamically -->
+                                </div>
+
+                                <div class="bottom-actions" style="margin-top: 24px; text-align: right;">
+                                    <button class="btn-save bottom-save-btn" id="saveBtnBottomAlt" disabled title="Save your settings. Changes take effect immediately for new Claude sessions.">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Global Settings (shown when globalMode = true) -->
-            <div id="globalSettings" class="settings-section">
+            <div id="globalSettings" class="settings-section" style="display: none;">
                 <h2 class="hooks-header">Hooks that are eligible for audio notifications</h2>
                 <p class="hint" style="margin-bottom: 16px;">According to the Claude Code developer documentation, "Claude Code hooks are user-defined shell commands that execute at various points in Claude Code's lifecycle" (<a href="https://docs.claude.com/en/docs/claude-code/hooks-guide" target="_blank" class="inline-link hooks-guide-link">source</a>)</p>
 
@@ -142,27 +381,24 @@
                 <button class="btn-add" id="addProjectBtn">+ Enable coding agent audio notifications for a new project</button>
             </div>
 
-            <!-- Add Custom Audio -->
-            <div class="card">
-                <h2>Upload custom audio</h2>
-                <p class="hint">Manage custom sounds. System sounds are available in the dropdowns above. Supported formats: .aiff, .wav, .mp3</p>
-
-                <div id="customSounds" class="sound-library">
-                    <!-- Custom sound items will be inserted here -->
                 </div>
-                <button class="btn-add" id="uploadSoundBtn">+ Upload audio</button>
-            </div>
 
-            <!-- Global Toggle -->
-            <div class="card">
-                <div class="setting-row">
-                    <div class="setting-label">
-                        <label for="globalMode">Apply to all projects</label>
-                        <p class="hint">When enabled, same sounds play everywhere. When disabled, configure sounds per project.</p>
+                <!-- Audio Library View -->
+                <div class="view" data-view="custom-sounds">
+                    <div class="getting-started">
+                        <h2>Audio library</h2>
+                        <p class="getting-started-text">
+                            You are welcome to use audio from our audio library (Apple's native alert sounds, some AI-generated audio from Fish Audio), alternatively please feel free to upload your own audio files for notifications. Supported formats: .aiff, .wav, .mp3
+                        </p>
                     </div>
-                    <input type="checkbox" id="globalMode" class="toggle">
-                </div>
-            </div>
+
+                    <div class="card">
+                        <h2>Your audio files</h2>
+                        <div id="customSounds" class="sound-library">
+                            <!-- Custom sound items will be inserted here -->
+                        </div>
+                        <button class="btn-add" id="uploadSoundBtn">+ Upload audio</button>
+                    </div>
                 </div>
 
                 <!-- FAQ View -->
@@ -173,6 +409,18 @@
                         <div class="faq-item">
                             <h3 class="faq-question">What coding agents are supported by this tool?</h3>
                             <p class="faq-answer">At present exclusively Claude Code. I would be happy to add support for <a href="https://github.com/features/copilot" target="_blank" class="inline-link">Codex</a>, <a href="https://www.jules.ai" target="_blank" class="inline-link">Jules</a>, <a href="https://www.droids.dev" target="_blank" class="inline-link">Droids</a>, etc if there winds up being demand for that.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h3 class="faq-question">Why should I use this tool instead of terminal-notifier, osascript, or writing Claude Code hooks directly?</h3>
+                            <p class="faq-answer">While tools like <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>, <a href="https://github.com/vjeantet/alerter" target="_blank" class="inline-link">alerter</a>, or <a href="https://github.com/Donearm/scripts/blob/master/notify_osx.sh" target="_blank" class="inline-link">custom notification scripts</a> are excellent, this tool provides:</p>
+                            <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
+                                <li><strong>One-click installation</strong> - Automatically installs scripts and configures Claude Code hooks</li>
+                                <li><strong>No coding required</strong> - GUI for configuring event-specific audio/voice notifications per project</li>
+                                <li><strong>Human voice support</strong> - Built-in high-quality AI voices (powered by Fish Audio)</li>
+                                <li><strong>Instant preview</strong> - Test sounds and voices before saving</li>
+                                <li><strong>Smart defaults</strong> - Pre-configured settings that work out of the box</li>
+                            </ul>
                         </div>
 
                         <div class="faq-item">
@@ -187,7 +435,7 @@
                     <div class="getting-started">
                         <h2>Support</h2>
                         <p class="getting-started-text">
-                            If you have any questions or encounter any issues, <a href="mailto:cwveysey@gmail.com" class="inline-link">please drop me a line via email</a>. Any and all feedback is of course so appreciated.
+                            If you have any questions, encounter any issues, or would like to request an update, <a href="mailto:cwveysey@gmail.com" class="inline-link">please drop me a line via email</a>. Any and all feedback is of course so appreciated.
                         </p>
                     </div>
                 </div>
