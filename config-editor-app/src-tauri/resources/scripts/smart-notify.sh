@@ -147,7 +147,6 @@ send_notification() {
         terminal-notifier \
             -title "$display_title" \
             -message "$display_message" \
-            -sound default \
             >/dev/null 2>&1 &
         debug_log "Visual notification sent: title='$display_title', message='${display_message:0:50}'"
     fi
