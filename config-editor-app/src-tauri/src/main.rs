@@ -14,6 +14,7 @@ use tauri::Manager;
 struct EventSounds {
     notification: String,
     stop: String,
+    pre_tool_use: String,
     post_tool_use: String,
     subagent_stop: String,
 }
@@ -35,6 +36,7 @@ struct ProjectConfig {
 struct EventEnabled {
     notification: bool,
     stop: bool,
+    pre_tool_use: bool,
     post_tool_use: bool,
     subagent_stop: bool,
 }
@@ -55,12 +57,15 @@ struct GlobalSettings {
     voice_id: Option<String>,
     #[serde(default)]
     fish_audio_api_key: Option<String>,
+    #[serde(default)]
+    respect_do_not_disturb: bool,
 }
 
 fn default_event_enabled() -> EventEnabled {
     EventEnabled {
         notification: true,
         stop: true,
+        pre_tool_use: true,
         post_tool_use: true,
         subagent_stop: true,
     }
@@ -70,6 +75,7 @@ fn default_event_voice_enabled() -> EventEnabled {
     EventEnabled {
         notification: true,
         stop: true,
+        pre_tool_use: true,
         post_tool_use: true,
         subagent_stop: true,
     }
@@ -117,6 +123,7 @@ impl Default for Config {
                 event_sounds: EventSounds {
                     notification: "voice:simple".to_string(),
                     stop: "voice:simple".to_string(),
+                    pre_tool_use: "voice:simple".to_string(),
                     post_tool_use: "voice:simple".to_string(),
                     subagent_stop: "voice:simple".to_string(),
                 },
@@ -126,6 +133,7 @@ impl Default for Config {
                 voice_provider: "fish_audio".to_string(),
                 voice_id: None,
                 fish_audio_api_key: None,
+                respect_do_not_disturb: false,
             },
             projects: vec![],
             sound_library: system_sounds,
@@ -328,6 +336,7 @@ async fn preview_voice(text: String, api_key: Option<String>, app_handle: tauri:
     let bundled_file_name = match text.as_str() {
         "notification event" => Some("notification.mp3"),
         "stop event" => Some("stop.mp3"),
+        "pre tool use event" => Some("pre_tool_use.mp3"),
         "post tool use event" => Some("post_tool_use.mp3"),
         "subagent stop event" => Some("subagent_stop.mp3"),
         _ => None,
@@ -355,6 +364,24 @@ async fn preview_voice(text: String, api_key: Option<String>, app_handle: tauri:
             return Ok(());
         } else {
             println!("Bundled file not found at {:?}", resource_path);
+        }
+
+        // Check for installed global voice file (from installation)
+        let voice_cache_dir = get_voice_cache_dir();
+        let global_file = voice_cache_dir.join("global").join(filename);
+
+        if global_file.exists() {
+            println!("Playing installed global voice file: {:?}", global_file);
+            #[cfg(target_os = "macos")]
+            {
+                Command::new("afplay")
+                    .arg(&global_file)
+                    .spawn()
+                    .map_err(|e| format!("Failed to play global voice: {}", e))?;
+            }
+            return Ok(());
+        } else {
+            println!("Global voice file not found at {:?}", global_file);
         }
     }
 
@@ -511,6 +538,13 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
                 }
             ]
         }],
+        "PreToolUse": [{
+            "matcher": "",
+            "hooks": [{
+                "type": "command",
+                "command": format!("bash {}/.claude/scripts/smart-notify.sh pre_tool_use", home)
+            }]
+        }],
         "PostToolUse": [{
             "matcher": "",
             "hooks": [{
@@ -554,10 +588,25 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn upload_sound() -> Result<Option<String>, String> {
-    // This will be called from the frontend using the dialog plugin
-    // For now, return None - the frontend will handle the dialog
-    Ok(None)
+async fn upload_sound(source_path: String) -> Result<String, String> {
+    // Copy the selected file to ~/.claude/sounds/
+    let sounds_dir = get_custom_sounds_dir();
+    fs::create_dir_all(&sounds_dir)
+        .map_err(|e| format!("Failed to create sounds directory: {}", e))?;
+
+    let source = PathBuf::from(&source_path);
+    let filename = source.file_name()
+        .ok_or("Invalid source file path")?;
+    let dest_path = sounds_dir.join(filename);
+
+    // Copy the file
+    fs::copy(&source, &dest_path)
+        .map_err(|e| format!("Failed to copy sound file: {}", e))?;
+
+    // Return the permanent path
+    dest_path.to_str()
+        .ok_or("Invalid destination path".to_string())
+        .map(|s| s.to_string())
 }
 
 #[tauri::command]
@@ -649,6 +698,7 @@ async fn pregenerate_basic_voices(api_key: String) -> Result<String, String> {
     let basic_texts = vec![
         "notification event",
         "stop event",
+        "pre tool use event",
         "post tool use event",
         "subagent stop event",
     ];
@@ -690,6 +740,7 @@ async fn generate_voice_notifications(config: Config, api_key: Option<String>) -
         let events = vec![
             ("notification", "notification"),
             ("stop", "stop"),
+            ("pre_tool_use", "pre tool use"),
             ("post_tool_use", "post tool use"),
             ("subagent_stop", "subagent stop"),
         ];
@@ -698,6 +749,7 @@ async fn generate_voice_notifications(config: Config, api_key: Option<String>) -
             let voice_enabled = match event_key {
                 "notification" => config.global_settings.voice_enabled.notification,
                 "stop" => config.global_settings.voice_enabled.stop,
+                "pre_tool_use" => config.global_settings.voice_enabled.pre_tool_use,
                 "post_tool_use" => config.global_settings.voice_enabled.post_tool_use,
                 "subagent_stop" => config.global_settings.voice_enabled.subagent_stop,
                 _ => false,
@@ -739,6 +791,7 @@ async fn generate_voice_notifications(config: Config, api_key: Option<String>) -
         let events = vec![
             ("notification", "notification"),
             ("stop", "stop"),
+            ("pre_tool_use", "pre tool use"),
             ("post_tool_use", "post tool use"),
             ("subagent_stop", "subagent stop"),
         ];
@@ -747,6 +800,7 @@ async fn generate_voice_notifications(config: Config, api_key: Option<String>) -
             let voice_enabled = match event_key {
                 "notification" => project.voice_enabled.notification,
                 "stop" => project.voice_enabled.stop,
+                "pre_tool_use" => project.voice_enabled.pre_tool_use,
                 "post_tool_use" => project.voice_enabled.post_tool_use,
                 "subagent_stop" => project.voice_enabled.subagent_stop,
                 _ => false,
@@ -780,6 +834,68 @@ async fn generate_voice_notifications(config: Config, api_key: Option<String>) -
     }
 
     Ok(format!("Generated {} voice notifications", generated_count))
+}
+
+#[tauri::command]
+async fn dev_reset_install() -> Result<(), String> {
+    let home = std::env::var("HOME").map_err(|_| "Could not get HOME directory")?;
+    let claude_dir = PathBuf::from(&home).join(".claude");
+
+    // Delete .sounds-enabled
+    let sounds_enabled = claude_dir.join(".sounds-enabled");
+    if sounds_enabled.exists() {
+        fs::remove_file(&sounds_enabled)
+            .map_err(|e| format!("Failed to remove .sounds-enabled: {}", e))?;
+    }
+
+    // Delete audio-notifier.yaml
+    let config_file = claude_dir.join("audio-notifier.yaml");
+    if config_file.exists() {
+        fs::remove_file(&config_file)
+            .map_err(|e| format!("Failed to remove audio-notifier.yaml: {}", e))?;
+    }
+
+    // Delete scripts
+    let scripts_to_delete = vec![
+        "smart-notify.sh",
+        "select-sound.sh",
+        "read-config.sh",
+    ];
+
+    let scripts_dir = claude_dir.join("scripts");
+    for script in scripts_to_delete {
+        let script_path = scripts_dir.join(script);
+        if script_path.exists() {
+            fs::remove_file(&script_path)
+                .map_err(|e| format!("Failed to remove {}: {}", script, e))?;
+        }
+    }
+
+    // Delete global voice files
+    let global_voices_dir = claude_dir.join("voices").join("global");
+    if global_voices_dir.exists() {
+        fs::remove_dir_all(&global_voices_dir)
+            .map_err(|e| format!("Failed to remove global voices: {}", e))?;
+    }
+
+    // Remove hooks from settings.json
+    let settings_file = claude_dir.join("settings.json");
+    if settings_file.exists() {
+        let contents = fs::read_to_string(&settings_file)
+            .map_err(|e| format!("Failed to read settings.json: {}", e))?;
+
+        if let Ok(mut settings) = serde_json::from_str::<serde_json::Value>(&contents) {
+            if settings.get("hooks").is_some() {
+                settings.as_object_mut().unwrap().remove("hooks");
+                let settings_str = serde_json::to_string_pretty(&settings)
+                    .map_err(|e| format!("Failed to serialize settings: {}", e))?;
+                fs::write(&settings_file, settings_str)
+                    .map_err(|e| format!("Failed to write settings.json: {}", e))?;
+            }
+        }
+    }
+
+    Ok(())
 }
 
 // ===== System Tray =====
@@ -854,6 +970,7 @@ fn main() {
             open_log_file,
             list_custom_sounds,
             generate_voice_notifications,
+            dev_reset_install,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

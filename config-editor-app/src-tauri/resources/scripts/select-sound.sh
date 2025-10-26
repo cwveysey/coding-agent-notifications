@@ -46,14 +46,23 @@ EVENT_SOUND=""
 if [[ -n "${EVENT_TYPE:-}" ]]; then
     # Look for event_sounds in YAML config (simple parsing)
     case "$EVENT_TYPE" in
-        permission)
-            EVENT_SOUND=$(grep "^\s*permission:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | sed 's/.*:\s*\([^#]*\).*/\1/' | tr -d ' ')
+        notification|permission)
+            EVENT_SOUND=$(grep -E "^[[:space:]]*notification:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | head -1 | awk -F': ' '{print $2}' | sed 's/#.*//' | xargs)
             ;;
         stop)
-            EVENT_SOUND=$(grep "^\s*stop:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | head -1 | awk -F': ' '{print $2}' | sed 's/#.*//' | xargs)
+            EVENT_SOUND=$(grep -E "^[[:space:]]*stop:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | head -1 | awk -F': ' '{print $2}' | sed 's/#.*//' | xargs)
+            ;;
+        pre_tool_use)
+            EVENT_SOUND=$(grep -E "^[[:space:]]*pre_tool_use:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | head -1 | awk -F': ' '{print $2}' | sed 's/#.*//' | xargs)
+            ;;
+        post_tool_use)
+            EVENT_SOUND=$(grep -E "^[[:space:]]*post_tool_use:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | head -1 | awk -F': ' '{print $2}' | sed 's/#.*//' | xargs)
+            ;;
+        subagent_stop)
+            EVENT_SOUND=$(grep -E "^[[:space:]]*subagent_stop:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | head -1 | awk -F': ' '{print $2}' | sed 's/#.*//' | xargs)
             ;;
         inactivity)
-            EVENT_SOUND=$(grep "^\s*inactivity:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | sed 's/.*:\s*\([^#]*\).*/\1/' | tr -d ' ')
+            EVENT_SOUND=$(grep -E "^[[:space:]]*inactivity:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | sed 's/.*:[[:space:]]*\([^#]*\).*/\1/' | tr -d ' ')
             ;;
     esac
 fi
@@ -70,6 +79,9 @@ if [[ "$EVENT_SOUND" == voice:* ]]; then
             ;;
         stop)
             VOICE_FILE="$HOME/.claude/voices/global/stop.mp3"
+            ;;
+        pre_tool_use)
+            VOICE_FILE="$HOME/.claude/voices/global/pre_tool_use.mp3"
             ;;
         post_tool_use)
             VOICE_FILE="$HOME/.claude/voices/global/post_tool_use.mp3"

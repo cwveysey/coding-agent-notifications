@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Chevron Measurement Tool</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        #results {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            white-space: pre;
+        }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>Chevron Alignment Measurement</h1>
+    <button onclick="measureAll()">Measure All Chevrons</button>
+    <div id="results"></div>
+
+    <script>
+        function measureAll() {
+            const iframe = document.createElement('iframe');
+            iframe.src = 'http://localhost:5173';
+            iframe.style.width = '1200px';
+            iframe.style.height = '800px';
+            iframe.style.border = 'none';
+
+            document.body.appendChild(iframe);
+
+            iframe.onload = () => {
+                setTimeout(() => {
+                    const doc = iframe.contentDocument;
+
+                    // Open all details
+                    doc.querySelectorAll('details').forEach(d => d.open = true);
+
+                    setTimeout(() => {
+                        const headers = Array.from(doc.querySelectorAll('.collapsible-header'));
+                        let output = '=== CHEVRON ALIGNMENT MEASUREMENTS ===\n\n';
+
+                        headers.forEach((header, i) => {
+                            const heading = header.querySelector('h2, h3, h4');
+                            if (!heading) {
+                                output += `${i + 1}. ERROR: No heading found\n\n`;
+                                return;
+                            }
+
+                            // Scroll into view
+                            header.scrollIntoView({ block: 'center' });
+
+                            const headerRect = header.getBoundingClientRect();
+                            const headingRect = heading.getBoundingClientRect();
+                            const beforeStyles = window.getComputedStyle(header, '::before');
+
+                            // Calculate text metrics
+                            const tempSpan = doc.createElement('span');
+                            tempSpan.textContent = 'X';
+                            tempSpan.style.font = window.getComputedStyle(heading).font;
+                            tempSpan.style.position = 'absolute';
+                            tempSpan.style.visibility = 'hidden';
+                            doc.body.appendChild(tempSpan);
+                            const textHeight = tempSpan.getBoundingClientRect().height;
+                            doc.body.removeChild(tempSpan);
+
+                            // Calculate chevron position
+                            const beforeHeight = parseFloat(beforeStyles.height);
+                            const beforeMarginTop = parseFloat(beforeStyles.marginTop);
+                            const chevronVisualCenter = beforeHeight / 2 + beforeMarginTop;
+
+                            // Calculate text visual center (cap height approximation)
+                            // Typically cap-height is about 70% of font-size
+                            const fontSize = parseFloat(window.getComputedStyle(heading).fontSize);
+                            const capHeight = fontSize * 0.7;
+                            const textVisualCenter = capHeight / 2;
+
+                            const diff = Math.abs(chevronVisualCenter - textVisualCenter);
+
+                            const status = diff <= 1 ? '✅' : '❌';
+                            output += `${i + 1}. ${status} <${heading.tagName}> "${heading.textContent.substring(0, 50)}"\n`;
+                            output += `   Font size: ${fontSize}px\n`;
+                            output += `   Text visual center: ~${textVisualCenter.toFixed(1)}px from baseline\n`;
+                            output += `   Chevron: ${beforeHeight}px tall, ${beforeMarginTop}px margin-top\n`;
+                            output += `   Chevron visual center: ${chevronVisualCenter.toFixed(1)}px from baseline\n`;
+                            output += `   Difference: ${diff.toFixed(1)}px ${diff <= 1 ? '(GOOD)' : '(BAD)'}\n`;
+                            output += `   Background position: ${beforeStyles.backgroundPosition}\n\n`;
+                        });
+
+                        document.getElementById('results').innerHTML = output;
+                        document.body.removeChild(iframe);
+                    }, 500);
+                }, 500);
+            };
+        }
+    </script>
+</body>
+</html>

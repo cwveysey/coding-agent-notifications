@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chevron Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f7;
+        }
+
+        .demo-card {
+            background: white;
+            border: 1px solid #e5e5e7;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .demo-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b6b6b;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        details {
+            margin: 16px 0;
+        }
+
+        summary {
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f5f5f7;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .content {
+            padding: 16px 12px 12px 32px;
+            color: #6b6b6b;
+        }
+
+        /* Option 1: Right-rotating chevron (current) */
+        .chevron-right summary::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+            transition: transform 0.15s ease;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M4.5 2 L8.5 6 L4.5 10' stroke='%2386868B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .chevron-right[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        /* Option 2: Down/up swap */
+        .chevron-swap summary::before {
+            content: '∨';
+            font-size: 14px;
+            color: #86868B;
+            transition: all 0.15s ease;
+            line-height: 1;
+        }
+
+        .chevron-swap[open] summary::before {
+            content: '∧';
+        }
+
+        /* Option 3: Plus/minus */
+        .plus-minus summary::before {
+            content: '+';
+            font-size: 18px;
+            color: #86868B;
+            transition: all 0.15s ease;
+            line-height: 1;
+            font-weight: 300;
+        }
+
+        .plus-minus[open] summary::before {
+            content: '−';
+        }
+
+        /* Option 4: macOS Finder style triangle */
+        .triangle-style summary::before {
+            content: '▸';
+            font-size: 12px;
+            color: #86868B;
+            transition: transform 0.15s ease;
+            line-height: 1;
+        }
+
+        .triangle-style[open] summary::before {
+            content: '▾';
+        }
+
+        /* Option 5: Thin down chevron (no rotation) */
+        .down-chevron summary::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5 L6 8.5 L10 4.5' stroke='%2386868B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: opacity 0.15s ease;
+            opacity: 0.5;
+        }
+
+        .down-chevron[open] summary::before {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="margin-bottom: 32px;">Chevron Style Options</h1>
+
+    <div class="demo-card">
+        <div class="demo-title">Option 1: Right-rotating chevron (current implementation)</div>
+        <details class="chevron-right">
+            <summary>Click to expand/collapse</summary>
+            <div class="content">This is the current implementation. Chevron points right when closed, rotates 90° to point down when open.</div>
+        </details>
+    </div>
+
+    <div class="demo-card">
+        <div class="demo-title">Option 2: Down/up swap (no rotation)</div>
+        <details class="chevron-swap">
+            <summary>Click to expand/collapse</summary>
+            <div class="content">Points down (∨) when closed, up (∧) when open. No rotation animation.</div>
+        </details>
+    </div>
+
+    <div class="demo-card">
+        <div class="demo-title">Option 3: Plus/minus</div>
+        <details class="plus-minus">
+            <summary>Click to expand/collapse</summary>
+            <div class="content">Shows + when closed, − when open. Clean and minimalist.</div>
+        </details>
+    </div>
+
+    <div class="demo-card">
+        <div class="demo-title">Option 4: macOS Finder style triangle</div>
+        <details class="triangle-style">
+            <summary>Click to expand/collapse</summary>
+            <div class="content">Triangle points right (▸) when closed, down (▾) when open. Familiar macOS pattern.</div>
+        </details>
+    </div>
+
+    <div class="demo-card">
+        <div class="demo-title">Option 5: Subtle down chevron (opacity change)</div>
+        <details class="down-chevron">
+            <summary>Click to expand/collapse</summary>
+            <div class="content">Always points down, but opacity changes. Closed = subtle (50%), open = full opacity.</div>
+        </details>
+    </div>
+</body>
+</html>

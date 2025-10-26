@@ -17,6 +17,9 @@ set -eo pipefail
 HOOK_TYPE="${1:-unknown}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# ALWAYS log hook execution for debugging
+echo "[$(date '+%F %T')] Hook fired: $HOOK_TYPE, SOUNDS_FILE_CHECK: $(ls -lh ~/.claude/.sounds-enabled 2>&1 | head -1)" >> "$HOME/.claude/hook-execution.log"
+
 # Load configuration
 if [[ -f "$SCRIPT_DIR/read-config.sh" ]]; then
     source "$SCRIPT_DIR/read-config.sh"
@@ -35,6 +38,38 @@ debug_log() {
     fi
 }
 
+# Check if Do Not Disturb is active and should be respected
+check_do_not_disturb() {
+    # Read config setting
+    local respect_dnd=$(grep "respect_do_not_disturb:" "$HOME/.claude/audio-notifier.yaml" 2>/dev/null | awk -F': ' '{print $2}' | sed 's/#.*//' | xargs)
+
+    debug_log "DND respect setting: ${respect_dnd:-not set}"
+
+    # Default to false if not set (play audio by default)
+    if [[ "$respect_dnd" != "true" ]]; then
+        debug_log "DND respect disabled, will play audio"
+        return 1  # Don't skip (play audio)
+    fi
+
+    # Method 1: Check using macOS defaults (works out of box)
+    # This checks if DND/Focus is visible in menu bar (indicates it's active)
+    local dnd_status=$(defaults read com.apple.controlcenter "NSStatusItem Visible DoNotDisturb" 2>/dev/null)
+    if [[ "$dnd_status" == "1" ]]; then
+        debug_log "Do Not Disturb is active (detected via defaults), skipping audio"
+        return 0  # Skip audio
+    fi
+
+    # Method 2: Check Focus mode via plutil (alternative detection)
+    local focus_enabled=$(plutil -extract dnd_prefs.userPref.enabled raw ~/Library/Preferences/com.apple.ncprefs.plist 2>/dev/null)
+    if [[ "$focus_enabled" == "true" || "$focus_enabled" == "1" ]]; then
+        debug_log "Do Not Disturb is active (detected via plutil), skipping audio"
+        return 0  # Skip audio
+    fi
+
+    debug_log "Do Not Disturb is not active, will play audio"
+    return 1  # Play audio
+}
+
 # Send notification with project-specific sound
 send_notification() {
     local message="$1"
@@ -51,18 +86,31 @@ send_notification() {
     case "$reason" in
         notification-hook)
             # Check message content to determine if it's permission or inactivity
-            if [[ "$message" =~ "needs your permission" ]]; then
-                event_type="permission"
-            elif [[ "$message" =~ "waiting for" ]]; then
+            if [[ "$message" =~ "waiting for" ]]; then
                 # Skip inactivity notifications - we're notified on Stop already
                 debug_log "Skipping inactivity notification (already notified on Stop)"
                 return 0
             fi
+            # Always use notification sound for notification hook
+            event_type="notification"
             ;;
         stop-hook)
             event_type="stop"
             ;;
+        pre_tool_use-hook)
+            event_type="pre_tool_use"
+            ;;
+        post_tool_use-hook)
+            event_type="post_tool_use"
+            ;;
+        subagent_stop-hook)
+            event_type="subagent_stop"
+            ;;
     esac
+
+    # ALWAYS log event type
+    echo "[$(date '+%F %T')] Event type determined: $event_type (reason: $reason)" >> "$HOME/.claude/hook-execution.log"
+
     debug_log "Event type: $event_type"
 
     # Get custom message for this event type (if configured)
@@ -108,17 +156,25 @@ send_notification() {
     # Ensure PROJECT_NAME is available for notification
     PROJECT_NAME="${PROJECT_NAME:-$detected_project}"
 
+    # ALWAYS log sound selection
+    echo "[$(date '+%F %T')] Sound selected: $sound, SOUNDS_ENABLED=$SOUNDS_ENABLED, exists=$([ -f "$sound" ] && echo YES || echo NO)" >> "$HOME/.claude/hook-execution.log"
+
     debug_log "Sound variable set to: $sound"
     debug_log "Checking if should play: SOUNDS_ENABLED=$SOUNDS_ENABLED, file exists=$([ -f "$sound" ] && echo yes || echo no)"
 
-    # Audio notification
-    if [[ "$SOUNDS_ENABLED" == "true" && -f "$sound" ]]; then
+    # Check if audio should be skipped due to Do Not Disturb
+    if check_do_not_disturb; then
+        debug_log "Skipping audio due to Do Not Disturb"
+        echo "[$(date '+%F %T')] SKIPPED: DND active" >> "$HOME/.claude/hook-execution.log"
+    elif [[ "$SOUNDS_ENABLED" == "true" && -f "$sound" ]]; then
         debug_log "About to play sound: $sound"
+        echo "[$(date '+%F %T')] PLAYING: $sound" >> "$HOME/.claude/hook-execution.log"
         # Use osascript for better audio device access from hooks
         osascript -e "do shell script \"afplay '$sound'\"" >/dev/null 2>&1 &
         local pid=$!
         debug_log "Audio notification sent (osascript PID: $pid)"
     else
+        echo "[$(date '+%F %T')] SKIPPED: SOUNDS_ENABLED=$SOUNDS_ENABLED, file_exists=$([ -f "$sound" ] && echo YES || echo NO)" >> "$HOME/.claude/hook-execution.log"
         debug_log "Skipping audio: SOUNDS_ENABLED=$SOUNDS_ENABLED, sound file exists=$([ -f "$sound" ] && echo yes || echo no)"
     fi
 
@@ -144,11 +200,32 @@ send_notification() {
             display_message="${message:0:200}"
         fi
 
-        terminal-notifier \
-            -title "$display_title" \
-            -message "$display_message" \
-            >/dev/null 2>&1 &
-        debug_log "Visual notification sent: title='$display_title', message='${display_message:0:50}'"
+        # Find icon file (look in common locations)
+        local icon_path=""
+        if [[ -f "$SCRIPT_DIR/../icons/128x128.png" ]]; then
+            icon_path="$SCRIPT_DIR/../icons/128x128.png"
+        elif [[ -f "$HOME/.claude/icons/128x128.png" ]]; then
+            icon_path="$HOME/.claude/icons/128x128.png"
+        fi
+
+        # ALWAYS log the terminal-notifier command
+        echo "[$(date '+%F %T')] TERMINAL-NOTIFIER: title='$display_title', message='${display_message:0:50}', icon='${icon_path:-none}'" >> "$HOME/.claude/hook-execution.log"
+
+        if [[ -n "$icon_path" ]]; then
+            terminal-notifier \
+                -title "$display_title" \
+                -message "$display_message" \
+                -sender com.claude.notifier \
+                -contentImage "$icon_path" \
+                >> "$HOME/.claude/terminal-notifier-errors.log" 2>&1 &
+        else
+            terminal-notifier \
+                -title "$display_title" \
+                -message "$display_message" \
+                -sender com.claude.notifier \
+                >> "$HOME/.claude/terminal-notifier-errors.log" 2>&1 &
+        fi
+        debug_log "Visual notification sent: title='$display_title', message='${display_message:0:50}', icon='${icon_path:-none}'"
     fi
 
     # Log the notification
@@ -194,7 +271,7 @@ handle_notification_hook() {
 
     # Parse notification details
     local message=$(echo "$input" | jq -r '.message // "Claude needs your attention"' 2>/dev/null || echo "Claude needs your attention")
-    local title=$(echo "$input" | jq -r '.title // "Claude Code"' 2>/dev/null || echo "Claude Code")
+    local title="Notification from Claude"
 
     debug_log "Notification hook message: $message"
 
@@ -265,9 +342,72 @@ handle_stop_hook() {
 
     # Send notification with message preview
     local preview="${last_message:0:100}"
-    send_notification "$preview" "Claude finished" "stop-hook"
+    send_notification "$preview" "Stop notification from Claude" "stop-hook"
 
     debug_log "Stop hook notification sent"
+}
+
+# Handle PostToolUse hook
+handle_post_tool_use_hook() {
+    debug_log "PostToolUse hook triggered"
+
+    # Read JSON input from stdin
+    local input=$(cat)
+
+    local message="Tool execution completed"
+    local title="PostToolUse notification from Claude"
+
+    # Check anti-spam
+    if ! check_spam; then
+        return 0
+    fi
+
+    # Send notification
+    send_notification "$message" "$title" "post_tool_use-hook"
+
+    debug_log "PostToolUse hook completed"
+}
+
+# Handle SubagentStop hook
+handle_subagent_stop_hook() {
+    debug_log "SubagentStop hook triggered"
+
+    # Read JSON input from stdin
+    local input=$(cat)
+
+    local message="Subagent task completed"
+    local title="SubagentStop notification from Claude"
+
+    # Check anti-spam
+    if ! check_spam; then
+        return 0
+    fi
+
+    # Send notification
+    send_notification "$message" "$title" "subagent_stop-hook"
+
+    debug_log "SubagentStop hook completed"
+}
+
+# Handle PreToolUse hook
+handle_pre_tool_use_hook() {
+    debug_log "PreToolUse hook triggered"
+
+    # Read JSON input from stdin
+    local input=$(cat)
+
+    local message="Permission required"
+    local title="PreToolUse notification from Claude"
+
+    # Check anti-spam
+    if ! check_spam; then
+        return 0
+    fi
+
+    # Send notification
+    send_notification "$message" "$title" "pre_tool_use-hook"
+
+    debug_log "PreToolUse hook completed"
 }
 
 # Main execution
@@ -278,12 +418,24 @@ case "$HOOK_TYPE" in
     stop)
         handle_stop_hook
         ;;
+    pre_tool_use|PreToolUse)
+        handle_pre_tool_use_hook
+        ;;
+    post_tool_use|PostToolUse)
+        handle_post_tool_use_hook
+        ;;
+    subagent_stop|SubagentStop)
+        handle_subagent_stop_hook
+        ;;
     *)
-        echo "Usage: $0 {notification|stop}" >&2
+        echo "Usage: $0 {notification|stop|pre_tool_use|post_tool_use|subagent_stop}" >&2
         echo "" >&2
         echo "This script is called by Claude Code hooks:" >&2
-        echo "  notification - Fired when Claude needs permission or after 60s idle" >&2
-        echo "  stop         - Fired when Claude finishes responding" >&2
+        echo "  notification    - Fired when Claude needs permission or after 60s idle" >&2
+        echo "  stop            - Fired when Claude finishes responding" >&2
+        echo "  pre_tool_use    - Fired before tool calls (permission prompts)" >&2
+        echo "  post_tool_use   - Fired after tool calls complete" >&2
+        echo "  subagent_stop   - Fired when subagent tasks complete" >&2
         exit 1
         ;;
 esac
