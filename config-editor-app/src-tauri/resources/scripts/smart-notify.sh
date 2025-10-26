@@ -209,23 +209,13 @@ send_notification() {
         fi
 
         # ALWAYS log the terminal-notifier command
-        echo "[$(date '+%F %T')] TERMINAL-NOTIFIER: title='$display_title', message='${display_message:0:50}', icon='${icon_path:-none}'" >> "$HOME/.claude/hook-execution.log"
+        echo "[$(date '+%F %T')] TERMINAL-NOTIFIER: title='$display_title', message='${display_message:0:50}'" >> "$HOME/.claude/hook-execution.log"
 
-        if [[ -n "$icon_path" ]]; then
-            terminal-notifier \
-                -title "$display_title" \
-                -message "$display_message" \
-                -sender com.claude.notifier \
-                -contentImage "$icon_path" \
-                >> "$HOME/.claude/terminal-notifier-errors.log" 2>&1 &
-        else
-            terminal-notifier \
-                -title "$display_title" \
-                -message "$display_message" \
-                -sender com.claude.notifier \
-                >> "$HOME/.claude/terminal-notifier-errors.log" 2>&1 &
-        fi
-        debug_log "Visual notification sent: title='$display_title', message='${display_message:0:50}', icon='${icon_path:-none}'"
+        terminal-notifier \
+            -title "$display_title" \
+            -message "$display_message" \
+            >/dev/null 2>&1 &
+        debug_log "Visual notification sent: title='$display_title', message='${display_message:0:50}'"
     fi
 
     # Log the notification

@@ -665,7 +665,7 @@ function renderSoundLibrary() {
         const emptyState = document.createElement('div');
         emptyState.className = 'hint';
         emptyState.style.padding = '12px 0';
-        emptyState.textContent = 'No custom sounds have been added yet.';
+        emptyState.textContent = 'No custom audio has been added yet.';
         customSoundsContainer.appendChild(emptyState);
     } else {
         customSounds.forEach((soundPath) => {
