@@ -36,7 +36,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
     background: var(--bg);
     color: var(--text);
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -128,8 +128,8 @@ body {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
 }
 
 .card h2 {
@@ -490,10 +490,15 @@ details.card > summary h2 {
 }
 
 details.card > summary h2::before {
-    content: '▶';
-    font-size: 12px;
-    color: var(--text-secondary);
-    transition: transform 0.2s;
+    content: '';
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M4.5 2 L8.5 6 L4.5 10' stroke='%2386868B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-size: 12px 12px;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 details.card[open] > summary h2::before {
@@ -561,15 +566,15 @@ details.card > summary:hover h2::before {
 
 /* Getting Started */
 .getting-started {
-    margin-bottom: 28px;
+    margin-bottom: 32px;
 }
 
 .getting-started h2 {
     font-size: 19px;
     font-weight: 600;
     color: var(--text);
-    margin-top: 32px;
-    margin-bottom: 10px;
+    margin-top: 48px;
+    margin-bottom: 16px;
     letter-spacing: -0.3px;
 }
 
@@ -593,6 +598,82 @@ ul.getting-started-text {
 
 ul.getting-started-text li {
     margin-bottom: 6px;
+}
+
+/* Collapsible Sections */
+.collapsible-section {
+    margin-top: 24px;
+}
+
+.collapsible-section:first-child {
+    margin-top: 0;
+}
+
+.collapsible-header {
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.collapsible-header::-webkit-details-marker {
+    display: none;
+}
+
+.collapsible-header::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M4.5 2 L8.5 6 L4.5 10' stroke='%2386868B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-size: 12px 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-top: 7px; /* Default for h3/h4 */
+}
+
+/* H2 headings need more offset */
+.collapsible-header:has(h2)::before {
+    margin-top: 7px;
+}
+
+.collapsible-section[open] .collapsible-header::before {
+    transform: rotate(90deg);
+}
+
+.collapsible-header:hover {
+    opacity: 0.8;
+}
+
+.collapsible-header:hover::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M4.5 2 L8.5 6 L4.5 10' stroke='%231D1D1F' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+    .collapsible-header::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M4.5 2 L8.5 6 L4.5 10' stroke='%2386868B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+
+    .collapsible-header:hover::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M4.5 2 L8.5 6 L4.5 10' stroke='%23F5F5F7' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+}
+
+.collapsible-header h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+.collapsible-content {
+    margin-top: 16px;
+    padding-left: 32px;
 }
 
 /* Hooks Header */
@@ -764,7 +845,7 @@ button[title] {
 
 /* FAQ */
 .faq-item {
-    margin-bottom: 24px;
+    margin-bottom: 40px;
 }
 
 .getting-started .faq-item:first-of-type {
@@ -781,62 +862,20 @@ button[title] {
 
 .faq-answer {
     font-size: 15px;
-    line-height: 1.6;
+    line-height: 1.7;
     color: var(--text);
     letter-spacing: 0.01em;
     margin: 0;
 }
 
-/* Prototype Selector (TEMPORARY) */
-.prototype-selector {
-    background: #FFF9E6;
-    border: 2px dashed #F59E0B;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
+ul.faq-answer li {
+    margin-bottom: 12px;
 }
 
-.prototype-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #D97706;
-    letter-spacing: 0.5px;
+.faq-answer + .faq-answer {
+    margin-top: 16px;
 }
 
-.prototype-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.prototype-btn {
-    padding: 6px 12px;
-    background: white;
-    border: 1px solid #F59E0B;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #D97706;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.prototype-btn:hover {
-    background: #FEF3C7;
-}
-
-.prototype-btn.active {
-    background: #F59E0B;
-    color: white;
-}
-
-/* Prototype Views */
-.prototype-view {
-    margin-top: 24px;
-}
 
 /* Prototype 1: Scope Dropdown */
 .scope-selector-container {
@@ -1103,6 +1142,94 @@ button[title] {
     margin-bottom: 16px;
 }
 
-.global-content, .project-content {
-    margin-top: 24px;
+/* Comparison Table */
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
 }
+
+.comparison-table thead {
+    background: var(--bg-secondary);
+}
+
+.comparison-table th {
+    padding: 12px 16px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+}
+
+.comparison-table th:first-child {
+    text-align: left;
+    min-width: 180px;
+}
+
+.comparison-table th a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.comparison-table th a:hover {
+    text-decoration: underline;
+}
+
+.comparison-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+}
+
+.comparison-table td:first-child {
+    text-align: left;
+    font-weight: 500;
+}
+
+.comparison-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.comparison-table tbody tr:hover {
+    background: var(--bg-secondary);
+}
+
+.comparison-table .check {
+    color: var(--success);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.comparison-table .cross {
+    color: #FF3B30;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.comparison-table .partial {
+    color: #FF9500;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .comparison-table {
+        font-size: 11px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 8px 12px;
+    }
+
+    .comparison-table th:first-child {
+        min-width: 120px;
+    }
+}
+

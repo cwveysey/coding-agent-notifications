@@ -94,9 +94,10 @@ fi
 if [ -f "$CLAUDE_DIR/settings.json" ]; then
     if grep -q "smart-notify.sh notification" "$CLAUDE_DIR/settings.json" && \
        grep -q "smart-notify.sh stop" "$CLAUDE_DIR/settings.json" && \
+       grep -q "smart-notify.sh pre_tool_use" "$CLAUDE_DIR/settings.json" && \
        grep -q "smart-notify.sh post_tool_use" "$CLAUDE_DIR/settings.json" && \
        grep -q "smart-notify.sh subagent_stop" "$CLAUDE_DIR/settings.json"; then
-        echo "   ✓ All 4 hooks configured in settings.json"
+        echo "   ✓ All 5 hooks configured in settings.json"
     else
         echo "   ✗ ERROR: Not all hooks found in settings.json"
         exit 1
@@ -112,6 +113,7 @@ echo "4. Verifying default configuration uses human voices..."
 if [ -f "$CLAUDE_DIR/audio-notifier.yaml" ]; then
     if grep -q "notification: voice:simple" "$CLAUDE_DIR/audio-notifier.yaml" && \
        grep -q "stop: voice:simple" "$CLAUDE_DIR/audio-notifier.yaml" && \
+       grep -q "pre_tool_use: voice:simple" "$CLAUDE_DIR/audio-notifier.yaml" && \
        grep -q "post_tool_use: voice:simple" "$CLAUDE_DIR/audio-notifier.yaml" && \
        grep -q "subagent_stop: voice:simple" "$CLAUDE_DIR/audio-notifier.yaml" && \
        grep -q "voice_provider: fish_audio" "$CLAUDE_DIR/audio-notifier.yaml"; then

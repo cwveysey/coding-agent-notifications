@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Notifications for Claude Code - Blog Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .install-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 48px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 40px 0;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .install-section h2 {
+            margin: 0 0 16px 0;
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .install-section p {
+            margin: 0 0 32px 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .install-methods {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .install-btn {
+            background: white;
+            color: #667eea;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .install-btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .install-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            text-align: left;
+            margin: 24px 0;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .code-block code {
+            color: #fff;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .note {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Audio Notifications for Claude Code</h1>
+
+    <p>Never miss when Claude needs your input. Get audio alerts for key events during your coding sessions.</p>
+
+    <div class="install-section">
+        <h2>Install Audio Notifications</h2>
+        <p>Choose your preferred installation method:</p>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('shell')">Shell Script</div>
+            <div class="tab" onclick="showTab('homebrew')">Homebrew</div>
+            <div class="tab" onclick="showTab('npx')">NPX</div>
+            <div class="tab" onclick="showTab('dmg')">Download Installer</div>
+        </div>
+
+        <!-- Shell Script Tab -->
+        <div id="shell-tab" class="tab-content active">
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode('shell-code')">Copy</button>
+                <code id="shell-code">curl -fsSL https://www.cooperveysey.com/install.sh | bash</code>
+            </div>
+            <p class="note">Installs everything in one command. Review script first: <a href="https://www.cooperveysey.com/install.sh" style="color: white; text-decoration: underline;">install.sh</a></p>
+        </div>
+
+        <!-- Homebrew Tab -->
+        <div id="homebrew-tab" class="tab-content">
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode('brew-code')">Copy</button>
+                <code id="brew-code">brew install --cask audio-notifications-claude</code>
+            </div>
+            <p class="note">Installs app + auto-configures on first launch</p>
+        </div>
+
+        <!-- NPX Tab -->
+        <div id="npx-tab" class="tab-content">
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode('npx-code')">Copy</button>
+                <code id="npx-code">npx claude-audio-notifications</code>
+            </div>
+            <p class="note">No installation needed - runs directly via npx</p>
+        </div>
+
+        <!-- Installer Tab -->
+        <div id="dmg-tab" class="tab-content">
+            <a href="https://github.com/cooperveysey/audio-notifications-for-claude-code-activity/releases/latest" class="install-btn">
+                Download for macOS
+            </a>
+            <p class="note" style="margin-top: 16px;">Download → Install → Auto-configures</p>
+        </div>
+    </div>
+
+    <h2>Features</h2>
+    <ul>
+        <li>Audio alerts for Claude Code events (notification, stop, tool use, subagent)</li>
+        <li>Customizable sounds - use system sounds or upload your own</li>
+        <li>AI-generated voice notifications</li>
+        <li>Respects macOS Focus modes (optional)</li>
+        <li>Simple GUI for configuration</li>
+    </ul>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function copyCode(elementId) {
+            const code = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        // Optional: Track button clicks with analytics
+        document.querySelectorAll('.install-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Example: Google Analytics
+                // gtag('event', 'install_click', { method: e.target.textContent });
+                console.log('Install button clicked:', e.target.textContent);
+            });
+        });
+    </script>
+</body>
+</html>

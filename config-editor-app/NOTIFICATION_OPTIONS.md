@@ -1,5 +1,19 @@
 # Modern macOS Notification Options (2024-2025)
 
+## ⚠️ macOS Notification Center Design Constraint
+
+**You cannot change notification aesthetics (background color, fonts, layout, etc.) while keeping Notification Center integration. Apple doesn't allow it - it's their design system.**
+
+All apps using Notification Center get the same styling:
+- Background color determined by macOS theme (light/dark mode)
+- Font styles controlled by system
+- Layout and spacing fixed
+- Border radius, shadows, animations all system-defined
+
+**This is intentional** - Apple wants notifications to be consistent and familiar to users across all apps.
+
+---
+
 ## Current Implementation: terminal-notifier ✅
 
 **What we're using now:**
