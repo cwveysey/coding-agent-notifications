@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     setupCloseHandler();
     renderUI();
+    // Fetch GitHub stats in background (non-blocking, for display only)
+    fetchGitHubStats().catch(err => console.warn('GitHub stats fetch failed:', err));
 });
 
 // Check if installation is needed and auto-install
@@ -850,4 +852,100 @@ function showToast(message, type = 'success', action = null) {
     }
 }
 
+// Fetch GitHub stats for alternative solutions
+// Note: Stats fetched for display purposes only - notification system remains fully local
+async function fetchGitHubStats() {
+    const repos = [
+        {
+            owner: 'wyattjoh',
+            name: 'claude-code-notification',
+            starsId: 'ccn-stars',
+            starsDateId: 'ccn-stars-date',
+            commitId: 'ccn-last-commit',
+            commitDateId: 'ccn-commit-date'
+        },
+        {
+            owner: 'daveschumaker',
+            name: 'homebrew-claude-sounds',
+            starsId: 'cs-stars',
+            starsDateId: 'cs-stars-date',
+            commitId: 'cs-last-commit',
+            commitDateId: 'cs-commit-date'
+        }
+    ];
+
+    for (const repo of repos) {
+        try {
+            // Check cache first (24 hour cache)
+            const cacheKey = `github-stats-${repo.owner}-${repo.name}`;
+            const cached = localStorage.getItem(cacheKey);
+
+            if (cached) {
+                const { data, timestamp } = JSON.parse(cached);
+                const age = Date.now() - timestamp;
+                const ONE_DAY = 24 * 60 * 60 * 1000;
+
+                if (age < ONE_DAY) {
+                    updateRepoStats(repo, data);
+                    continue;
+                }
+            }
+
+            // Fetch fresh data
+            const [repoResponse, commitsResponse] = await Promise.all([
+                fetch(`https://api.github.com/repos/${repo.owner}/${repo.name}`),
+                fetch(`https://api.github.com/repos/${repo.owner}/${repo.name}/commits?per_page=1`)
+            ]);
+
+            if (!repoResponse.ok || !commitsResponse.ok) {
+                console.warn(`Failed to fetch GitHub stats for ${repo.owner}/${repo.name}`);
+                continue;
+            }
+
+            const repoData = await repoResponse.json();
+            const commitsData = await commitsResponse.json();
+
+            const stats = {
+                stars: repoData.stargazers_count,
+                lastCommit: commitsData[0]?.commit?.author?.date || null
+            };
+
+            // Cache the results
+            localStorage.setItem(cacheKey, JSON.stringify({
+                data: stats,
+                timestamp: Date.now()
+            }));
+
+            updateRepoStats(repo, stats);
+        } catch (error) {
+            console.warn(`Error fetching GitHub stats for ${repo.owner}/${repo.name}:`, error);
+            // Silently fail - hardcoded values remain visible
+        }
+    }
+}
+
+function updateRepoStats(repo, stats) {
+    const starsEl = document.getElementById(repo.starsId);
+    const starsDateEl = document.getElementById(repo.starsDateId);
+    const commitEl = document.getElementById(repo.commitId);
+    const commitDateEl = document.getElementById(repo.commitDateId);
+
+    if (!starsEl || !starsDateEl || !commitEl || !commitDateEl) return;
+
+    const now = new Date();
+    const currentDateStr = now.toLocaleDateString();
+
+    // Update stars and stars date
+    if (stats.stars !== undefined) {
+        starsEl.textContent = stats.stars;
+        starsDateEl.textContent = currentDateStr;
+    }
+
+    // Update last commit date and "as of" date
+    if (stats.lastCommit) {
+        const commitDate = new Date(stats.lastCommit);
+        commitEl.textContent = commitDate.toLocaleDateString();
+        commitDateEl.textContent = currentDateStr;
+    }
+}
 
