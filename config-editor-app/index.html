@@ -38,7 +38,7 @@
                     <div class="getting-started">
                         <h2>Getting started</h2>
                         <p class="getting-started-text">
-                            If you are reading this copy, then you have already completed all steps required to receive coding agent audio notifications. All required configuration steps were completed by downloading this application. 
+                            If you are reading this copy, then you have already completed all steps required to receive audio notifications when designated coding agent events occur. All required configuration steps were completed by downloading this application. 
                             
                             <br><br>If you have any questions, encounter any issues, or would like to request an update, please <a href="mailto:cwveysey@gmail.com" class="inline-link">drop me a line via email</a>. Any and all feedback is of course so appreciated.
                         </p>
@@ -46,7 +46,7 @@
                         <h2 style="margin-top: 24px;">Next steps</h2>
                         <ul class="getting-started-text">
                             <li>Audio will play when designated coding agent events occur.</li>
-                            <li>Review <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click();">your customization options</a> (e.g. turn alerts on and off on a per hook type basis, arrange for different audio to play on a per hook type basis).</li>
+                            <li>Review <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click();">your customization options</a> (to e.g. turn alerts on and off on a per hook type basis, arrange for different audio to play on a per hook type basis).</li>
                         </ul>
                         <!-- Install Section (Auto-installs on first launch) -->
                         <div id="installSection" style="display: none; margin: 48px 0; padding: 48px 0; border-top: 1px solid rgba(0, 0, 0, 0.08); border-bottom: 1px solid rgba(0, 0, 0, 0.08);">
@@ -180,24 +180,6 @@
                     <div class="getting-started">
                         <details class="collapsible-section">
                             <summary class="collapsible-header">
-                                <h2>How does this work?</h2>
-                            </summary>
-                            <div class="collapsible-content">
-                                <p class="getting-started-text">
-                                    This tool relies on <a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Claude Code hooks</a> to trigger audio alerts. At the time of this writing the following hooks are supported:
-                                </p>
-                                <ul class="getting-started-text">
-                                    <li><strong>Notification</strong> - runs when Claude Code sends notifications.</li>
-                                    <li><strong>Stop</strong> - runs when Claude Code finishes responding.</li>
-                                    <li><strong>PreToolUse</strong> - runs before tool calls (permission prompts).</li>
-                                    <li><strong>PostToolUse</strong> - runs after tool calls complete.</li>
-                                    <li><strong>SubagentStop</strong> - runs when subagent tasks complete.</li>
-                                </ul>
-                            </div>
-                        </details>
-
-                        <details class="collapsible-section">
-                            <summary class="collapsible-header">
                                 <h2>Some customization options</h2>
                             </summary>
                             <div class="collapsible-content">
@@ -240,24 +222,6 @@
 
                         <details class="collapsible-section faq-item">
                             <summary class="collapsible-header">
-                                <h3 class="faq-question">What are the benefits of using this tool?</h3>
-                            </summary>
-                            <div class="collapsible-content">
-                                <p class="faq-answer">
-                                    This tool provides audio alerts when designated Claude Code events occur. It is designed to:
-                                </p>
-                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li>Help ensure that you are alerted as early as possible whenever Claude Code might benefit from your input</li>
-                                    <li>Free you from having to actively monitor whether or not Claude Code requires your input</li>
-                                </ul>
-                                <p class="faq-answer" style="margin-top: 16px;">
-                                    For a detailed comparison with alternative solutions, see the question "Aren't there a bunch of tools that do this already?" below.
-                                </p>
-                            </div>
-                        </details>
-
-                        <details class="collapsible-section faq-item">
-                            <summary class="collapsible-header">
                                 <h3 class="faq-question">What coding agents are supported by this tool?</h3>
                             </summary>
                             <div class="collapsible-content">
@@ -267,153 +231,129 @@
 
                         <details class="collapsible-section faq-item">
                             <summary class="collapsible-header">
-                                <h3 class="faq-question">Aren't there a bunch of tools that do this already? Why should I use this one instead?</h3>
+                                <h3 class="faq-question">What problem does this tool solve?</h3>
                             </summary>
                             <div class="collapsible-content">
-                                <p class="faq-answer">There are definitely many alternatives, and I am sure that a number of them are great. I will share links to some of the alternatives below, and would encourage anyone reading this to evaluate different options and to choose the tool that best fits their needs. I also want to note that someone that is comfortable with script editing (or working with coding agents) could "roll their own" solution for coding agent notifications without much time and effort. In the meantime, some reasons to use our tool:
-                                    <br>
                                 <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
+                                    <li>Our tool helps ensure that you are alerted as early as possible whenever a coding agent might benefit from your input.</li>
+                                    <li>Our tool frees you from having to actively monitor whether or not a coding agent requires your input.</li>
+                                </ul>
+                            </div>
+                        </details>
+
+                        <details class="collapsible-section faq-item">
+                            <summary class="collapsible-header">
+                                <h3 class="faq-question">Why should I use this tool instead of one of the existing alternatives?</h3>
+                            </summary>
+                            <div class="collapsible-content">
+                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 16px;">
                                     <li><strong>It takes less than 60 seconds to install and start using our solution</strong> - Our tool is installed via a one-line terminal command or three GUI clicks. Following installation there is no additional setup required.</li>
-                                    <li><strong>There is no setup or manual configuration required after installation</strong> - No JSON or YAML files need to be modified, no scripts need to executed. As soon as installation finishes you'll start receiving audio notifications when designated events occur.</li>
+                                    <li><strong>There is no setup or manual configuration required after installation</strong> - No JSON or YAML files need to be modified, no scripts need to executed. You don't need to carefully read through any hooks-related developer documentation.
+
+                                        <br>
+                                        <br>
+                                        As soon as installation finishes you'll start receiving audio notifications when designated events occur.</li>
                                     <li><strong>Sensible default values and thoughtful customization capabilities</strong> - As communicated via <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click();">this section</a>:
                                         <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
                                             <li>Alerts can be turned on and off on a per hook type basis.</li>
                                             <li>You can arrange for different audio to play on a per hook type basis.</li>
                                             <li>You can use custom audio for your alerts.</li>
-                                            <li>You can customize how Apple "Focuses" affect your coding agent alerts.</li>
+                                            <li>You can customize how Apple "Focuses" affect your audio alerts.</li>
                                         </ul>
                                     </li>
-                                    <li><strong>GUI for customization</strong> - Easy interface for configuring sounds and settings</li>
-                                    <li><strong>No background process required</strong> - This app does not need to be running in order for the solution to work. Install the app once and feel free not to open it again.</li>
-                                    <li><strong>Native macOS integration</strong> - Everything runs locally on your Mac using native macOS features. Our notifications rely on macOS Notification Center, as a result this application's alerts can be reviewed in your Notification Center notification history and respect your notification preferences. </li>
+                                    <li><strong>Quick and easy customization via a GUI</strong> - Customize notification preferences, toggle events on and off, and update Focus behavior through an intuitive and easy to use visual interface. No JSON or YAML files need to be manually modified, no scripts need to executed to make changes.</li>
+                                    <li><strong>No background process required</strong> - This app does not need to be running in order for the solution to work. Install the app once and close it from there.</li>
+                                    <li><strong>Native macOS integration</strong> - Takes advantage of native macOS features, as a result our notifications display alongside your other notifications via the <a href="https://developer.apple.com/documentation/usernotifications" target="_blank" class="inline-link">Notification Center</a> and respect your Focus preferences.</li>
+                                </ul>
                                 </ul>
 
-                                <h4 style="margin-top: 24px; margin-bottom: 12px; font-size: 16px;">Some notable alternative solutions</h4>
+                            </div>
+                        </details>
+
+                        <details class="collapsible-section faq-item">
+                            <summary class="collapsible-header">
+                                <h3 class="faq-question">What are some alternative solutions?</h3>
+                            </summary>
+                            <div class="collapsible-content">
                                 <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li><strong><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">claude-code-notification</a></strong> - CLI tool with 16 GitHub stars. Last commit to main was 9/9/2025</li>
-                                    <li><strong><a href="https://github.com/daveschumaker/homebrew-claude-sounds" target="_blank" class="inline-link">claude-sounds</a></strong> - CLI tool with 1 GitHub star. Last commit to main was 10/25/2025 </li>
-                                    <li><strong><a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a></strong> - Popular macOS notification tool requiring manual setup</li>
-                                    <li><strong><a href="https://velvetshark.com/til/claude-code-sound-notification" target="_blank" class="inline-link">Terminal Bell</a></strong> - "This command tells Claude Code to use the terminal's built-in bell as its sound notification channel. After you run this, you'll hear a simple system beep whenever a long-running command completes.
+                                    <li><strong><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">claude-code-notification</a></strong>
+                                        <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
+                                            <li><strong>Description:</strong> CLI tool with 16 GitHub stars. Last commit to main was 9/9/2025. Described via the respository as a "lightweight macOS desktop notification hook for Claude Code that displays native notifications with customizable system sounds when events occur during AI coding sessions."</li>
+                                            <li><strong>What makes our tool different?</strong> Our tool does not require manual hook configuration or JSON editing. Customization is handled through a GUI, and includes Focus mode control.</li>
+                                        </ul>
+                                    </li>
+                                    <li style="margin-top: 12px;"><strong><a href="https://github.com/daveschumaker/homebrew-claude-sounds" target="_blank" class="inline-link">claude-sounds</a></strong>
+                                        <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
+                                            <li><strong>Description:</strong> CLI tool with 1 GitHub star. Last commit to main was 10/25/2025. Described via the repository as "a simple CLI tool that plays random sound effects from a collection of audio files. Perfect as a notification hook for Claude Code or for general terminal fun!"</li>
+                                            <li><strong>What makes our tool different?</strong> Our tool includes GUI-based configuration, visual notifications, and Focus mode control in addition to audio alerts.</li>
+                                        </ul>
+                                    </li>
+                                    <li style="margin-top: 12px;"><strong><a href="https://velvetshark.com/til/claude-code-sound-notification" target="_blank" class="inline-link">https://velvetshark.com/til/claude-code-sound-notification</a></strong>
+                                        <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
+                                            <li><strong>Description:</strong> Via <a href="https://velvetshark.com/til/claude-code-sound-notification" target="_blank" class="inline-link">a post on his personal site</a> developer Radek Sienkiewicz shares a terminal command that "tells Claude Code to use the terminal's built-in bell as its sound notification channel. After you run this, you'll hear a simple system beep whenever a long-running command completes."</li>
+                                            <li><strong>What makes our tool different?</strong> Our tool offers similar ease of installation (one-line terminal command) with additional features including custom sounds, human voices, event-specific audio, visual notifications, and GUI configuration.</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </details>
 
-It's not as fancy as a custom sound, but it's a game-changer for productivity. You can kick off a build, a test suite, or a code generation task, switch to another window, and wait for the beep. No more constant context-switching to check on progress."</li>
-                                    <li><strong><a href="https://justin.searls.co/posts/notify-your-iphone-or-watch-when-claude-code-finishes/" target="_blank" class="inline-link">Pushcut for iPhone/Watch</a></strong> - Send notifications to your mobile devices (~$2/month)</li>
+                        <details class="collapsible-section faq-item">
+                            <summary class="collapsible-header">
+                                <h3 class="faq-question">How does this solution work from a technical standpoint?</h3>
+                            </summary>
+                            <div class="collapsible-content">
+                                <p class="faq-answer">
+                                    Our tool integrates with <a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Claude Code's hooks system</a>, which allows external scripts to execute when specific events occur during Claude Code sessions.
+                                </p>
+
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Installation process:</strong> When you open this application for the first time, it automatically installs notification scripts to <code>~/.claude/scripts/</code> and configures Claude Code's <code>~/.claude/settings.json</code> file to execute these scripts when hook events fire. No manual configuration is required.
+                                </p>
+
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Supported hook events:</strong>
+                                </p>
+                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Notification</a></strong> - Runs when Claude Code sends notifications.</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Stop</a></strong> - Runs when Claude Code finishes responding.</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">PreToolUse</a></strong> - Runs before tool calls (permission prompts).</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">PostToolUse</a></strong> - Runs after tool calls complete.</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">SubagentStop</a></strong> - Runs when subagent tasks complete.</li>
                                 </ul>
 
-                                <details class="collapsible-section" style="margin-top: 24px;">
-                                    <summary class="collapsible-header">
-                                        <h4 style="font-size: 16px; display: inline;">Detailed comparison with alternatives</h4>
-                                    </summary>
-                                    <div class="collapsible-content">
-                                    <div style="overflow-x: auto;">
-                                        <table class="comparison-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Feature</th>
-                                                    <th>This Tool</th>
-                                                    <th>Terminal<br/>Bell</th>
-                                                    <th><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">claude-code-<br/>notification</a></th>
-                                                    <th><a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-<br/>notifier</a></th>
-                                                    <th>Custom<br/>Scripts</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td><strong>Automated installation</strong></td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓<br/><span style="font-size: 11px;">(built-in)</span></td>
-                                                    <td class="partial">△<br/><span style="font-size: 11px;">(brew)</span></td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="cross">✗</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>GUI configuration</strong></td>
-                                                    <td class="check">✓</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="cross">✗</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>No coding required</strong></td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="partial">△<br/><span style="font-size: 11px;">(JSON)</span></td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="cross">✗</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Custom sounds</strong></td>
-                                                    <td class="check">✓</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Event-specific sounds</strong></td>
-                                                    <td class="check">✓</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="partial">△<br/><span style="font-size: 11px;">(manual)</span></td>
-                                                    <td class="check">✓</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Visual notifications</strong></td>
-                                                    <td class="check">✓</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="partial">△</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>DND/Focus control</strong></td>
-                                                    <td class="check">✓</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="partial">△<br/><span style="font-size: 11px;">(manual)</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Performance</strong></td>
-                                                    <td class="check">Good</td>
-                                                    <td class="check">Excellent</td>
-                                                    <td class="check">Excellent<br/><span style="font-size: 11px;">(Rust)</span></td>
-                                                    <td class="check">Good</td>
-                                                    <td class="partial">Varies</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Free & open source</strong></td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>No installation needed</strong></td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="check">✓</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Full customization</strong></td>
-                                                    <td class="partial">△<br/><span style="font-size: 11px;">(GUI)</span></td>
-                                                    <td class="cross">✗</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓</td>
-                                                    <td class="check">✓</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Audio delivery:</strong> Audio notifications are played using macOS's native <code>afplay</code> command, which plays audio files directly without requiring any background processes. Sound files are stored in <code>~/.claude/voices/</code> and can be customized per hook type.
+                                </p>
 
-                                    <p class="faq-answer" style="margin-top: 16px; font-size: 13px; color: #666;">
-                                        <strong>Legend:</strong> ✓ = Supported, ✗ = Not supported, △ = Partial/Manual setup required
-                                    </p>
-                                </div>
-                            </details>
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Visual notifications:</strong> Visual notifications are delivered via <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>, which sends notifications to macOS Notification Center. These notifications appear alongside your other system notifications and persist in notification history.
+                                </p>
+
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Focus mode detection:</strong> When Focus mode control is enabled, the notification scripts check macOS's current Focus status using native macOS commands before playing audio. This allows audio to respect Do Not Disturb, Sleep, Work, and other Focus modes without requiring additional setup.
+                                </p>
+
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Configuration storage:</strong> All settings (sound preferences, enabled/disabled hooks, Focus mode preferences) are stored locally in <code>~/.claude/config.json</code>. The GUI application reads and writes to this file, providing a visual interface for configuration that would otherwise require manual JSON editing.
+                                </p>
+
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>No background process:</strong> Unlike many notification solutions, our tool does not require a background process to remain running. Once installed and configured, the notification scripts are executed directly by Claude Code's hooks system when events occur. You can close the GUI application immediately after installation.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details class="collapsible-section faq-item">
+                            <summary class="collapsible-header">
+                                <h3 class="faq-question">What third-party tools does this app use?</h3>
+                            </summary>
+                            <div class="collapsible-content">
+                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
+                                    <li><strong><a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a></strong> - macOS command-line tool for delivering user notifications to the macOS Notification Center.</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code" target="_blank" class="inline-link">Claude Code</a></strong> - The hooks system that enables these notifications to trigger at the right moments.</li>
+                                    <li><strong><a href="https://tauri.app/" target="_blank" class="inline-link">Tauri</a></strong> - Framework used to build this desktop application.</li>
+                                </ul>
                             </div>
                         </details>
 
@@ -424,7 +364,7 @@ It's not as fancy as a custom sound, but it's a game-changer for productivity. Y
                             <div class="collapsible-content">
                             <p class="faq-answer"><strong>Visual notifications:</strong> Always blocked by Do Not Disturb and Focus modes - this cannot be changed. Visual notifications use macOS Notification Center (via terminal-notifier), which is controlled by the operating system. When DND/Focus mode is active, macOS blocks all visual notifications automatically.</p>
                             <p class="faq-answer" style="margin-top: 8px;"><strong>Audio notifications:</strong> Configurable. By default, audio plays regardless of Focus mode to ensure you never miss important Claude Code events. Audio plays directly via <code>afplay</code>, which bypasses Notification Center, giving you control over whether it respects DND.</p>
-                            <p class="faq-answer" style="margin-top: 8px;"><strong>How to silence audio during Focus modes:</strong> Enable "Silence audio during Do Not Disturb / Focus modes" in the General Settings section (Overview tab). This works with all macOS Focus modes including Do Not Disturb, Sleep, Work, Personal, and custom Focus modes. Detection happens automatically using built-in macOS commands - no additional setup required.</p>
+                            <p class="faq-answer" style="margin-top: 8px;"><strong>How to silence audio during Focus modes:</strong> Enable the "Silence this application 'when you have Focus turned on'" toggle in the Focus settings section (Claude Code tab). This works with all macOS Focus modes including Do Not Disturb, Sleep, Work, Personal, and custom Focus modes. Detection happens automatically using built-in macOS commands - no additional setup required.</p>
                             </div>
                         </details>
 <!-- If this toggle is in the on position, then this application's audio will not play while any "Focus" is "turned on." If this toggle is in the off position, then this application's audio will play regardless of whether or not a Focus is turned on.
