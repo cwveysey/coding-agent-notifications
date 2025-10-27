@@ -41,7 +41,7 @@ async function checkInstallation() {
                 }
 
                 // Show success message
-                showToast('Audio notifications enabled! Configure settings in the Claude Code tab.', 'success');
+                showToast('Installation complete - you will now receive audio notifications for designated events.', 'success');
 
                 // Reload config to pick up new default config
                 await loadConfig();
@@ -815,20 +815,39 @@ function populateSoundSelector(select, sounds, includeVoiceOptions = true) {
 
 // ===== Toast Notifications =====
 
-function showToast(message, type = 'success') {
+function showToast(message, type = 'success', action = null) {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    toast.textContent = message;
+
+    const messageSpan = document.createElement('span');
+    messageSpan.textContent = message;
+    toast.appendChild(messageSpan);
+
+    // Add action button if provided
+    if (action) {
+        const actionBtn = document.createElement('button');
+        actionBtn.textContent = action.text;
+        actionBtn.className = 'toast-action';
+        actionBtn.onclick = () => {
+            action.onClick();
+            toast.classList.remove('visible');
+            setTimeout(() => toast.remove(), 300);
+        };
+        toast.appendChild(actionBtn);
+    }
+
     document.body.appendChild(toast);
 
     // Trigger animation
     setTimeout(() => toast.classList.add('visible'), 10);
 
-    // Remove toast after 3 seconds
-    setTimeout(() => {
-        toast.classList.remove('visible');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    // Auto-dismiss only if no action button (UX best practice)
+    if (!action) {
+        setTimeout(() => {
+            toast.classList.remove('visible');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000); // Increased from 3s to 5s per UX guidelines
+    }
 }
 
 

@@ -816,7 +816,7 @@ button[title] {
     position: fixed;
     bottom: 32px;
     right: 32px;
-    padding: 12px 20px;
+    padding: 14px 18px;
     background: var(--success);
     color: white;
     border-radius: 8px;
@@ -826,8 +826,12 @@ button[title] {
     opacity: 0;
     transform: translateY(10px);
     transition: all 0.3s;
-    pointer-events: none;
+    pointer-events: all;
     z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 400px;
 }
 
 .toast.visible {
@@ -841,6 +845,45 @@ button[title] {
 
 .toast-error {
     background: #FF3B30;
+}
+
+.toast-action {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.toast-action:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.toast-close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    transition: color 0.2s;
+}
+
+.toast-close:hover {
+    color: white;
 }
 
 /* FAQ */
