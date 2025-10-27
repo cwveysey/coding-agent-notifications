@@ -47,6 +47,7 @@
                         <ul class="getting-started-text">
                             <li>Audio will play when designated coding agent events occur.</li>
                             <li>Review <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click();">your customization options</a> (to e.g. turn alerts on and off on a per hook type basis, arrange for different audio to play on a per hook type basis).</li>
+                            <li>Review <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click();">the FAQs</a> for answers to frequently asked questions.</li>
                         </ul>
                         <!-- Install Section (Auto-installs on first launch) -->
                         <div id="installSection" style="display: none; margin: 48px 0; padding: 48px 0; border-top: 1px solid rgba(0, 0, 0, 0.08); border-bottom: 1px solid rgba(0, 0, 0, 0.08);">
@@ -160,7 +161,7 @@
                     </div>
 
                     <!-- Focus Settings -->
-                    <h2 class="hooks-header" style="margin-top: 32px;">Focus settings</h2>
+                    <h2 id="focus-settings" class="hooks-header" style="margin-top: 32px;">Focus settings</h2>
                     <div class="card">
                         <div class="setting-row">
                             <div class="setting-label">
@@ -178,9 +179,9 @@
                     </div>
 
                     <div class="getting-started">
-                        <details class="collapsible-section">
+                        <details class="collapsible-section" id="customization-details">
                             <summary class="collapsible-header">
-                                <h2>Some customization options</h2>
+                                <h2>Some customization details</h2>
                             </summary>
                             <div class="collapsible-content">
                                 <p class="getting-started-text">
@@ -247,13 +248,13 @@
                             </summary>
                             <div class="collapsible-content">
                                 <ul class="faq-answer" style="margin-left: 20px; margin-top: 16px;">
-                                    <li><strong>It takes less than 60 seconds to install and start using our solution</strong> - Our tool is installed via a one-line terminal command or three GUI clicks. Following installation there is no additional setup required.</li>
-                                    <li><strong>There is no setup or manual configuration required after installation</strong> - No JSON or YAML files need to be modified, no scripts need to executed. You don't need to carefully read through any hooks-related developer documentation.
+                                    <li><strong>Less than 60 seconds to install and start using our solution</strong><br>Our tool is installed via a one-line terminal command or three GUI clicks. Following installation there is no additional setup required.</li>
+                                    <li><strong>No setup or manual configuration required</strong><br>No JSON or YAML files need to be modified, no scripts need to executed. You don't need to carefully read through any hooks-related developer documentation.
 
                                         <br>
                                         <br>
                                         As soon as installation finishes you'll start receiving audio notifications when designated events occur.</li>
-                                    <li><strong>Sensible default values and thoughtful customization capabilities</strong> - As communicated via <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click();">this section</a>:
+                                    <li><strong>Sensible default values and thoughtful customization capabilities</strong><br>As communicated via <a href="#customization-details" class="inline-link">this section</a>:
                                         <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
                                             <li>Alerts can be turned on and off on a per hook type basis.</li>
                                             <li>You can arrange for different audio to play on a per hook type basis.</li>
@@ -261,9 +262,9 @@
                                             <li>You can customize how Apple "Focuses" affect your audio alerts.</li>
                                         </ul>
                                     </li>
-                                    <li><strong>Quick and easy customization via a GUI</strong> - Customize notification preferences, toggle events on and off, and update Focus behavior through an intuitive and easy to use visual interface. No JSON or YAML files need to be manually modified, no scripts need to executed to make changes.</li>
-                                    <li><strong>No background process required</strong> - This app does not need to be running in order for the solution to work. Install the app once and close it from there.</li>
-                                    <li><strong>Native macOS integration</strong> - Takes advantage of native macOS features, as a result our notifications display alongside your other notifications via the <a href="https://developer.apple.com/documentation/usernotifications" target="_blank" class="inline-link">Notification Center</a> and respect your Focus preferences.</li>
+                                    <li><strong>Quick and easy customization via a GUI</strong><br>Customize notification preferences, toggle events on and off, and update Focus behavior through an intuitive and easy to use visual interface. No JSON or YAML files need to be manually modified, no scripts need to executed to make changes.</li>
+                                    <li><strong>The app does not need to be running in order for the solution to work</strong><br>Install the app once and close it from there. No background process required.</li>
+                                    <li><strong>Native macOS integration</strong><br>Takes advantage of native macOS features, as a result our notifications display alongside your other notifications via the <a href="https://developer.apple.com/documentation/usernotifications" target="_blank" class="inline-link">Notification Center</a> and respect your Focus preferences.</li>
                                 </ul>
                                 </ul>
 
@@ -276,22 +277,50 @@
                             </summary>
                             <div class="collapsible-content">
                                 <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li><strong><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">claude-code-notification</a></strong>
+                                    <li><strong>Build your own solution using Claude Code hooks</strong><br>I want to note that someone that is comfortable with script editing (or working with coding agents) could set up audio alerts for designated coding agent events without much time and effort. <a href="https://docs.claude.com/en/docs/claude-code/hooks" target="_blank" class="inline-link">This Claude Code hooks documentation</a>, as well as the GitHub repository associated with this application, should give you everything that you need to get started.</li>
+                                    <li style="margin-top: 12px;"><strong><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">claude-code-notification</a></strong>
                                         <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
-                                            <li><strong>Description:</strong> CLI tool with 16 GitHub stars. Last commit to main was 9/9/2025. Described via the respository as a "lightweight macOS desktop notification hook for Claude Code that displays native notifications with customizable system sounds when events occur during AI coding sessions."</li>
-                                            <li><strong>What makes our tool different?</strong> Our tool does not require manual hook configuration or JSON editing. Customization is handled through a GUI, and includes Focus mode control.</li>
+                                            <li><strong>Description</strong><br>Official respository description: "A lightweight macOS desktop notification hook for Claude Code that displays native notifications with customizable system sounds when events occur during AI coding sessions."</li>
+                                            <li><strong>Misc</strong>
+                                                <ul style="margin-left: 20px; margin-top: 4px; list-style-type: disc;">
+                                                    <li><span id="ccn-stars">16</span> GitHub stars as of <span id="ccn-stars-date">10/27/2025</span>.</li>
+                                                    <li>As of <span id="ccn-commit-date">10/27/2025</span> the last commit to main was on <span id="ccn-last-commit">9/9/2025</span>.</li>
+                                                </ul>
+                                                <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+                                                    <li>Authored by two Vercel employees (<a href="https://github.com/wyattjoh" target="_blank" class="inline-link">wyattjoh</a>, <a href="https://github.com/adrienthebo" target="_blank" class="inline-link">adrienthebo</a>).</li>
+                                                </ul>
+                                            </li>
+                                            <li><strong>Some of the differences between this solution and our solution</strong>
+                                                <ul style="margin-left: 20px; margin-top: 4px; list-style-type: disc;">
+                                                    <li><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">https://github.com/wyattjoh/claude-code-notification</a> offers cross-platform notifications (Windows, Linux, macOS), whereas our solution at this time exclusively supports macOS notifications.</li>
+                                                    <li><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">https://github.com/wyattjoh/claude-code-notification</a> requires JSON editing for updating configuration values and notification preferences, whereas our tool allows for configuration values and notification preferences to be updated via a GUI.</li>
+                                                    <li>Our solution offers users control over how Apple "Focuses" affect their coding agent audio alerts.</li>
+                                                </ul>
+                                            </li>
                                         </ul>
                                     </li>
                                     <li style="margin-top: 12px;"><strong><a href="https://github.com/daveschumaker/homebrew-claude-sounds" target="_blank" class="inline-link">claude-sounds</a></strong>
                                         <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
-                                            <li><strong>Description:</strong> CLI tool with 1 GitHub star. Last commit to main was 10/25/2025. Described via the repository as "a simple CLI tool that plays random sound effects from a collection of audio files. Perfect as a notification hook for Claude Code or for general terminal fun!"</li>
-                                            <li><strong>What makes our tool different?</strong> Our tool includes GUI-based configuration, visual notifications, and Focus mode control in addition to audio alerts.</li>
+                                            <li><strong>Description</strong><br>Official repository description: "A simple CLI tool that plays random sound effects from a collection of audio files. Perfect as a notification hook for Claude Code or for general terminal fun!"</li>
+                                            <li><strong>Misc</strong>
+                                                <ul style="margin-left: 20px; margin-top: 4px; list-style-type: disc;">
+                                                    <li><span id="cs-stars">1</span> GitHub star as of <span id="cs-stars-date">10/27/2025</span>.</li>
+                                                    <li>As of <span id="cs-commit-date">10/27/2025</span> the last commit to main was on <span id="cs-last-commit">10/25/2025</span>.</li>
+                                                </ul>
+                                            </li>
+                                            <li><strong>Some of the differences between this solution and our solution</strong>
+                                                <ul style="margin-left: 20px; margin-top: 4px; list-style-type: disc;">
+                                                    <li><a href="https://github.com/daveschumaker/homebrew-claude-sounds" target="_blank" class="inline-link">claude-sounds</a> provides audio-only alerts, whereas our tool offers visual notifications in addition to audio alerts.</li>
+                                                    <li><a href="https://github.com/daveschumaker/homebrew-claude-sounds" target="_blank" class="inline-link">claude-sounds</a> requires JSON editing for updating configuration values and notification preferences, whereas our tool allows for configuration values and notification preferences to be updated via a GUI.</li>
+                                                    <li>Our solution offers users control over how Apple "Focuses" affect their coding agent audio alerts.</li>
+                                                </ul>
+                                            </li>
                                         </ul>
                                     </li>
                                     <li style="margin-top: 12px;"><strong><a href="https://velvetshark.com/til/claude-code-sound-notification" target="_blank" class="inline-link">https://velvetshark.com/til/claude-code-sound-notification</a></strong>
                                         <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
-                                            <li><strong>Description:</strong> Via <a href="https://velvetshark.com/til/claude-code-sound-notification" target="_blank" class="inline-link">a post on his personal site</a> developer Radek Sienkiewicz shares a terminal command that "tells Claude Code to use the terminal's built-in bell as its sound notification channel. After you run this, you'll hear a simple system beep whenever a long-running command completes."</li>
-                                            <li><strong>What makes our tool different?</strong> Our tool offers similar ease of installation (one-line terminal command) with additional features including custom sounds, human voices, event-specific audio, visual notifications, and GUI configuration.</li>
+                                            <li><strong>Description</strong><br>Via <a href="https://velvetshark.com/til/claude-code-sound-notification" target="_blank" class="inline-link">a post on his personal site</a> developer Radek Sienkiewicz shares a terminal command that "tells Claude Code to use the terminal's built-in bell as its sound notification channel. After you run this, you'll hear a simple system beep whenever a long-running command completes."</li>
+                                            <li><strong>Some of the differences between this solution and our solution</strong><br>Via the "claude config set --global preferredNotifChannel terminal_bell" command, a system sound plays when the Notification hook event fires. Via our solution, configuration values and notification preferences can be updated via a GUI, alerts can be turned on and off on a per hook type basis, you can arrange for different audio to play on a per hook type basis, and you can control how Apple "Focuses" affect your audio alerts.</li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -308,38 +337,38 @@
                                 </p>
 
                                 <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Installation process:</strong> When you open this application for the first time, it automatically installs notification scripts to <code>~/.claude/scripts/</code> and configures Claude Code's <code>~/.claude/settings.json</code> file to execute these scripts when hook events fire. No manual configuration is required.
+                                    <strong>Installation process</strong><br>When you open this application for the first time, it automatically installs notification scripts to <code>~/.claude/scripts/</code> and configures Claude Code's <code>~/.claude/settings.json</code> file to execute these scripts when hook events fire. No manual configuration is required.
                                 </p>
 
                                 <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Supported hook events:</strong>
+                                    <strong>Supported hook events</strong>
                                 </p>
                                 <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Notification</a></strong> - Runs when Claude Code sends notifications.</li>
-                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Stop</a></strong> - Runs when Claude Code finishes responding.</li>
-                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">PreToolUse</a></strong> - Runs before tool calls (permission prompts).</li>
-                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">PostToolUse</a></strong> - Runs after tool calls complete.</li>
-                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">SubagentStop</a></strong> - Runs when subagent tasks complete.</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Notification</a></strong><br>Runs when Claude Code sends notifications.</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">Stop</a></strong><br>Runs when Claude Code finishes responding.</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">PreToolUse</a></strong><br>Runs before tool calls (permission prompts).</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">PostToolUse</a></strong><br>Runs after tool calls complete.</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code/hooks-guide#hook-events-overview" target="_blank" class="inline-link">SubagentStop</a></strong><br>Runs when subagent tasks complete.</li>
                                 </ul>
 
                                 <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Audio delivery:</strong> Audio notifications are played using macOS's native <code>afplay</code> command, which plays audio files directly without requiring any background processes. Sound files are stored in <code>~/.claude/voices/</code> and can be customized per hook type.
+                                    <strong>Audio delivery</strong><br>Audio notifications are played using macOS's native <code>afplay</code> command, which plays audio files directly without requiring any background processes. Sound files are stored in <code>~/.claude/voices/</code> and can be customized per hook type.
                                 </p>
 
                                 <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Visual notifications:</strong> Visual notifications are delivered via <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>, which sends notifications to macOS Notification Center. These notifications appear alongside your other system notifications and persist in notification history.
+                                    <strong>Visual notifications</strong><br>Visual notifications are delivered via <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>, which sends notifications to macOS Notification Center. These notifications appear alongside your other system notifications and persist in notification history.
                                 </p>
 
                                 <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Focus mode detection:</strong> When Focus mode control is enabled, the notification scripts check macOS's current Focus status using native macOS commands before playing audio. This allows audio to respect Do Not Disturb, Sleep, Work, and other Focus modes without requiring additional setup.
+                                    <strong>Focus mode detection</strong><br>When Focus mode control is enabled, the notification scripts check macOS's current Focus status using native macOS commands before playing audio. This allows audio to respect Do Not Disturb, Sleep, Work, and other Focus modes without requiring additional setup.
                                 </p>
 
                                 <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Configuration storage:</strong> All settings (sound preferences, enabled/disabled hooks, Focus mode preferences) are stored locally in <code>~/.claude/config.json</code>. The GUI application reads and writes to this file, providing a visual interface for configuration that would otherwise require manual JSON editing.
+                                    <strong>Configuration storage</strong><br>All settings (sound preferences, enabled/disabled hooks, Focus mode preferences) are stored locally in <code>~/.claude/config.json</code>. The GUI application reads and writes to this file, providing a visual interface for configuration that would otherwise require manual JSON editing.
                                 </p>
 
                                 <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>No background process:</strong> Unlike many notification solutions, our tool does not require a background process to remain running. Once installed and configured, the notification scripts are executed directly by Claude Code's hooks system when events occur. You can close the GUI application immediately after installation.
+                                    <strong>No background process</strong><br>Unlike many notification solutions, our tool does not require a background process to remain running. Once installed and configured, the notification scripts are executed directly by Claude Code's hooks system when events occur. You can close the GUI application immediately after installation.
                                 </p>
                             </div>
                         </details>
@@ -350,9 +379,9 @@
                             </summary>
                             <div class="collapsible-content">
                                 <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li><strong><a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a></strong> - macOS command-line tool for delivering user notifications to the macOS Notification Center.</li>
-                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code" target="_blank" class="inline-link">Claude Code</a></strong> - The hooks system that enables these notifications to trigger at the right moments.</li>
-                                    <li><strong><a href="https://tauri.app/" target="_blank" class="inline-link">Tauri</a></strong> - Framework used to build this desktop application.</li>
+                                    <li><strong><a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a></strong><br>macOS command-line tool for delivering user notifications to the macOS Notification Center.</li>
+                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code" target="_blank" class="inline-link">Claude Code</a></strong><br>The hooks system that enables these notifications to trigger at the right moments.</li>
+                                    <li><strong><a href="https://tauri.app/" target="_blank" class="inline-link">Tauri</a></strong><br>Framework used to build this desktop application.</li>
                                 </ul>
                             </div>
                         </details>
@@ -362,9 +391,9 @@
                                 <h3 class="faq-question">Do Apple "Focuses" (e.g. "Do Not Disturb," Work, Sleep) silence this app's notifications?</h3>
                             </summary>
                             <div class="collapsible-content">
-                            <p class="faq-answer"><strong>Visual notifications:</strong> Always blocked by Do Not Disturb and Focus modes - this cannot be changed. Visual notifications use macOS Notification Center (via terminal-notifier), which is controlled by the operating system. When DND/Focus mode is active, macOS blocks all visual notifications automatically.</p>
-                            <p class="faq-answer" style="margin-top: 8px;"><strong>Audio notifications:</strong> Configurable. By default, audio plays regardless of Focus mode to ensure you never miss important Claude Code events. Audio plays directly via <code>afplay</code>, which bypasses Notification Center, giving you control over whether it respects DND.</p>
-                            <p class="faq-answer" style="margin-top: 8px;"><strong>How to silence audio during Focus modes:</strong> Enable the "Silence this application 'when you have Focus turned on'" toggle in the Focus settings section (Claude Code tab). This works with all macOS Focus modes including Do Not Disturb, Sleep, Work, Personal, and custom Focus modes. Detection happens automatically using built-in macOS commands - no additional setup required.</p>
+                            <p class="faq-answer"><strong>Visual notifications</strong><br>Always blocked by Do Not Disturb and Focus modes - this cannot be changed. Visual notifications use macOS Notification Center (via <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>), which is controlled by the operating system. When DND/Focus mode is active, macOS blocks all visual notifications automatically.</p>
+                            <p class="faq-answer" style="margin-top: 8px;"><strong>Audio notifications</strong><br>Configurable. By default, audio plays regardless of Focus mode to ensure you never miss important Claude Code events. Audio plays directly via <code>afplay</code>, which bypasses Notification Center, giving you control over whether it respects DND.</p>
+                            <p class="faq-answer" style="margin-top: 8px;"><strong>How to silence audio during Focus modes</strong><br>Enable the "Silence this application 'when you have Focus turned on'" toggle in the <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click(); setTimeout(() => document.getElementById('focus-settings').scrollIntoView({behavior: 'smooth', block: 'start'}), 100);">Focus settings section</a>. This works with all macOS Focus modes including Do Not Disturb, Sleep, Work, Personal, and custom Focus modes. Detection happens automatically using built-in macOS commands - no additional setup required.</p>
                             </div>
                         </details>
 <!-- If this toggle is in the on position, then this application's audio will not play while any "Focus" is "turned on." If this toggle is in the off position, then this application's audio will play regardless of whether or not a Focus is turned on.
