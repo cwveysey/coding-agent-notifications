@@ -3,6 +3,10 @@ node_modules/
 dist/
 *.log
 
+# Environment variables
+.env.local
+.env*.local
+
 # Rust
 src-tauri/target/
 
@@ -18,3 +22,34 @@ src-tauri/Cargo.lock
 # OS
 .DS_Store
 Thumbs.db
+
+# Test artifacts
+test-results/
+playwright-report/
+.playwright/
+test-*.html
+
+# Test screenshots (but keep app icons)
+/*.png
+!src-tauri/icons/*.png
+
+# Development notes (internal documentation)
+CUSTOM_ICON_APPROACH.md
+DO_NOT_DISTURB_OPTIONS.md
+NOTIFICATION_OPTIONS.md
+PROJECT_SUMMARY.md
+NEXT_STEPS.md
+SESSION_RESUME.md
+REMOVED_FEATURES.md
+REQUIREMENTS.md
+SETUP.md
+
+# Development scripts
+build-and-run.sh
+dev.sh
+setup-icon.sh
+test-first-time-install.sh
+measure-chevrons.html
+
+# Playwright test specs (optional - uncomment if you want to keep tests private)
+# test-*.spec.js

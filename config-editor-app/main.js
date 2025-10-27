@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { open as openUrl } from '@tauri-apps/plugin-shell';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { initAnalytics, trackEvent, trackError, setAnalyticsEnabled, isAnalyticsEnabled } from './analytics.js';
 
 // State
 let config = null;
@@ -9,6 +10,10 @@ let savedConfig = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize analytics (respects user preference)
+    initAnalytics();
+    trackEvent('app_opened');
+
     await loadConfig();
     await checkInstallation();
     setupEventListeners();
@@ -48,9 +53,11 @@ async function checkInstallation() {
                 // Reload config to pick up new default config
                 await loadConfig();
                 renderUI();
+                trackEvent('installation_complete');
             } catch (error) {
                 console.error('Auto-installation failed:', error);
                 showToast('Installation failed: ' + error, 'error');
+                trackError(error, { context: 'auto_installation' });
             }
         }
     } catch (error) {
@@ -177,9 +184,11 @@ async function saveConfig() {
         savedConfig = JSON.parse(JSON.stringify(config)); // Update saved state
         updateSaveButton();
         showToast('Settings saved successfully');
+        trackEvent('settings_saved');
     } catch (error) {
         console.error('Failed to save config:', error);
         showToast('Failed to save configuration', 'error');
+        trackError(error, { context: 'save_config' });
     }
 }
 
@@ -286,59 +295,82 @@ function setupEventListeners() {
     document.getElementById('notificationSound').addEventListener('change', (e) => {
         config.global_settings.event_sounds.notification = e.target.value;
         markChanged();
+        trackEvent('sound_changed', { hook_type: 'notification', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
     });
 
     document.getElementById('stopSound').addEventListener('change', (e) => {
         config.global_settings.event_sounds.stop = e.target.value;
         markChanged();
+        trackEvent('sound_changed', { hook_type: 'stop', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
     });
 
     document.getElementById('preToolUseSound').addEventListener('change', (e) => {
         config.global_settings.event_sounds.pre_tool_use = e.target.value;
         markChanged();
+        trackEvent('sound_changed', { hook_type: 'pre_tool_use', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
     });
 
     document.getElementById('postToolUseSound').addEventListener('change', (e) => {
         config.global_settings.event_sounds.post_tool_use = e.target.value;
         markChanged();
+        trackEvent('sound_changed', { hook_type: 'post_tool_use', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
     });
 
     document.getElementById('subagentStopSound').addEventListener('change', (e) => {
         config.global_settings.event_sounds.subagent_stop = e.target.value;
         markChanged();
+        trackEvent('sound_changed', { hook_type: 'subagent_stop', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
     });
 
     // Event enabled toggles
     document.getElementById('notificationEnabled').addEventListener('change', (e) => {
         config.global_settings.event_enabled.notification = e.target.checked;
         markChanged();
+        trackEvent('hook_toggled', { hook_type: 'notification', enabled: e.target.checked });
     });
 
     document.getElementById('stopEnabled').addEventListener('change', (e) => {
         config.global_settings.event_enabled.stop = e.target.checked;
         markChanged();
+        trackEvent('hook_toggled', { hook_type: 'stop', enabled: e.target.checked });
     });
 
     document.getElementById('preToolUseEnabled').addEventListener('change', (e) => {
         config.global_settings.event_enabled.pre_tool_use = e.target.checked;
         markChanged();
+        trackEvent('hook_toggled', { hook_type: 'pre_tool_use', enabled: e.target.checked });
     });
 
     document.getElementById('postToolUseEnabled').addEventListener('change', (e) => {
         config.global_settings.event_enabled.post_tool_use = e.target.checked;
         markChanged();
+        trackEvent('hook_toggled', { hook_type: 'post_tool_use', enabled: e.target.checked });
     });
 
     document.getElementById('subagentStopEnabled').addEventListener('change', (e) => {
         config.global_settings.event_enabled.subagent_stop = e.target.checked;
         markChanged();
+        trackEvent('hook_toggled', { hook_type: 'subagent_stop', enabled: e.target.checked });
     });
 
     // Respect Do Not Disturb toggle
     document.getElementById('respectDND').addEventListener('change', (e) => {
         config.global_settings.respect_do_not_disturb = e.target.checked;
         markChanged();
+        trackEvent('focus_mode_toggled', { enabled: e.target.checked });
     });
+
+    // Analytics toggle
+    const analyticsToggle = document.getElementById('analyticsEnabled');
+    if (analyticsToggle) {
+        // Initialize from current state
+        analyticsToggle.checked = isAnalyticsEnabled();
+
+        analyticsToggle.addEventListener('change', (e) => {
+            setAnalyticsEnabled(e.target.checked);
+            showToast(e.target.checked ? 'Analytics enabled' : 'Analytics disabled', 'success');
+        });
+    }
 
     // Sound preview buttons
     document.addEventListener('click', async (e) => {
@@ -430,9 +462,11 @@ function setupEventListeners() {
                 renderSoundLibrary();
                 populateSoundSelectors();
                 showToast('Audio file added successfully');
+                trackEvent('custom_sound_added');
             } catch (error) {
                 console.error('Failed to upload sound:', error);
                 showToast('Failed to upload audio file: ' + error);
+                trackError(error, { context: 'upload_sound' });
             }
         }
     });
@@ -440,9 +474,16 @@ function setupEventListeners() {
     // Note: Installation now happens automatically on first launch
     // No manual install button needed
 
-    // Dev reset button (temporary for testing)
+    // Dev reset button (only show in development)
+    const devPanel = document.getElementById('devPanel');
     const devResetBtn = document.getElementById('devResetBtn');
-    if (devResetBtn) {
+
+    // Hide dev panel in production builds
+    if (devPanel && !import.meta.env.DEV) {
+        devPanel.style.display = 'none';
+    }
+
+    if (devResetBtn && import.meta.env.DEV) {
         devResetBtn.addEventListener('click', async () => {
             if (!confirm('This will delete all installed files and reset to fresh install state. Continue?')) {
                 return;
