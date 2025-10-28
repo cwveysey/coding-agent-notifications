@@ -19,6 +19,7 @@
             <nav class="sidebar">
                 <div class="nav-item active" data-view="overview">Overview</div>
                 <div class="nav-item" data-view="claude-code">Claude Code</div>
+                <div class="nav-item" data-view="recent-activity">Recent activity</div>
                 <div class="nav-item" data-view="custom-sounds">Audio library</div>
                 <div class="nav-item" data-view="settings">Settings</div>
                 <div class="nav-item" data-view="faq">FAQ</div>
@@ -216,6 +217,41 @@
                                 </ul>
                             </div>
                         </details>
+                    </div>
+                </div>
+
+                <!-- Recent Activity View -->
+                <div class="view" data-view="recent-activity" style="display: none;">
+                    <div class="getting-started">
+                        <h2>Recent activity</h2>
+                        <p class="getting-started-text">
+                            This view shows recent notification events from Claude Code.
+                        </p>
+                    </div>
+
+                    <div class="card">
+                        <div id="activityTableContainer">
+                            <table class="activity-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Event</th>
+                                        <th>Audio</th>
+                                        <th>Visual</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activityTableBody">
+                                    <tr>
+                                        <td colspan="4" class="empty-state-cell">
+                                            <div class="empty-state">
+                                                <p class="hint">No recent activity to display.</p>
+                                                <p class="hint" style="margin-top: 8px;">Events will appear here as Claude Code triggers notifications.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
