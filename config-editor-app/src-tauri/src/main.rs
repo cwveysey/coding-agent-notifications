@@ -7,6 +7,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 use tauri::Manager;
+use chrono::Utc;
 
 // ===== Config Structures =====
 
@@ -141,6 +142,23 @@ impl Default for Config {
             debug: false,
         }
     }
+}
+
+// ===== Installation Manifest =====
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct InstallationManifest {
+    installed_at: String,
+    backup_path: String,
+    app_version: String,
+    changes: InstallationChanges,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct InstallationChanges {
+    files_created: Vec<String>,
+    hooks_added: Vec<String>,
+    existing_hooks_preserved: Vec<String>,
 }
 
 // ===== Helper Functions =====
@@ -438,6 +456,124 @@ async fn preview_voice(text: String, api_key: Option<String>, app_handle: tauri:
     Ok(())
 }
 
+// ===== Installation Safety Functions =====
+
+fn get_manifest_path() -> PathBuf {
+    let home = std::env::var("HOME").unwrap();
+    PathBuf::from(home).join(".claude/audio-notifier-install.json")
+}
+
+fn get_backup_dir() -> PathBuf {
+    let home = std::env::var("HOME").unwrap();
+    PathBuf::from(home).join(".claude/backups")
+}
+
+fn check_existing_hooks(settings: &serde_json::Value) -> Vec<String> {
+    let mut existing_hooks = Vec::new();
+
+    if let Some(hooks) = settings.get("hooks").and_then(|h| h.as_object()) {
+        for (hook_type, _) in hooks {
+            existing_hooks.push(hook_type.clone());
+        }
+    }
+
+    existing_hooks
+}
+
+fn create_backup(settings_file: &PathBuf) -> Result<String, String> {
+    if !settings_file.exists() {
+        return Ok(String::new()); // No backup needed if no settings exist
+    }
+
+    let backup_dir = get_backup_dir();
+    fs::create_dir_all(&backup_dir)
+        .map_err(|e| format!("Failed to create backup directory: {}", e))?;
+
+    let timestamp = Utc::now().timestamp();
+    let backup_filename = format!("settings-pre-audio-notifier-{}.json", timestamp);
+    let backup_path = backup_dir.join(&backup_filename);
+
+    fs::copy(settings_file, &backup_path)
+        .map_err(|e| format!("Failed to create backup: {}", e))?;
+
+    Ok(backup_path.to_str().unwrap().to_string())
+}
+
+fn merge_hooks(existing_hooks: &serde_json::Value, our_hooks: serde_json::Value) -> serde_json::Value {
+    let mut merged = our_hooks.clone();
+
+    // If existing hooks exist, merge them
+    if let Some(existing) = existing_hooks.as_object() {
+        if let Some(merged_obj) = merged.as_object_mut() {
+            for (hook_type, hook_data) in existing {
+                // Check if these are our hooks by looking for smart-notify.sh
+                let is_our_hook = hook_data
+                    .as_array()
+                    .map(|arr| {
+                        arr.iter().any(|item| {
+                            item.get("hooks")
+                                .and_then(|h| h.as_array())
+                                .map(|hooks| {
+                                    hooks.iter().any(|h| {
+                                        h.get("command")
+                                            .and_then(|c| c.as_str())
+                                            .map(|cmd| cmd.contains("smart-notify.sh"))
+                                            .unwrap_or(false)
+                                    })
+                                })
+                                .unwrap_or(false)
+                        })
+                    })
+                    .unwrap_or(false);
+
+                // If not our hooks, preserve them by merging
+                if !is_our_hook {
+                    if let Some(our_hook_data) = merged_obj.get_mut(hook_type) {
+                        if let (Some(existing_arr), Some(our_arr)) = (hook_data.as_array(), our_hook_data.as_array_mut()) {
+                            // Append existing hooks to our hooks
+                            for item in existing_arr {
+                                our_arr.push(item.clone());
+                            }
+                        }
+                    } else {
+                        // Hook type doesn't exist in our config, add it entirely
+                        merged_obj.insert(hook_type.clone(), hook_data.clone());
+                    }
+                }
+            }
+        }
+    }
+
+    merged
+}
+
+fn create_installation_manifest(
+    backup_path: String,
+    files_created: Vec<String>,
+    hooks_added: Vec<String>,
+    existing_hooks_preserved: Vec<String>,
+) -> Result<(), String> {
+    let manifest = InstallationManifest {
+        installed_at: Utc::now().to_rfc3339(),
+        backup_path,
+        app_version: "1.0.0".to_string(),
+        changes: InstallationChanges {
+            files_created,
+            hooks_added,
+            existing_hooks_preserved,
+        },
+    };
+
+    let manifest_path = get_manifest_path();
+    let manifest_json = serde_json::to_string_pretty(&manifest)
+        .map_err(|e| format!("Failed to serialize manifest: {}", e))?;
+
+    fs::write(&manifest_path, manifest_json)
+        .map_err(|e| format!("Failed to write manifest: {}", e))?;
+
+    Ok(())
+}
+
 #[tauri::command]
 async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
     let home = std::env::var("HOME").map_err(|_| "Could not get HOME directory")?;
@@ -505,8 +641,10 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
         }
     }
 
-    // Update settings.json with hooks
+    // Update settings.json with hooks (with safety features)
     let settings_file = claude_dir.join("settings.json");
+
+    // Load existing settings
     let mut settings: serde_json::Value = if settings_file.exists() {
         let contents = fs::read_to_string(&settings_file)
             .map_err(|e| format!("Failed to read settings.json: {}", e))?;
@@ -516,8 +654,18 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
         serde_json::json!({})
     };
 
-    // Add hooks configuration
-    let hooks_config = serde_json::json!({
+    // Check for existing hooks
+    let existing_hooks_list = check_existing_hooks(&settings);
+    let had_existing_hooks = !existing_hooks_list.is_empty();
+
+    // Create backup before making changes
+    let backup_path = create_backup(&settings_file)?;
+
+    // Store old hooks value for merging
+    let old_hooks = settings.get("hooks").cloned().unwrap_or(serde_json::json!({}));
+
+    // Add our hooks configuration
+    let our_hooks_config = serde_json::json!({
         "Notification": [{
             "matcher": "",
             "hooks": [{
@@ -561,7 +709,48 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
         }]
     });
 
-    settings["hooks"] = hooks_config;
+    // Merge with existing hooks (preserve non-smart-notify hooks)
+    let merged_hooks = merge_hooks(&old_hooks, our_hooks_config);
+    settings["hooks"] = merged_hooks;
+
+    // Track files created
+    let mut files_created = vec![
+        format!("{}/.claude/scripts/smart-notify.sh", home),
+        format!("{}/.claude/scripts/select-sound.sh", home),
+        format!("{}/.claude/scripts/read-config.sh", home),
+        format!("{}/.claude/scripts/audio-notifier-uninstall.sh", home),
+        format!("{}/.claude/.sounds-enabled", home),
+    ];
+
+    // Track voice files if they were created
+    if voices_dir.exists() {
+        if let Ok(entries) = fs::read_dir(&voices_dir) {
+            for entry in entries.flatten() {
+                if let Some(path_str) = entry.path().to_str().map(|s| s.to_string()) {
+                    files_created.push(path_str);
+                }
+            }
+        }
+    }
+
+    // Identify which hooks we added
+    let hooks_added = vec![
+        "Notification".to_string(),
+        "Stop".to_string(),
+        "PreToolUse".to_string(),
+        "PostToolUse".to_string(),
+        "SubagentStop".to_string(),
+    ];
+
+    // Identify existing hooks we preserved
+    let existing_hooks_preserved: Vec<String> = if had_existing_hooks {
+        existing_hooks_list
+            .into_iter()
+            .filter(|h| !hooks_added.contains(h))
+            .collect()
+    } else {
+        vec![]
+    };
 
     // Save updated settings
     let settings_str = serde_json::to_string_pretty(&settings)
@@ -582,9 +771,26 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
             .map_err(|e| format!("Failed to serialize default config: {}", e))?;
         fs::write(&config_file, yaml)
             .map_err(|e| format!("Failed to create default config: {}", e))?;
+        files_created.push(format!("{}/.claude/audio-notifier.yaml", home));
     }
 
-    Ok("Installation complete! Audio notifications are now active.".to_string())
+    // Create installation manifest
+    create_installation_manifest(
+        backup_path,
+        files_created,
+        hooks_added,
+        existing_hooks_preserved.clone(),
+    )?;
+
+    let mut result_message = "Installation complete! Audio notifications are now active.".to_string();
+    if had_existing_hooks {
+        result_message.push_str(&format!(
+            "\n\nExisting hooks preserved: {}",
+            existing_hooks_preserved.join(", ")
+        ));
+    }
+
+    Ok(result_message)
 }
 
 #[tauri::command]
@@ -836,6 +1042,147 @@ async fn generate_voice_notifications(config: Config, api_key: Option<String>) -
     Ok(format!("Generated {} voice notifications", generated_count))
 }
 
+// ===== Uninstall Functions =====
+
+#[tauri::command]
+async fn get_installation_info() -> Result<InstallationManifest, String> {
+    let manifest_path = get_manifest_path();
+
+    if !manifest_path.exists() {
+        return Err("Installation manifest not found. The application may not be installed.".to_string());
+    }
+
+    let contents = fs::read_to_string(&manifest_path)
+        .map_err(|e| format!("Failed to read installation manifest: {}", e))?;
+
+    let manifest: InstallationManifest = serde_json::from_str(&contents)
+        .map_err(|e| format!("Failed to parse installation manifest: {}", e))?;
+
+    Ok(manifest)
+}
+
+#[tauri::command]
+async fn uninstall_hooks() -> Result<String, String> {
+    let home = std::env::var("HOME").map_err(|_| "Could not get HOME directory")?;
+    let claude_dir = PathBuf::from(&home).join(".claude");
+    let settings_file = claude_dir.join("settings.json");
+
+    // Read manifest to know what to remove
+    let manifest = get_installation_info().await?;
+
+    // Create backup before uninstalling
+    let backup_path = create_backup(&settings_file)?;
+
+    // Read settings
+    if !settings_file.exists() {
+        return Err("settings.json not found".to_string());
+    }
+
+    let contents = fs::read_to_string(&settings_file)
+        .map_err(|e| format!("Failed to read settings.json: {}", e))?;
+    let mut settings: serde_json::Value = serde_json::from_str(&contents)
+        .map_err(|e| format!("Failed to parse settings.json: {}", e))?;
+
+    // Remove only our hooks (those containing smart-notify.sh)
+    if let Some(hooks) = settings.get_mut("hooks").and_then(|h| h.as_object_mut()) {
+        for (_hook_type, hook_data) in hooks.iter_mut() {
+            if let Some(hook_array) = hook_data.as_array_mut() {
+                // Filter out entries that contain smart-notify.sh
+                hook_array.retain(|item| {
+                    !item
+                        .get("hooks")
+                        .and_then(|h| h.as_array())
+                        .map(|hooks| {
+                            hooks.iter().any(|h| {
+                                h.get("command")
+                                    .and_then(|c| c.as_str())
+                                    .map(|cmd| cmd.contains("smart-notify.sh"))
+                                    .unwrap_or(false)
+                            })
+                        })
+                        .unwrap_or(false)
+                });
+            }
+        }
+
+        // Remove empty hook arrays
+        hooks.retain(|_k, v| {
+            v.as_array().map(|arr| !arr.is_empty()).unwrap_or(true)
+        });
+    }
+
+    // Save updated settings
+    let settings_str = serde_json::to_string_pretty(&settings)
+        .map_err(|e| format!("Failed to serialize settings: {}", e))?;
+    fs::write(&settings_file, settings_str)
+        .map_err(|e| format!("Failed to write settings.json: {}", e))?;
+
+    // Remove scripts
+    let scripts_to_remove = vec![
+        "smart-notify.sh",
+        "select-sound.sh",
+        "read-config.sh",
+    ];
+
+    let scripts_dir = claude_dir.join("scripts");
+    for script in scripts_to_remove {
+        let script_path = scripts_dir.join(script);
+        if script_path.exists() {
+            fs::remove_file(&script_path)
+                .map_err(|e| format!("Failed to remove {}: {}", script, e))?;
+        }
+    }
+
+    // Remove .sounds-enabled
+    let sounds_enabled_file = claude_dir.join(".sounds-enabled");
+    if sounds_enabled_file.exists() {
+        fs::remove_file(&sounds_enabled_file)
+            .map_err(|e| format!("Failed to remove .sounds-enabled: {}", e))?;
+    }
+
+    // Remove global voice files
+    let global_voices_dir = claude_dir.join("voices").join("global");
+    if global_voices_dir.exists() {
+        fs::remove_dir_all(&global_voices_dir)
+            .map_err(|e| format!("Failed to remove global voices: {}", e))?;
+    }
+
+    // Update manifest to mark as uninstalled
+    let manifest_path = get_manifest_path();
+    if manifest_path.exists() {
+        fs::remove_file(&manifest_path)
+            .map_err(|e| format!("Failed to remove manifest: {}", e))?;
+    }
+
+    let mut result = format!(
+        "Uninstallation complete!\n\nBackup created at: {}\nConfig preserved at: ~/.claude/audio-notifier.yaml",
+        backup_path
+    );
+
+    if !manifest.changes.existing_hooks_preserved.is_empty() {
+        result.push_str(&format!(
+            "\n\nYour existing hooks were preserved: {}",
+            manifest.changes.existing_hooks_preserved.join(", ")
+        ));
+    }
+
+    Ok(result)
+}
+
+#[tauri::command]
+async fn export_installation_log() -> Result<String, String> {
+    let manifest = get_installation_info().await?;
+    let json = serde_json::to_string_pretty(&manifest)
+        .map_err(|e| format!("Failed to serialize manifest: {}", e))?;
+    Ok(json)
+}
+
+#[tauri::command]
+async fn get_backup_path() -> Result<String, String> {
+    let manifest = get_installation_info().await?;
+    Ok(manifest.backup_path)
+}
+
 #[tauri::command]
 async fn dev_reset_install() -> Result<(), String> {
     let home = std::env::var("HOME").map_err(|_| "Could not get HOME directory")?;
@@ -952,6 +1299,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             create_tray(app.handle())?;
             Ok(())
@@ -970,6 +1318,10 @@ fn main() {
             open_log_file,
             list_custom_sounds,
             generate_voice_notifications,
+            get_installation_info,
+            uninstall_hooks,
+            export_installation_log,
+            get_backup_path,
             dev_reset_install,
         ])
         .run(tauri::generate_context!())
