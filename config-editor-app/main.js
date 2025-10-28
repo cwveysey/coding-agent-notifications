@@ -288,6 +288,11 @@ function setupEventListeners() {
             if (saveBtn) {
                 saveBtn.style.display = targetView === 'claude-code' ? 'block' : 'none';
             }
+
+            // Load activity log when recent-activity view is selected
+            if (targetView === 'recent-activity') {
+                loadActivityLog();
+            }
         });
     });
 
@@ -1040,6 +1045,68 @@ async function loadInstallationInfo() {
     } catch (error) {
         console.error('Failed to load installation info:', error);
         infoDiv.innerHTML = `<p style="color: #666;">Installation information not available. This may be an older installation.</p>`;
+    }
+}
+
+// ===== Activity Log =====
+
+async function loadActivityLog() {
+    const tbody = document.getElementById('activityTableBody');
+    if (!tbody) return;
+
+    try {
+        const events = await invoke('get_activity_log');
+
+        if (events.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-state-cell">
+                        <div class="empty-state">
+                            <p class="hint">No recent activity to display.</p>
+                            <p class="hint" style="margin-top: 8px;">Events will appear here as Claude Code triggers notifications.</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Format events into table rows
+        tbody.innerHTML = events.map(event => {
+            // Format timestamp to local time
+            const date = new Date(event.timestamp);
+            const timeStr = date.toLocaleString();
+
+            // Format event name (capitalize first letter, replace underscores)
+            const eventName = event.event
+                .split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+
+            // Checkmark or dash for audio/visual
+            const audioIcon = event.audio ? '✓' : '—';
+            const visualIcon = event.visual ? '✓' : '—';
+
+            return `
+                <tr>
+                    <td>${timeStr}</td>
+                    <td>${eventName}</td>
+                    <td>${audioIcon}</td>
+                    <td>${visualIcon}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Failed to load activity log:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="empty-state-cell">
+                    <div class="empty-state">
+                        <p class="hint" style="color: #ff3b30;">Failed to load activity log.</p>
+                    </div>
+                </td>
+            </tr>
+        `;
     }
 }
 

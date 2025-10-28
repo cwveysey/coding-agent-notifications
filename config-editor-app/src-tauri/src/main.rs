@@ -1183,6 +1183,37 @@ async fn get_backup_path() -> Result<String, String> {
     Ok(manifest.backup_path)
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct ActivityEvent {
+    timestamp: String,
+    event: String,
+    audio: bool,
+    visual: bool,
+}
+
+#[tauri::command]
+async fn get_activity_log() -> Result<Vec<ActivityEvent>, String> {
+    let home = std::env::var("HOME").map_err(|_| "Could not get HOME directory")?;
+    let activity_log_path = PathBuf::from(&home).join(".claude/activity-log.json");
+
+    if !activity_log_path.exists() {
+        // Return empty array if log doesn't exist yet
+        return Ok(vec![]);
+    }
+
+    let content = fs::read_to_string(&activity_log_path)
+        .map_err(|e| format!("Failed to read activity log: {}", e))?;
+
+    let events: Vec<ActivityEvent> = serde_json::from_str(&content)
+        .map_err(|e| format!("Failed to parse activity log: {}", e))?;
+
+    // Return events in reverse order (most recent first)
+    let mut reversed_events = events;
+    reversed_events.reverse();
+
+    Ok(reversed_events)
+}
+
 #[tauri::command]
 async fn dev_reset_install() -> Result<(), String> {
     let home = std::env::var("HOME").map_err(|_| "Could not get HOME directory")?;
@@ -1322,6 +1353,7 @@ fn main() {
             uninstall_hooks,
             export_installation_log,
             get_backup_path,
+            get_activity_log,
             dev_reset_install,
         ])
         .run(tauri::generate_context!())
