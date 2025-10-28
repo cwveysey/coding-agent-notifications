@@ -70,6 +70,36 @@ check_do_not_disturb() {
     return 1  # Play audio
 }
 
+# Log activity event to JSON
+log_activity_event() {
+    local event_type="$1"
+    local audio_played="$2"
+    local visual_shown="$3"
+
+    local activity_log="$HOME/.claude/activity-log.json"
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    # Create log file if it doesn't exist
+    if [[ ! -f "$activity_log" ]]; then
+        echo "[]" > "$activity_log"
+    fi
+
+    # Create new event entry
+    local new_event=$(cat <<EOF
+{
+  "timestamp": "$timestamp",
+  "event": "$event_type",
+  "audio": $audio_played,
+  "visual": $visual_shown
+}
+EOF
+)
+
+    # Append to log (keep last 100 events)
+    local temp_log=$(mktemp)
+    jq --argjson event "$new_event" '. += [$event] | .[-100:]' "$activity_log" > "$temp_log" 2>/dev/null && mv "$temp_log" "$activity_log" || rm -f "$temp_log"
+}
+
 # Send notification with project-specific sound
 send_notification() {
     local message="$1"
@@ -162,6 +192,10 @@ send_notification() {
     debug_log "Sound variable set to: $sound"
     debug_log "Checking if should play: SOUNDS_ENABLED=$SOUNDS_ENABLED, file exists=$([ -f "$sound" ] && echo yes || echo no)"
 
+    # Track whether audio/visual were actually triggered
+    local audio_played="false"
+    local visual_shown="false"
+
     # Check if audio should be skipped due to Do Not Disturb
     if check_do_not_disturb; then
         debug_log "Skipping audio due to Do Not Disturb"
@@ -173,6 +207,7 @@ send_notification() {
         osascript -e "do shell script \"afplay '$sound'\"" >/dev/null 2>&1 &
         local pid=$!
         debug_log "Audio notification sent (osascript PID: $pid)"
+        audio_played="true"
     else
         echo "[$(date '+%F %T')] SKIPPED: SOUNDS_ENABLED=$SOUNDS_ENABLED, file_exists=$([ -f "$sound" ] && echo YES || echo NO)" >> "$HOME/.claude/hook-execution.log"
         debug_log "Skipping audio: SOUNDS_ENABLED=$SOUNDS_ENABLED, sound file exists=$([ -f "$sound" ] && echo yes || echo no)"
@@ -216,11 +251,15 @@ send_notification() {
             -message "$display_message" \
             >/dev/null 2>&1 &
         debug_log "Visual notification sent: title='$display_title', message='${display_message:0:50}'"
+        visual_shown="true"
     fi
 
     # Log the notification
     local log_file="${LOG_FILE:-$HOME/.claude/notifications.log}"
     echo "$(date '+%F %T') [$reason] ${message:0:100}" >> "$log_file"
+
+    # Log activity event to JSON
+    log_activity_event "$event_type" "$audio_played" "$visual_shown"
 }
 
 # Anti-spam check
