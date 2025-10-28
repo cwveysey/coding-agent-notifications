@@ -39,14 +39,14 @@
                     <div class="getting-started">
                         <h2>Getting started</h2>
                         <p class="getting-started-text">
-                            If you are reading this copy, then you have already completed all steps required to receive audio notifications when designated coding agent events occur. All required configuration steps were completed by downloading this application. 
+                            If you are reading this copy, then you have already completed all steps required to receive notifications when designated coding agent events occur. All required configuration steps were completed by downloading this application. 
                             
                             <br><br>If you have any questions, encounter any issues, or would like to request an update, please <a href="mailto:cwveysey@gmail.com" class="inline-link">drop me a line via email</a>. Any and all feedback is of course so appreciated.
                         </p>
 
                         <h2 style="margin-top: 24px;">Next steps</h2>
                         <ul class="getting-started-text">
-                            <li>Audio will play when designated coding agent events occur.</li>
+                            <li>You will be notified when designated coding agent events occur.</li>
                             <li>Review <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click(); requestAnimationFrame(() => { const details = document.getElementById('customization-details'); if (details) { details.open = true; details.scrollIntoView({block: 'start'}); } });">your customization options</a> (to e.g. turn alerts on and off on a per hook type basis, arrange for different audio to play on a per hook type basis).</li>
                             <li>Review <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=faq]').click();">the FAQs</a> for answers to frequently asked questions.</li>
                         </ul>
@@ -78,9 +78,9 @@
                                         }
                                     </style>
                                 </div>
-                                <h3 style="font-size: 20px; margin: 0 0 16px 0; color: #202124; font-weight: 500;">Installing audio notifications...</h3>
+                                <h3 style="font-size: 20px; margin: 0 0 16px 0; color: #202124; font-weight: 500;">Completing notification setup...</h3>
                                 <p style="font-size: 15px; line-height: 1.7; color: #5f6368; margin-bottom: 32px; font-weight: 400;">
-                                    Setting up your audio notification system. This will only take a moment.
+                                    Setting up your notification system. This will only take a moment.
                                 </p>
                                 <ul style="text-align: left; list-style: none; padding: 0; margin: 0; color: #5f6368; font-size: 14px; line-height: 2;">
                                     <li style="padding-left: 24px; position: relative;">
@@ -93,7 +93,7 @@
                                     </li>
                                     <li style="padding-left: 24px; position: relative;">
                                         <span style="position: absolute; left: 0; color: #1a73e8;">→</span>
-                                        Enabling audio notifications
+                                        Enabling notifications
                                     </li>
                                 </ul>
                             </div>
@@ -209,9 +209,9 @@
                                     Using the controls above:
                                 </p>
                                 <ul class="getting-started-text">
-                                    <li>You can turn audio alerts on and off on a per hook type basis.</li>
+                                    <li>You can turn alerts on and off on a per hook type basis.</li>
                                     <li>You can arrange for different audio to play on a per hook type basis.</li>
-                                    <li>You can arrange for custom audio to be used for Claude Code audio alerts.</li>
+                                    <li>You can arrange for custom audio to be used for notifications.</li>
                                     <li>You can choose whether or not Claude Code audio alerts are silenced if <a href="https://support.apple.com/guide/mac-help/change-focus-settings-mchlff5da36d/mac" target="_blank" class="inline-link">any Apple "Focuses"</a> are turned on.</li>
                                 </ul>
                             </div>
@@ -244,8 +244,8 @@
 
                         <div class="card">
                             <h3>Uninstall</h3>
-                            <p>Remove audio notification hooks from Claude Code while preserving other customizations.</p>
-                            <button id="uninstallBtn" class="btn">Uninstall Audio Notifications</button>
+                            <p>Remove notification hooks from Claude Code while preserving other customizations.</p>
+                            <button id="uninstallBtn" class="btn">Uninstall Notifications</button>
                         </div>
 
                         <div class="card" style="margin-top: 24px;">
@@ -295,13 +295,13 @@
 
                                         <br>
                                         <br>
-                                        As soon as installation finishes you'll start receiving audio notifications when designated events occur.</li>
+                                        As soon as installation finishes you'll start receiving notifications when designated events occur.</li>
                                     <li><strong>Sensible default values and thoughtful customization capabilities</strong><br>As communicated via <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click(); requestAnimationFrame(() => { const details = document.getElementById('customization-details'); if (details) { details.open = true; details.scrollIntoView({block: 'start'}); } });">this section</a>:
                                         <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
                                             <li>Alerts can be turned on and off on a per hook type basis.</li>
                                             <li>You can arrange for different audio to play on a per hook type basis.</li>
                                             <li>You can use custom audio for your alerts.</li>
-                                            <li>You can customize how Apple "Focuses" affect your audio alerts.</li>
+                                            <li>You can customize how Apple "Focuses" affect your notifications.</li>
                                         </ul>
                                     </li>
                                     <li><strong>Quick and easy customization via a GUI</strong><br>Customize notification preferences, toggle events on and off, and update Focus behavior through an intuitive and easy to use visual interface. No JSON or YAML files need to be manually modified, no scripts need to executed to make changes.</li>
@@ -319,7 +319,7 @@
                             </summary>
                             <div class="collapsible-content">
                                 <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li><strong>Build your own solution using Claude Code hooks</strong><br>I want to note that someone that is comfortable with script editing (or working with coding agents) could set up audio alerts for designated coding agent events without much time and effort. <a href="https://docs.claude.com/en/docs/claude-code/hooks" target="_blank" class="inline-link">This Claude Code hooks documentation</a>, as well as the GitHub repository associated with this application, should give you everything that you need to get started.</li>
+                                    <li><strong>Build your own solution using Claude Code hooks</strong><br>I want to note that someone that is comfortable with script editing (or working with coding agents) could set up notifications for designated coding agent events without much time and effort. <a href="https://docs.claude.com/en/docs/claude-code/hooks" target="_blank" class="inline-link">This Claude Code hooks documentation</a>, as well as the GitHub repository associated with this application, should give you everything that you need to get started.</li>
                                     <li style="margin-top: 12px;"><strong><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">claude-code-notification</a></strong>
                                         <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
                                             <li><strong>Description</strong><br>Official respository description: "A lightweight macOS desktop notification hook for Claude Code that displays native notifications with customizable system sounds when events occur during AI coding sessions."</li>
@@ -336,7 +336,7 @@
                                                 <ul style="margin-left: 20px; margin-top: 4px; list-style-type: disc;">
                                                     <li><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">https://github.com/wyattjoh/claude-code-notification</a> offers cross-platform notifications (Windows, Linux, macOS), whereas our solution at this time exclusively supports macOS notifications.</li>
                                                     <li><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">https://github.com/wyattjoh/claude-code-notification</a> requires JSON editing for updating configuration values and notification preferences, whereas our tool allows for configuration values and notification preferences to be updated via a GUI.</li>
-                                                    <li>Our solution offers users control over how Apple "Focuses" affect their coding agent audio alerts.</li>
+                                                    <li>Our solution offers users control over how Apple "Focuses" affect their notifications.</li>
                                                 </ul>
                                             </li>
                                         </ul>
@@ -354,7 +354,7 @@
                                                 <ul style="margin-left: 20px; margin-top: 4px; list-style-type: disc;">
                                                     <li><a href="https://github.com/daveschumaker/homebrew-claude-sounds" target="_blank" class="inline-link">claude-sounds</a> provides audio-only alerts, whereas our tool offers visual notifications in addition to audio alerts.</li>
                                                     <li><a href="https://github.com/daveschumaker/homebrew-claude-sounds" target="_blank" class="inline-link">claude-sounds</a> requires JSON editing for updating configuration values and notification preferences, whereas our tool allows for configuration values and notification preferences to be updated via a GUI.</li>
-                                                    <li>Our solution offers users control over how Apple "Focuses" affect their coding agent audio alerts.</li>
+                                                    <li>Our solution offers users control over how Apple "Focuses" affect their notifications.</li>
                                                 </ul>
                                             </li>
                                         </ul>
@@ -362,7 +362,7 @@
                                     <li style="margin-top: 12px;"><strong><a href="https://velvetshark.com/til/claude-code-sound-notification" target="_blank" class="inline-link">https://velvetshark.com/til/claude-code-sound-notification</a></strong>
                                         <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
                                             <li><strong>Description</strong><br>Via <a href="https://velvetshark.com/til/claude-code-sound-notification" target="_blank" class="inline-link">a post on his personal site</a> developer Radek Sienkiewicz shares a terminal command that "tells Claude Code to use the terminal's built-in bell as its sound notification channel. After you run this, you'll hear a simple system beep whenever a long-running command completes."</li>
-                                            <li><strong>Some of the differences between this solution and our solution</strong><br>Via the "claude config set --global preferredNotifChannel terminal_bell" command, a system sound plays when the Notification hook event fires. Via our solution, configuration values and notification preferences can be updated via a GUI, alerts can be turned on and off on a per hook type basis, you can arrange for different audio to play on a per hook type basis, and you can control how Apple "Focuses" affect your audio alerts.</li>
+                                            <li><strong>Some of the differences between this solution and our solution</strong><br>Via the "claude config set --global preferredNotifChannel terminal_bell" command, a system sound plays when the Notification hook event fires. Via our solution, configuration values and notification preferences can be updated via a GUI, alerts can be turned on and off on a per hook type basis, you can arrange for different audio to play on a per hook type basis, and you can control how Apple "Focuses" affect your notifications.</li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -426,7 +426,7 @@
                                 <ol class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
                                     <li>Open the app</li>
                                     <li>Go to Settings</li>
-                                    <li>Click "Uninstall audio notifications"</li>
+                                    <li>Click "Uninstall notifications"</li>
                                     <li>Confirm</li>
                                 </ol>
                                 <p class="faq-answer" style="margin-top: 8px;">
