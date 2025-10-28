@@ -49,7 +49,7 @@ body {
 
 .layout {
     display: flex;
-    gap: 24px;
+    gap: 20px;
     margin-top: 24px;
 }
 
@@ -149,7 +149,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 12px 0;
-    gap: 32px;
+    gap: 16px;
 }
 
 .setting-row:not(:last-child) {
@@ -201,6 +201,10 @@ body {
     cursor: pointer;
     transition: background 0.2s ease;
     flex-shrink: 0;
+    box-sizing: border-box;
+    border: none;
+    padding: 0;
+    margin: 0;
 }
 
 .toggle:checked {
@@ -227,10 +231,11 @@ body {
 /* Sound Control */
 .sound-control {
     display: flex;
-    gap: 6px;
+    gap: 10px;
     align-items: center;
     flex-shrink: 0;
 }
+
 
 .sound-select {
     padding: 6px 10px;
@@ -241,7 +246,7 @@ body {
     font-size: 13px;
     font-weight: 400;
     cursor: pointer;
-    min-width: 140px;
+    width: 130px;
     height: 32px;
     line-height: 1.4;
     transition: all 0.15s ease;
@@ -250,6 +255,7 @@ body {
     background-repeat: no-repeat;
     background-position: right 8px center;
     padding-right: 28px;
+    box-sizing: border-box;
 }
 
 .sound-select:hover {
@@ -300,6 +306,7 @@ body {
     transition: all 0.15s ease;
     padding: 0;
     flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .btn-play:hover {
@@ -694,7 +701,7 @@ ul.getting-started-text li {
     margin-bottom: 0;
     margin-top: 16px;
     align-items: center;
-    gap: 24px;
+    gap: 16px;
 }
 
 .table-header-cell {
@@ -715,13 +722,13 @@ ul.getting-started-text li {
 
 .table-header-controls {
     display: flex;
-    gap: 6px;
+    gap: 10px;
     align-items: center;
     flex-shrink: 0;
 }
 
 .sound-header {
-    width: 140px;
+    width: 130px;
     text-align: left;
 }
 
@@ -729,10 +736,10 @@ ul.getting-started-text li {
     width: 28px;
 }
 
-.enabled-header {
+.visual-header,
+.audio-header {
     width: 38px;
     text-align: center;
-    margin-right: 12px;
 }
 
 /* Documentation */
@@ -802,12 +809,10 @@ details[open] > .doc-header::before {
     cursor: help;
 }
 
-/* Override help cursor for buttons */
-button[title] {
-    cursor: pointer;
-}
-
-.btn-play[title] {
+/* Override help cursor for buttons and toggles */
+button[title],
+.btn-play[title],
+.toggle[title] {
     cursor: pointer;
 }
 

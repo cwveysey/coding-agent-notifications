@@ -1,7 +1,8 @@
 import { invoke } from '@tauri-apps/api/core';
-import { open as openDialog } from '@tauri-apps/plugin-dialog';
+import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
 import { open as openUrl } from '@tauri-apps/plugin-shell';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { writeTextFile } from '@tauri-apps/plugin-fs';
 import { initAnalytics, trackEvent, trackError, setAnalyticsEnabled, isAnalyticsEnabled } from './analytics.js';
 
 // State
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     setupCloseHandler();
     renderUI();
+    loadInstallationInfo();
     // Fetch GitHub stats in background (non-blocking, for display only)
     fetchGitHubStats().catch(err => console.warn('GitHub stats fetch failed:', err));
 });
@@ -322,35 +324,66 @@ function setupEventListeners() {
         trackEvent('sound_changed', { hook_type: 'subagent_stop', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
     });
 
-    // Event enabled toggles
-    document.getElementById('notificationEnabled').addEventListener('change', (e) => {
+    // Visual notification toggles
+    document.getElementById('notificationVisual').addEventListener('change', (e) => {
         config.global_settings.event_enabled.notification = e.target.checked;
         markChanged();
-        trackEvent('hook_toggled', { hook_type: 'notification', enabled: e.target.checked });
+        trackEvent('hook_toggled', { hook_type: 'notification', visual: e.target.checked });
     });
 
-    document.getElementById('stopEnabled').addEventListener('change', (e) => {
+    document.getElementById('stopVisual').addEventListener('change', (e) => {
         config.global_settings.event_enabled.stop = e.target.checked;
         markChanged();
-        trackEvent('hook_toggled', { hook_type: 'stop', enabled: e.target.checked });
+        trackEvent('hook_toggled', { hook_type: 'stop', visual: e.target.checked });
     });
 
-    document.getElementById('preToolUseEnabled').addEventListener('change', (e) => {
+    document.getElementById('preToolUseVisual').addEventListener('change', (e) => {
         config.global_settings.event_enabled.pre_tool_use = e.target.checked;
         markChanged();
-        trackEvent('hook_toggled', { hook_type: 'pre_tool_use', enabled: e.target.checked });
+        trackEvent('hook_toggled', { hook_type: 'pre_tool_use', visual: e.target.checked });
     });
 
-    document.getElementById('postToolUseEnabled').addEventListener('change', (e) => {
+    document.getElementById('postToolUseVisual').addEventListener('change', (e) => {
         config.global_settings.event_enabled.post_tool_use = e.target.checked;
         markChanged();
-        trackEvent('hook_toggled', { hook_type: 'post_tool_use', enabled: e.target.checked });
+        trackEvent('hook_toggled', { hook_type: 'post_tool_use', visual: e.target.checked });
     });
 
-    document.getElementById('subagentStopEnabled').addEventListener('change', (e) => {
+    document.getElementById('subagentStopVisual').addEventListener('change', (e) => {
         config.global_settings.event_enabled.subagent_stop = e.target.checked;
         markChanged();
-        trackEvent('hook_toggled', { hook_type: 'subagent_stop', enabled: e.target.checked });
+        trackEvent('hook_toggled', { hook_type: 'subagent_stop', visual: e.target.checked });
+    });
+
+    // Audio notification toggles
+    document.getElementById('notificationAudio').addEventListener('change', (e) => {
+        config.global_settings.voice_enabled.notification = e.target.checked;
+        markChanged();
+        trackEvent('hook_toggled', { hook_type: 'notification', audio: e.target.checked });
+    });
+
+    document.getElementById('stopAudio').addEventListener('change', (e) => {
+        config.global_settings.voice_enabled.stop = e.target.checked;
+        markChanged();
+        trackEvent('hook_toggled', { hook_type: 'stop', audio: e.target.checked });
+    });
+
+    document.getElementById('preToolUseAudio').addEventListener('change', (e) => {
+        config.global_settings.voice_enabled.pre_tool_use = e.target.checked;
+        markChanged();
+        trackEvent('hook_toggled', { hook_type: 'pre_tool_use', audio: e.target.checked });
+    });
+
+    document.getElementById('postToolUseAudio').addEventListener('change', (e) => {
+        config.global_settings.voice_enabled.post_tool_use = e.target.checked;
+        markChanged();
+        trackEvent('hook_toggled', { hook_type: 'post_tool_use', audio: e.target.checked });
+    });
+
+    document.getElementById('subagentStopAudio').addEventListener('change', (e) => {
+        config.global_settings.voice_enabled.subagent_stop = e.target.checked;
+        markChanged();
+        trackEvent('hook_toggled', { hook_type: 'subagent_stop', audio: e.target.checked });
     });
 
     // Respect Do Not Disturb toggle
@@ -471,6 +504,73 @@ function setupEventListeners() {
         }
     });
 
+    // Uninstall button
+    const uninstallBtn = document.getElementById('uninstallBtn');
+    if (uninstallBtn) {
+        uninstallBtn.addEventListener('click', async () => {
+            try {
+                // Load manifest for confirmation dialog
+                const manifest = await invoke('get_installation_info');
+
+                const confirmMessage = `Are you sure you want to uninstall audio notifications?\n\nThis will:\n- Remove ${manifest.changes.hooks_added.length} hooks from Claude Code\n- Delete ${manifest.changes.files_created.length} files\n- Preserve your audio-notifier.yaml config\n${manifest.changes.existing_hooks_preserved.length > 0 ? `- Keep your existing hooks: ${manifest.changes.existing_hooks_preserved.join(', ')}` : ''}\n\nA backup will be created before uninstalling.`;
+
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+
+                uninstallBtn.disabled = true;
+                uninstallBtn.textContent = 'Uninstalling...';
+
+                const result = await invoke('uninstall_hooks');
+                showToast('Uninstallation complete!', 'success');
+
+                // Show detailed result in a longer toast
+                setTimeout(() => {
+                    alert(result);
+                }, 500);
+
+                // Reload installation info (will show "not available" now)
+                await loadInstallationInfo();
+
+                trackEvent('uninstall_complete');
+            } catch (error) {
+                console.error('Uninstall failed:', error);
+                showToast('Uninstall failed: ' + error, 'error');
+                trackError(error, { context: 'uninstall' });
+                uninstallBtn.disabled = false;
+                uninstallBtn.textContent = 'Uninstall Audio Notifications';
+            }
+        });
+    }
+
+    // Export log button
+    const exportLogBtn = document.getElementById('exportLogBtn');
+    if (exportLogBtn) {
+        exportLogBtn.addEventListener('click', async () => {
+            try {
+                const logJson = await invoke('export_installation_log');
+
+                // Use Tauri's save dialog
+                const filePath = await saveDialog({
+                    filters: [{ name: 'JSON', extensions: ['json'] }],
+                    defaultPath: 'audio-notifier-installation.json'
+                });
+
+                if (filePath) {
+                    await writeTextFile(filePath, logJson);
+                    showToast('Installation log exported', 'success');
+                    trackEvent('export_installation_log');
+                } else {
+                    // User cancelled the dialog
+                    trackEvent('export_cancelled');
+                }
+            } catch (error) {
+                console.error('Export failed:', error);
+                showToast('Export failed: ' + error, 'error');
+            }
+        });
+    }
+
     // Note: Installation now happens automatically on first launch
     // No manual install button needed
 
@@ -562,19 +662,34 @@ function renderGlobalSettings() {
             : config.global_settings.event_sounds.subagent_stop;
     }
 
-    // Set event enabled toggles
-    const notificationEnabled = document.getElementById('notificationEnabled');
-    const stopEnabled = document.getElementById('stopEnabled');
-    const preToolUseEnabled = document.getElementById('preToolUseEnabled');
-    const postToolUseEnabled = document.getElementById('postToolUseEnabled');
-    const subagentStopEnabled = document.getElementById('subagentStopEnabled');
+    // Set visual notification toggles
+    const notificationVisual = document.getElementById('notificationVisual');
+    const stopVisual = document.getElementById('stopVisual');
+    const preToolUseVisual = document.getElementById('preToolUseVisual');
+    const postToolUseVisual = document.getElementById('postToolUseVisual');
+    const subagentStopVisual = document.getElementById('subagentStopVisual');
 
     if (config.global_settings.event_enabled) {
-        if (notificationEnabled) notificationEnabled.checked = config.global_settings.event_enabled.notification;
-        if (stopEnabled) stopEnabled.checked = config.global_settings.event_enabled.stop;
-        if (preToolUseEnabled) preToolUseEnabled.checked = config.global_settings.event_enabled.pre_tool_use;
-        if (postToolUseEnabled) postToolUseEnabled.checked = config.global_settings.event_enabled.post_tool_use;
-        if (subagentStopEnabled) subagentStopEnabled.checked = config.global_settings.event_enabled.subagent_stop;
+        if (notificationVisual) notificationVisual.checked = config.global_settings.event_enabled.notification;
+        if (stopVisual) stopVisual.checked = config.global_settings.event_enabled.stop;
+        if (preToolUseVisual) preToolUseVisual.checked = config.global_settings.event_enabled.pre_tool_use;
+        if (postToolUseVisual) postToolUseVisual.checked = config.global_settings.event_enabled.post_tool_use;
+        if (subagentStopVisual) subagentStopVisual.checked = config.global_settings.event_enabled.subagent_stop;
+    }
+
+    // Set audio notification toggles
+    const notificationAudio = document.getElementById('notificationAudio');
+    const stopAudio = document.getElementById('stopAudio');
+    const preToolUseAudio = document.getElementById('preToolUseAudio');
+    const postToolUseAudio = document.getElementById('postToolUseAudio');
+    const subagentStopAudio = document.getElementById('subagentStopAudio');
+
+    if (config.global_settings.voice_enabled) {
+        if (notificationAudio) notificationAudio.checked = config.global_settings.voice_enabled.notification;
+        if (stopAudio) stopAudio.checked = config.global_settings.voice_enabled.stop;
+        if (preToolUseAudio) preToolUseAudio.checked = config.global_settings.voice_enabled.pre_tool_use;
+        if (postToolUseAudio) postToolUseAudio.checked = config.global_settings.voice_enabled.post_tool_use;
+        if (subagentStopAudio) subagentStopAudio.checked = config.global_settings.voice_enabled.subagent_stop;
     }
 
     // Set respect_do_not_disturb toggle
@@ -890,6 +1005,41 @@ function showToast(message, type = 'success', action = null) {
             toast.classList.remove('visible');
             setTimeout(() => toast.remove(), 300);
         }, 5000); // Increased from 3s to 5s per UX guidelines
+    }
+}
+
+// ===== Installation Info and Uninstall =====
+
+async function loadInstallationInfo() {
+    const infoDiv = document.getElementById('installationInfo');
+    if (!infoDiv) return;
+
+    try {
+        const manifest = await invoke('get_installation_info');
+
+        const installedDate = new Date(manifest.installed_at).toLocaleString();
+        const filesCount = manifest.changes.files_created.length;
+        const hooksCount = manifest.changes.hooks_added.length;
+
+        let html = `
+            <div style="font-size: 14px; line-height: 1.8;">
+                <p><strong>Installed:</strong> ${installedDate}</p>
+                <p><strong>App Version:</strong> ${manifest.app_version}</p>
+                <p><strong>Files Created:</strong> ${filesCount}</p>
+                <p><strong>Hooks Added:</strong> ${hooksCount} (${manifest.changes.hooks_added.join(', ')})</p>
+        `;
+
+        if (manifest.changes.existing_hooks_preserved.length > 0) {
+            html += `<p><strong>Existing Hooks Preserved:</strong> ${manifest.changes.existing_hooks_preserved.join(', ')}</p>`;
+        }
+
+        html += `<p><strong>Backup Location:</strong><br><code style="background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 12px;">${manifest.backup_path}</code></p>`;
+        html += `</div>`;
+
+        infoDiv.innerHTML = html;
+    } catch (error) {
+        console.error('Failed to load installation info:', error);
+        infoDiv.innerHTML = `<p style="color: #666;">Installation information not available. This may be an older installation.</p>`;
     }
 }
 

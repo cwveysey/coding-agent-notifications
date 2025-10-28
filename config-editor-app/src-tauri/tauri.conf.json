@@ -1,5 +1,5 @@
 {
-  "productName": "Coding agent audio notifications",
+  "productName": "Coding agent notifications",
   "version": "1.0.0",
   "identifier": "com.cwveysey.audio-notifier-config",
   "build": {
@@ -30,7 +30,7 @@
   "app": {
     "windows": [
       {
-        "title": "Coding agent audio notifications",
+        "title": "Coding agent notifications",
         "width": 900,
         "height": 950,
         "resizable": true,
@@ -50,7 +50,9 @@
           "windows": ["main"],
           "permissions": [
             "dialog:allow-open",
-            "shell:allow-open"
+            "dialog:allow-save",
+            "shell:allow-open",
+            "fs:allow-write-text-file"
           ]
         }
       ]

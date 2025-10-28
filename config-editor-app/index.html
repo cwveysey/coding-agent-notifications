@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coding Agent Audio Notifications</title>
+    <title>Coding Agent Notifications</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="app-container">
         <!-- Header -->
         <header class="header">
-            <h1>Coding agent audio notifications</h1>
+            <h1>Coding agent notifications</h1>
             <button class="btn-save" id="saveBtn" disabled style="display: none;" title="Save your settings. Changes take effect immediately for new Claude sessions.">Save</button>
         </header>
 
@@ -20,6 +20,7 @@
                 <div class="nav-item active" data-view="overview">Overview</div>
                 <div class="nav-item" data-view="claude-code">Claude Code</div>
                 <div class="nav-item" data-view="custom-sounds">Audio library</div>
+                <div class="nav-item" data-view="settings">Settings</div>
                 <div class="nav-item" data-view="faq">FAQ</div>
                 <div class="nav-item" data-view="support">Support</div>
             </nav>
@@ -109,7 +110,8 @@
                             <div class="table-header-controls">
                                 <div class="table-header-cell sound-header">Sound</div>
                                 <div class="table-header-cell play-header"></div>
-                                <div class="table-header-cell enabled-header">Enabled</div>
+                                <div class="table-header-cell audio-header">Audio</div>
+                                <div class="table-header-cell visual-header">Visual</div>
                             </div>
                         </div>
 
@@ -121,7 +123,8 @@
                             <div class="sound-control">
                                 <select id="notificationSound" class="sound-select"></select>
                                 <button class="btn-play" data-sound="notification" title="Preview this sound">▶</button>
-                                <input type="checkbox" id="notificationEnabled" class="toggle" checked>
+                                <input type="checkbox" id="notificationAudio" class="toggle" checked title="Play audio notification">
+                                <input type="checkbox" id="notificationVisual" class="toggle" checked title="Show visual notification">
                             </div>
                         </div>
 
@@ -133,7 +136,8 @@
                             <div class="sound-control">
                                 <select id="stopSound" class="sound-select"></select>
                                 <button class="btn-play" data-sound="stop" title="Preview this sound">▶</button>
-                                <input type="checkbox" id="stopEnabled" class="toggle" checked>
+                                <input type="checkbox" id="stopAudio" class="toggle" checked title="Play audio notification">
+                                <input type="checkbox" id="stopVisual" class="toggle" checked title="Show visual notification">
                             </div>
                         </div>
 
@@ -145,7 +149,8 @@
                             <div class="sound-control">
                                 <select id="preToolUseSound" class="sound-select"></select>
                                 <button class="btn-play" data-sound="preToolUse" title="Preview this sound">▶</button>
-                                <input type="checkbox" id="preToolUseEnabled" class="toggle" checked>
+                                <input type="checkbox" id="preToolUseAudio" class="toggle" checked title="Play audio notification">
+                                <input type="checkbox" id="preToolUseVisual" class="toggle" checked title="Show visual notification">
                             </div>
                         </div>
 
@@ -157,7 +162,8 @@
                             <div class="sound-control">
                                 <select id="postToolUseSound" class="sound-select"></select>
                                 <button class="btn-play" data-sound="postToolUse" title="Preview this sound">▶</button>
-                                <input type="checkbox" id="postToolUseEnabled" class="toggle" checked>
+                                <input type="checkbox" id="postToolUseAudio" class="toggle" checked title="Play audio notification">
+                                <input type="checkbox" id="postToolUseVisual" class="toggle" checked title="Show visual notification">
                             </div>
                         </div>
 
@@ -169,7 +175,8 @@
                             <div class="sound-control">
                                 <select id="subagentStopSound" class="sound-select"></select>
                                 <button class="btn-play" data-sound="subagentStop" title="Preview this sound">▶</button>
-                                <input type="checkbox" id="subagentStopEnabled" class="toggle" checked>
+                                <input type="checkbox" id="subagentStopAudio" class="toggle" checked title="Play audio notification">
+                                <input type="checkbox" id="subagentStopVisual" class="toggle" checked title="Show visual notification">
                             </div>
                         </div>
                     </div>
@@ -227,6 +234,27 @@
                             <!-- Custom sound items will be inserted here -->
                         </div>
                         <button class="btn-add" id="uploadSoundBtn">+ Upload audio</button>
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div class="view" data-view="settings" style="display: none;">
+                    <div class="getting-started">
+                        <h2>Settings</h2>
+
+                        <div class="card">
+                            <h3>Uninstall</h3>
+                            <p>Remove audio notification hooks from Claude Code while preserving other customizations.</p>
+                            <button id="uninstallBtn" class="btn">Uninstall Audio Notifications</button>
+                        </div>
+
+                        <div class="card" style="margin-top: 24px;">
+                            <h3>Installation Details</h3>
+                            <div id="installationInfo" style="margin-bottom: 16px;">
+                                <p>Loading installation information...</p>
+                            </div>
+                            <button id="exportLogBtn" class="btn-secondary">Export Installation Log</button>
+                        </div>
                     </div>
                 </div>
 
@@ -383,6 +411,51 @@
 
                                 <p class="faq-answer" style="margin-top: 12px;">
                                     <strong>No background process</strong><br>Unlike many notification solutions, our tool does not require a background process to remain running. Once installed and configured, the notification scripts are executed directly by Claude Code's hooks system when events occur. You can close the GUI application immediately after installation.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details class="collapsible-section faq-item">
+                            <summary class="collapsible-header">
+                                <h3 class="faq-question">How do I uninstall this application?</h3>
+                            </summary>
+                            <div class="collapsible-content">
+                                <p class="faq-answer">
+                                    <strong>Option 1: Use the uninstall button (recommended)</strong>
+                                </p>
+                                <ol class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
+                                    <li>Open the app</li>
+                                    <li>Go to Settings</li>
+                                    <li>Click "Uninstall audio notifications"</li>
+                                    <li>Confirm</li>
+                                </ol>
+                                <p class="faq-answer" style="margin-top: 8px;">
+                                    This removes our hooks and scripts while preserving any other Claude Code customizations you've made.
+                                </p>
+
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Option 2: Manual uninstall</strong><br>
+                                    If you can't open the app, run:
+                                </p>
+                                <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin-top: 8px;"><code>bash ~/.claude/scripts/audio-notifier-uninstall.sh</code></pre>
+
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Option 3: Full restore from backup</strong><br>
+                                    To restore Claude Code to its exact state before installation:
+                                </p>
+                                <ol class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
+                                    <li>Locate your backup at <code>~/.claude/backups/settings-pre-audio-notifier-[timestamp].json</code></li>
+                                    <li>Replace <code>~/.claude/settings.json</code> with the backup</li>
+                                    <li>Delete <code>~/.claude/scripts/smart-notify.sh</code></li>
+                                    <li>Delete <code>~/.claude/audio-notifier.yaml</code></li>
+                                </ol>
+                                <p class="faq-answer" style="margin-top: 8px;">
+                                    Warning: This removes ALL changes made since installation, including any hooks you added manually.
+                                </p>
+
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Option 4: Selective removal with AI assistance</strong><br>
+                                    Download your installation manifest from Settings → "Export installation log" and share it with an AI coding agent with the prompt: "Remove the hooks and files listed in this manifest from my Claude Code configuration, but preserve any other customizations I've made."
                                 </p>
                             </div>
                         </details>
