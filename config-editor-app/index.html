@@ -21,7 +21,6 @@
                 <div class="nav-item" data-view="claude-code">Claude Code</div>
                 <div class="nav-item" data-view="recent-activity">Activity log</div>
                 <div class="nav-item" data-view="custom-sounds">Audio library</div>
-                <div class="nav-item" data-view="settings">Settings</div>
                 <div class="nav-item" data-view="faq">FAQ</div>
                 <div class="nav-item" data-view="support">Support</div>
             </nav>
@@ -273,27 +272,6 @@
                     </div>
                 </div>
 
-                <!-- Settings View -->
-                <div class="view" data-view="settings" style="display: none;">
-                    <div class="getting-started">
-                        <h2>Settings</h2>
-
-                        <div class="card">
-                            <h3>Uninstall</h3>
-                            <p>Remove notification hooks from Claude Code while preserving other customizations.</p>
-                            <button id="uninstallBtn" class="btn">Uninstall Notifications</button>
-                        </div>
-
-                        <div class="card" style="margin-top: 24px;">
-                            <h3>Installation Details</h3>
-                            <div id="installationInfo" style="margin-bottom: 16px;">
-                                <p>Loading installation information...</p>
-                            </div>
-                            <button id="exportLogBtn" class="btn-secondary">Export Installation Log</button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- FAQ View -->
                 <div class="view" data-view="faq" style="display: none;">
                     <div class="getting-started">
@@ -459,17 +437,24 @@
                                 <p class="faq-answer">
                                     <strong>Option 1: Use the uninstall button (recommended)</strong>
                                 </p>
-                                <ol class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li>Open the app</li>
-                                    <li>Go to Settings</li>
-                                    <li>Click "Uninstall notifications"</li>
-                                    <li>Confirm</li>
-                                </ol>
-                                <p class="faq-answer" style="margin-top: 8px;">
+                                <div class="card" style="margin-top: 12px;">
+                                    <h3>Uninstall</h3>
+                                    <p>Remove notification hooks from Claude Code while preserving other customizations.</p>
+                                    <button id="uninstallBtn" class="btn">Uninstall Notifications</button>
+                                </div>
+                                <p class="faq-answer" style="margin-top: 12px;">
                                     This removes our hooks and scripts while preserving any other Claude Code customizations you've made.
                                 </p>
 
-                                <p class="faq-answer" style="margin-top: 12px;">
+                                <div class="card" style="margin-top: 24px;">
+                                    <h3>Installation Details</h3>
+                                    <div id="installationInfo" style="margin-bottom: 16px;">
+                                        <p>Loading installation information...</p>
+                                    </div>
+                                    <button id="exportLogBtn" class="btn-secondary">Export Installation Log</button>
+                                </div>
+
+                                <p class="faq-answer" style="margin-top: 24px;">
                                     <strong>Option 2: Manual uninstall</strong><br>
                                     If you can't open the app, run:
                                 </p>
@@ -491,7 +476,7 @@
 
                                 <p class="faq-answer" style="margin-top: 12px;">
                                     <strong>Option 4: Selective removal with AI assistance</strong><br>
-                                    Download your installation manifest from Settings → "Export installation log" and share it with an AI coding agent with the prompt: "Remove the hooks and files listed in this manifest from my Claude Code configuration, but preserve any other customizations I've made."
+                                    Click "Export Installation Log" above and share the downloaded file with an AI coding agent with the prompt: "Remove the hooks and files listed in this manifest from my Claude Code configuration, but preserve any other customizations I've made."
                                 </p>
                             </div>
                         </details>
