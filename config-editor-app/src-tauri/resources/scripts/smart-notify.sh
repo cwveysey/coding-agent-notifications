@@ -75,6 +75,7 @@ log_activity_event() {
     local event_type="$1"
     local audio_played="$2"
     local visual_shown="$3"
+    local message="$4"
 
     local activity_log="$HOME/.claude/activity-log.json"
     local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -84,13 +85,19 @@ log_activity_event() {
         echo "[]" > "$activity_log"
     fi
 
+    # Truncate message to first 200 characters and escape for JSON
+    local truncated_message="${message:0:200}"
+    # Escape quotes and newlines for JSON
+    truncated_message=$(echo "$truncated_message" | sed 's/"/\\"/g' | tr '\n' ' ')
+
     # Create new event entry
     local new_event=$(cat <<EOF
 {
   "timestamp": "$timestamp",
   "event": "$event_type",
   "audio": $audio_played,
-  "visual": $visual_shown
+  "visual": $visual_shown,
+  "message": "$truncated_message"
 }
 EOF
 )
@@ -259,7 +266,7 @@ send_notification() {
     echo "$(date '+%F %T') [$reason] ${message:0:100}" >> "$log_file"
 
     # Log activity event to JSON
-    log_activity_event "$event_type" "$audio_played" "$visual_shown"
+    log_activity_event "$event_type" "$audio_played" "$visual_shown" "$message"
 }
 
 # Anti-spam check

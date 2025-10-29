@@ -1065,7 +1065,7 @@ async function loadActivityLog() {
         if (events.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="empty-state-cell">
+                    <td colspan="3" class="empty-state-cell">
                         <div class="empty-state">
                             <p class="hint">No recent activity to display.</p>
                             <p class="hint" style="margin-top: 8px;">Events will appear here as Claude Code triggers notifications.</p>
@@ -1096,16 +1096,14 @@ async function loadActivityLog() {
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                 .join(' ');
 
-            // Checkmark or dash for audio/visual
-            const audioIcon = event.audio ? '✓' : '—';
-            const visualIcon = event.visual ? '✓' : '—';
+            // Display message or placeholder
+            const message = event.message || '—';
 
             return `
                 <tr>
                     <td>${timeStr}</td>
                     <td>${eventName}</td>
-                    <td>${audioIcon}</td>
-                    <td>${visualIcon}</td>
+                    <td>${message}</td>
                 </tr>
             `;
         }).join('');
@@ -1113,7 +1111,7 @@ async function loadActivityLog() {
         console.error('Failed to load activity log:', error);
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" class="empty-state-cell">
+                <td colspan="3" class="empty-state-cell">
                     <div class="empty-state">
                         <p class="hint" style="color: #ff3b30;">Failed to load activity log.</p>
                     </div>
