@@ -50,7 +50,7 @@ async function checkInstallation() {
                 }
 
                 // Show success message
-                showToast('Installation complete - you will now receive audio notifications for designated events.', 'success');
+                showToast('Installation complete - you will now receive alerts for designated events.', 'success');
 
                 // Reload config to pick up new default config
                 await loadConfig();

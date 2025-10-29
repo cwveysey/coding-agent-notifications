@@ -230,8 +230,18 @@ send_notification() {
         debug_log "Skipping audio: SOUNDS_ENABLED=$SOUNDS_ENABLED, sound file exists=$([ -f "$sound" ] && echo yes || echo no)"
     fi
 
-    # Visual notification (if terminal-notifier available)
+    # Determine which terminal-notifier to use
+    local terminal_notifier_cmd=""
     if command -v terminal-notifier >/dev/null 2>&1; then
+        # Use system-installed version (homebrew, etc)
+        terminal_notifier_cmd="terminal-notifier"
+    elif [[ -x "$HOME/.claude/terminal-notifier.app/Contents/MacOS/terminal-notifier" ]]; then
+        # Use bundled version
+        terminal_notifier_cmd="$HOME/.claude/terminal-notifier.app/Contents/MacOS/terminal-notifier"
+    fi
+
+    # Visual notification (if terminal-notifier available)
+    if [[ -n "$terminal_notifier_cmd" ]]; then
         # Determine title and message based on custom message availability
         local display_title
         local display_message
@@ -263,7 +273,7 @@ send_notification() {
         # ALWAYS log the terminal-notifier command
         echo "[$(date '+%F %T')] TERMINAL-NOTIFIER: title='$display_title', message='${display_message:0:50}'" >> "$HOME/.claude/hook-execution.log"
 
-        terminal-notifier \
+        "$terminal_notifier_cmd" \
             -title "$display_title" \
             -message "$display_message" \
             >/dev/null 2>&1 &
@@ -398,9 +408,8 @@ handle_stop_hook() {
         return 0
     fi
 
-    # Send notification with message preview
-    local preview="${last_message:0:100}"
-    send_notification "$preview" "Stop notification from Claude" "stop-hook"
+    # Send notification with full message (truncation handled by send_notification)
+    send_notification "$last_message" "Stop notification from Claude" "stop-hook"
 
     debug_log "Stop hook notification sent"
 }

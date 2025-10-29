@@ -574,6 +574,33 @@ fn create_installation_manifest(
     Ok(())
 }
 
+// Helper function to recursively copy directories
+fn copy_dir_recursive(src: &PathBuf, dest: &PathBuf) -> std::io::Result<()> {
+    fs::create_dir_all(dest)?;
+
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let src_path = entry.path();
+        let dest_path = dest.join(entry.file_name());
+
+        if src_path.is_dir() {
+            copy_dir_recursive(&src_path, &dest_path)?;
+        } else {
+            fs::copy(&src_path, &dest_path)?;
+
+            // Preserve executable permissions on macOS/Linux
+            #[cfg(unix)]
+            {
+                
+                let perms = fs::metadata(&src_path)?.permissions();
+                fs::set_permissions(&dest_path, perms)?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
 #[tauri::command]
 async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
     let home = std::env::var("HOME").map_err(|_| "Could not get HOME directory")?;
@@ -639,6 +666,22 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
                     .map_err(|e| format!("Failed to copy voice {:?}: {}", filename, e))?;
             }
         }
+    }
+
+    // Copy terminal-notifier.app to ~/.claude/terminal-notifier.app
+    let bundled_terminal_notifier = resource_dir.join("resources").join("terminal-notifier").join("terminal-notifier.app");
+    if bundled_terminal_notifier.exists() {
+        let dest_terminal_notifier = claude_dir.join("terminal-notifier.app");
+
+        // Remove existing terminal-notifier if present
+        if dest_terminal_notifier.exists() {
+            fs::remove_dir_all(&dest_terminal_notifier)
+                .map_err(|e| format!("Failed to remove existing terminal-notifier: {}", e))?;
+        }
+
+        // Copy the entire .app bundle
+        copy_dir_recursive(&bundled_terminal_notifier, &dest_terminal_notifier)
+            .map_err(|e| format!("Failed to copy terminal-notifier: {}", e))?;
     }
 
     // Update settings.json with hooks (with safety features)
@@ -731,6 +774,12 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
                 }
             }
         }
+    }
+
+    // Track terminal-notifier if it was installed
+    let terminal_notifier_path = claude_dir.join("terminal-notifier.app");
+    if terminal_notifier_path.exists() {
+        files_created.push(format!("{}/.claude/terminal-notifier.app", home));
     }
 
     // Identify which hooks we added
@@ -1147,6 +1196,13 @@ async fn uninstall_hooks() -> Result<String, String> {
             .map_err(|e| format!("Failed to remove global voices: {}", e))?;
     }
 
+    // Remove terminal-notifier.app
+    let terminal_notifier_dir = claude_dir.join("terminal-notifier.app");
+    if terminal_notifier_dir.exists() {
+        fs::remove_dir_all(&terminal_notifier_dir)
+            .map_err(|e| format!("Failed to remove terminal-notifier: {}", e))?;
+    }
+
     // Update manifest to mark as uninstalled
     let manifest_path = get_manifest_path();
     if manifest_path.exists() {
@@ -1257,6 +1313,13 @@ async fn dev_reset_install() -> Result<(), String> {
     if global_voices_dir.exists() {
         fs::remove_dir_all(&global_voices_dir)
             .map_err(|e| format!("Failed to remove global voices: {}", e))?;
+    }
+
+    // Delete terminal-notifier.app
+    let terminal_notifier_dir = claude_dir.join("terminal-notifier.app");
+    if terminal_notifier_dir.exists() {
+        fs::remove_dir_all(&terminal_notifier_dir)
+            .map_err(|e| format!("Failed to remove terminal-notifier: {}", e))?;
     }
 
     // Remove hooks from settings.json

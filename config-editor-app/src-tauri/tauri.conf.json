@@ -18,7 +18,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": ["resources/voices/*", "resources/scripts/*"],
+    "resources": ["resources/voices/*", "resources/scripts/*", "resources/terminal-notifier/**/*"],
     "copyright": "",
     "category": "DeveloperTool",
     "shortDescription": "",
