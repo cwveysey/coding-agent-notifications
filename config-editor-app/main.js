@@ -1078,9 +1078,17 @@ async function loadActivityLog() {
 
         // Format events into table rows
         tbody.innerHTML = events.map(event => {
-            // Format timestamp to local time
+            // Format timestamp to local time with timezone
             const date = new Date(event.timestamp);
-            const timeStr = date.toLocaleString();
+            const timeStr = date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZoneName: 'short'
+            });
 
             // Format event name (capitalize first letter, replace underscores)
             const eventName = event.event
