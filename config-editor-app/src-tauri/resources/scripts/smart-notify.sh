@@ -95,9 +95,9 @@ log_activity_event() {
 EOF
 )
 
-    # Append to log (keep last 100 events)
+    # Append to log (keep last 50 events)
     local temp_log=$(mktemp)
-    jq --argjson event "$new_event" '. += [$event] | .[-100:]' "$activity_log" > "$temp_log" 2>/dev/null && mv "$temp_log" "$activity_log" || rm -f "$temp_log"
+    jq --argjson event "$new_event" '. += [$event] | .[-50:]' "$activity_log" > "$temp_log" 2>/dev/null && mv "$temp_log" "$activity_log" || rm -f "$temp_log"
 }
 
 # Send notification with project-specific sound
