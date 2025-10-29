@@ -87,8 +87,8 @@ log_activity_event() {
 
     # Truncate message to first 200 characters and escape for JSON
     local truncated_message="${message:0:200}"
-    # Escape quotes and newlines for JSON
-    truncated_message=$(echo "$truncated_message" | sed 's/"/\\"/g' | tr '\n' ' ')
+    # Escape quotes and newlines for JSON (use printf for safer string handling)
+    truncated_message=$(printf '%s' "$truncated_message" | sed 's/"/\\"/g' | tr '\n' ' ')
 
     # Create new event entry
     local new_event=$(cat <<EOF
@@ -211,7 +211,7 @@ send_notification() {
         debug_log "About to play sound: $sound"
         echo "[$(date '+%F %T')] PLAYING: $sound" >> "$HOME/.claude/hook-execution.log"
         # Use osascript for better audio device access from hooks
-        osascript -e "do shell script \"afplay '$sound'\"" >/dev/null 2>&1 &
+        osascript -e "do shell script \"afplay $(printf '%q' "$sound")\"" >/dev/null 2>&1 &
         local pid=$!
         debug_log "Audio notification sent (osascript PID: $pid)"
         audio_played="true"
@@ -315,6 +315,12 @@ handle_notification_hook() {
     if [[ "$message" =~ "needs your permission" ]]; then
         local transcript_path=$(echo "$input" | jq -r '.transcript_path' 2>/dev/null | sed "s|^~|$HOME|")
 
+        # Validate path to prevent traversal attacks
+        if [[ "$transcript_path" =~ \.\. ]]; then
+            debug_log "Blocked path traversal attempt: $transcript_path"
+            transcript_path=""
+        fi
+
         if [[ -f "$transcript_path" ]]; then
             # Get last tool use description from transcript
             local tool_description=$(tail -n 200 "$transcript_path" 2>/dev/null | \
@@ -351,6 +357,12 @@ handle_stop_hook() {
 
     # Get transcript path
     local transcript_path=$(echo "$input" | jq -r '.transcript_path' 2>/dev/null | sed "s|^~|$HOME|")
+
+    # Validate path to prevent traversal attacks
+    if [[ "$transcript_path" =~ \.\. ]]; then
+        debug_log "Blocked path traversal attempt: $transcript_path"
+        return 0
+    fi
 
     if [[ ! -f "$transcript_path" ]]; then
         debug_log "Transcript not found: $transcript_path"
