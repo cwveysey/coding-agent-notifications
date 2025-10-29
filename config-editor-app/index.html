@@ -186,9 +186,10 @@
                     <div class="card">
                         <div class="setting-row">
                             <div class="setting-label">
-                                <label for="respectDND">Silence this application "when you have Focus turned on"</label>
-                                    <p class="hint"> If this toggle is in the on position, then this application's audio will not play while any "Focus" is "turned on."
-                                    If this toggle is in the off position, then this application's audio will play regardless of whether or not a Focus is turned on.
+                                <label for="respectDND">Silence audio when you have Focus turned on</label>
+                                    <p class="hint"> If this toggle is in the on position, then audio notifications will not play while any "Focus" is turned on. Visual notifications will still be sent (though they may be suppressed by macOS unless you've allowed terminal-notifier in your Focus settings).
+                                    <br><br>
+                                    If this toggle is in the off position, then audio notifications will play regardless of whether or not a Focus is turned on.
                                     <br><br>
                                 Do Not Disturb, Work, and Sleep are all examples of <a href="https://support.apple.com/guide/mac-help/change-focus-settings-mchlff5da36d/mac" target="_blank" class="inline-link">what Apple refers to as "Focuses."</a>
                             </p>
@@ -319,7 +320,7 @@
                                     </li>
                                     <li><strong>Quick and easy customization via a GUI</strong><br>Customize notification preferences, toggle events on and off, and update Focus behavior through an intuitive and easy to use visual interface. No JSON or YAML files need to be manually modified, no scripts need to executed to make changes.</li>
                                     <li><strong>The app does not need to be running in order for the solution to work</strong><br>Install the app once and close it from there. No background process required.</li>
-                                    <li><strong>Native macOS integration</strong><br>Takes advantage of native macOS features, as a result our notifications display alongside your other notifications via the <a href="https://developer.apple.com/documentation/usernotifications" target="_blank" class="inline-link">Notification Center</a> and respect your Focus preferences.</li>
+                                    <li><strong>Native macOS integration</strong><br>Takes advantage of native macOS features. Visual notifications display alongside your other notifications via the <a href="https://developer.apple.com/documentation/usernotifications" target="_blank" class="inline-link">Notification Center</a>, and you can configure audio notifications to respect your Focus preferences.</li>
                                 </ul>
                                 </ul>
 
@@ -411,11 +412,11 @@
                                 </p>
 
                                 <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Visual notifications</strong><br>Visual notifications are delivered via <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>, which sends notifications to macOS Notification Center. These notifications appear alongside your other system notifications and persist in notification history.
+                                    <strong>Visual notifications</strong><br>Visual notifications are delivered via <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>, which sends notifications to macOS Notification Center. These notifications appear alongside your other system notifications and persist in notification history. By default, terminal-notifier notifications are silent unless you've enabled sounds for it in System Settings. When Focus mode is active, these visual notifications may be suppressed by macOS unless you've added terminal-notifier to your Focus mode's allowed apps list.
                                 </p>
 
                                 <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Focus mode detection</strong><br>When Focus mode control is enabled, the notification scripts check macOS's current Focus status using native macOS commands before playing audio. This allows audio to respect Do Not Disturb, Sleep, Work, and other Focus modes without requiring additional setup.
+                                    <strong>Focus mode detection</strong><br>When Focus mode control is enabled in settings, the notification scripts check macOS's current Focus status using native macOS commands before playing audio notifications. This allows audio to respect Do Not Disturb, Sleep, Work, and other Focus modes without requiring additional setup. Visual notifications are always sent regardless of this setting, though macOS may suppress them based on your Focus configuration.
                                 </p>
 
                                 <p class="faq-answer" style="margin-top: 12px;">
@@ -499,9 +500,33 @@
                                 <h3 class="faq-question">Do Apple "Focuses" (e.g. "Do Not Disturb," Work, Sleep) silence this app's notifications?</h3>
                             </summary>
                             <div class="collapsible-content">
-                            <p class="faq-answer"><strong>Visual notifications</strong><br>Always blocked by Do Not Disturb and Focus modes - this cannot be changed. Visual notifications use macOS Notification Center (via <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>), which is controlled by the operating system. When DND/Focus mode is active, macOS blocks all visual notifications automatically.</p>
-                            <p class="faq-answer" style="margin-top: 8px;"><strong>Audio notifications</strong><br>Configurable. By default, audio plays regardless of Focus mode to ensure you never miss important Claude Code events. Audio plays directly via <code>afplay</code>, which bypasses Notification Center, giving you control over whether it respects DND.</p>
+                            <p class="faq-answer"><strong>Visual notifications</strong><br>By default, visual notifications are suppressed by Focus modes. However, you can configure your Focus settings to allow notifications from <code>terminal-notifier</code> to break through. Visual notifications use macOS Notification Center (via <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>). When Focus mode is active, macOS suppresses these notifications unless you've specifically allowed terminal-notifier in your Focus settings. <a href="#" class="inline-link" onclick="event.preventDefault(); const faq = document.querySelector('.faq-item details[data-focus-allow]'); if (faq) { faq.open = true; faq.scrollIntoView({block: 'start'}); }">Learn how to allow visual notifications during Focus modes</a>.</p>
+                            <p class="faq-answer" style="margin-top: 8px;"><strong>Audio notifications</strong><br>Configurable. By default, audio plays regardless of Focus mode to ensure you never miss important Claude Code events. Audio plays directly via <code>afplay</code>, which bypasses Notification Center, giving you control over whether it respects Focus modes.</p>
                             <p class="faq-answer" style="margin-top: 8px;"><strong>How to silence audio during Focus modes</strong><br>Enable the "Silence this application 'when you have Focus turned on'" toggle in the <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click(); requestAnimationFrame(() => document.getElementById('focus-settings').scrollIntoView({block: 'start'}));">Focus settings section</a>. This works with all macOS Focus modes including Do Not Disturb, Sleep, Work, Personal, and custom Focus modes. Detection happens automatically using built-in macOS commands - no additional setup required.</p>
+                            </div>
+                        </details>
+
+                        <details class="collapsible-section faq-item" data-focus-allow>
+                            <summary class="collapsible-header">
+                                <h3 class="faq-question">How do I allow visual notifications during Focus modes?</h3>
+                            </summary>
+                            <div class="collapsible-content">
+                                <p class="faq-answer">
+                                    By default, macOS suppresses visual notifications from terminal-notifier when any Focus mode is active. You can configure your Focus settings to allow these notifications through:
+                                </p>
+                                <ol class="faq-answer" style="margin-left: 20px; margin-top: 12px;">
+                                    <li>Open <strong>System Settings</strong> → <strong>Focus</strong></li>
+                                    <li>Select the Focus mode you want to configure (e.g., "Do Not Disturb" or "Work")</li>
+                                    <li>Scroll to the <strong>Apps</strong> section</li>
+                                    <li>Click the <strong>+</strong> button</li>
+                                    <li>Search for and add <strong>terminal-notifier</strong></li>
+                                </ol>
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Note:</strong> terminal-notifier may not appear in the app list until you've received at least one notification from it. Try triggering a notification first, then return to Focus settings to add it.
+                                </p>
+                                <p class="faq-answer" style="margin-top: 12px;">
+                                    <strong>Use case:</strong> This is particularly useful if you're frequently on calls and need silent notifications. Disable audio notifications in the <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click();">Claude Code settings</a>, add terminal-notifier to your Focus allowed apps, and you'll receive silent visual banners without any audio interrupting your meetings.
+                                </p>
                             </div>
                         </details>
 
