@@ -1211,15 +1211,25 @@ ul.faq-answer li {
 }
 
 .activity-table th:first-child {
-    width: 200px;
+    width: 150px;
 }
 
 .activity-table th:nth-child(2) {
-    width: 120px;
+    width: 100px;
 }
 
 .activity-table th:nth-child(3) {
     width: auto;
+}
+
+.timestamp-date {
+    font-weight: 500;
+}
+
+.timestamp-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
 }
 
 .activity-table tbody tr {
