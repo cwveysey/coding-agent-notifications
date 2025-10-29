@@ -1211,17 +1211,15 @@ ul.faq-answer li {
 }
 
 .activity-table th:first-child {
-    width: 180px;
+    width: 200px;
 }
 
 .activity-table th:nth-child(2) {
-    width: auto;
+    width: 120px;
 }
 
-.activity-table th:nth-child(3),
-.activity-table th:nth-child(4) {
-    width: 80px;
-    text-align: center;
+.activity-table th:nth-child(3) {
+    width: auto;
 }
 
 .activity-table tbody tr {
@@ -1240,11 +1238,6 @@ ul.faq-answer li {
 .activity-table td {
     padding: 14px 16px;
     color: var(--text);
-}
-
-.activity-table td:nth-child(3),
-.activity-table td:nth-child(4) {
-    text-align: center;
 }
 
 .empty-state-cell {
