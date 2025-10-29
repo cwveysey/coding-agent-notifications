@@ -1080,10 +1080,12 @@ async function loadActivityLog() {
         tbody.innerHTML = events.map(event => {
             // Format timestamp to local time with timezone
             const date = new Date(event.timestamp);
-            const timeStr = date.toLocaleString('en-US', {
+            const dateStr = date.toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'numeric',
-                day: 'numeric',
+                day: 'numeric'
+            });
+            const timeStr = date.toLocaleTimeString('en-US', {
                 hour: 'numeric',
                 minute: '2-digit',
                 second: '2-digit',
@@ -1101,7 +1103,7 @@ async function loadActivityLog() {
 
             return `
                 <tr>
-                    <td>${timeStr}</td>
+                    <td><div class="timestamp-date">${dateStr}</div><div class="timestamp-time">${timeStr}</div></td>
                     <td>${eventName}</td>
                     <td>${message}</td>
                 </tr>
