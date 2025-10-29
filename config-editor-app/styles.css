@@ -1254,6 +1254,52 @@ ul.faq-answer li {
     padding: 48px 16px !important;
 }
 
+/* Expandable Activity Rows */
+.activity-row.expandable {
+    cursor: pointer;
+}
+
+.activity-row.expandable:hover {
+    background: var(--bg-secondary);
+}
+
+.message-cell {
+    position: relative;
+}
+
+.message-preview {
+    display: flex;
+    align-items: center;
+}
+
+.expand-indicator {
+    color: var(--primary);
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+.message-expanded {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary);
+}
+
+.message-project {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.message-full {
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
 /* Comparison Table */
 .comparison-table {
     width: 100%;

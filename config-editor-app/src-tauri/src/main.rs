@@ -1190,6 +1190,8 @@ struct ActivityEvent {
     audio: bool,
     visual: bool,
     message: Option<String>,
+    full_message: Option<String>,
+    project: Option<String>,
 }
 
 #[tauri::command]

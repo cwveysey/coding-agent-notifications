@@ -76,6 +76,7 @@ log_activity_event() {
     local audio_played="$2"
     local visual_shown="$3"
     local message="$4"
+    local project="${5:-}"
 
     local activity_log="$HOME/.claude/activity-log.json"
     local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -85,10 +86,17 @@ log_activity_event() {
         echo "[]" > "$activity_log"
     fi
 
-    # Truncate message to first 200 characters and escape for JSON
+    # Truncate message to first 200 characters for preview
     local truncated_message="${message:0:200}"
     # Escape quotes and newlines for JSON (use printf for safer string handling)
     truncated_message=$(printf '%s' "$truncated_message" | sed 's/"/\\"/g' | tr '\n' ' ')
+
+    # Store full message (up to 2000 chars) for expandable view
+    local full_message="${message:0:2000}"
+    full_message=$(printf '%s' "$full_message" | sed 's/"/\\"/g' | tr '\n' ' ')
+
+    # Escape project name for JSON
+    local escaped_project=$(printf '%s' "$project" | sed 's/"/\\"/g')
 
     # Create new event entry
     local new_event=$(cat <<EOF
@@ -97,7 +105,9 @@ log_activity_event() {
   "event": "$event_type",
   "audio": $audio_played,
   "visual": $visual_shown,
-  "message": "$truncated_message"
+  "message": "$truncated_message",
+  "full_message": "$full_message",
+  "project": "$escaped_project"
 }
 EOF
 )
@@ -266,7 +276,7 @@ send_notification() {
     echo "$(date '+%F %T') [$reason] ${message:0:100}" >> "$log_file"
 
     # Log activity event to JSON
-    log_activity_event "$event_type" "$audio_played" "$visual_shown" "$message"
+    log_activity_event "$event_type" "$audio_played" "$visual_shown" "$message" "${PROJECT_NAME:-}"
 }
 
 # Anti-spam check

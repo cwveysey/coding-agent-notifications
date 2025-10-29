@@ -1077,7 +1077,7 @@ async function loadActivityLog() {
         }
 
         // Format events into table rows
-        tbody.innerHTML = events.map(event => {
+        tbody.innerHTML = events.map((event, index) => {
             // Format timestamp to local time with timezone
             const date = new Date(event.timestamp);
             const dateStr = date.toLocaleDateString('en-US', {
@@ -1099,16 +1099,49 @@ async function loadActivityLog() {
                 .join(' ');
 
             // Display message or placeholder
-            const message = event.message || '—';
+            const truncatedMessage = event.message || '—';
+            const fullMessage = event.full_message || event.message || '—';
+            const project = event.project || '';
+
+            // Check if message is expandable (has more content)
+            const isExpandable = fullMessage.length > truncatedMessage.length;
+            const rowId = `activity-row-${index}`;
 
             return `
-                <tr>
+                <tr class="activity-row ${isExpandable ? 'expandable' : ''}" data-row-id="${rowId}">
                     <td><div class="timestamp-date">${dateStr}</div><div class="timestamp-time">${timeStr}</div></td>
                     <td>${eventName}</td>
-                    <td>${message}</td>
+                    <td class="message-cell">
+                        <div class="message-preview">${truncatedMessage}${isExpandable ? '<span class="expand-indicator">…</span>' : ''}</div>
+                        ${isExpandable ? `
+                            <div class="message-expanded" style="display: none;">
+                                ${project ? `<div class="message-project"><strong>Project:</strong> ${project}</div>` : ''}
+                                <div class="message-full">${fullMessage}</div>
+                            </div>
+                        ` : ''}
+                    </td>
                 </tr>
             `;
         }).join('');
+
+        // Add click handlers for expandable rows
+        document.querySelectorAll('.activity-row.expandable').forEach(row => {
+            row.addEventListener('click', () => {
+                const messageCell = row.querySelector('.message-cell');
+                const preview = messageCell.querySelector('.message-preview');
+                const expanded = messageCell.querySelector('.message-expanded');
+
+                if (expanded.style.display === 'none') {
+                    preview.style.display = 'none';
+                    expanded.style.display = 'block';
+                    row.classList.add('expanded');
+                } else {
+                    preview.style.display = 'block';
+                    expanded.style.display = 'none';
+                    row.classList.remove('expanded');
+                }
+            });
+        });
     } catch (error) {
         console.error('Failed to load activity log:', error);
         tbody.innerHTML = `
