@@ -293,6 +293,11 @@ function setupEventListeners() {
             if (targetView === 'recent-activity') {
                 loadActivityLog();
             }
+
+            // Load installation info when FAQ view is selected (for uninstall section)
+            if (targetView === 'faq') {
+                loadInstallationInfo();
+            }
         });
     });
 
