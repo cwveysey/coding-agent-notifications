@@ -1520,6 +1520,35 @@ fn create_tray(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>>
     Ok(())
 }
 
+#[tauri::command]
+async fn open_focus_settings() -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        // Use osascript to open Focus settings directly
+        // Combine commands in a single script to ensure proper sequencing
+        let script = r#"
+            tell application "System Settings"
+                activate
+                delay 0.5
+                reveal pane id "com.apple.Focus-Settings.extension"
+            end tell
+        "#;
+
+        Command::new("osascript")
+            .arg("-e")
+            .arg(script)
+            .spawn()
+            .map_err(|e| format!("Failed to open Focus settings: {}", e))?;
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        return Err("Focus settings are only available on macOS".to_string());
+    }
+
+    Ok(())
+}
+
 // ===== Main =====
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -1554,6 +1583,7 @@ fn main() {
             get_activity_log,
             export_diagnostics,
             dev_reset_install,
+            open_focus_settings,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

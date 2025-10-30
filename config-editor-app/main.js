@@ -754,6 +754,20 @@ function setupEventListeners() {
         });
     }
 
+    // Open Focus Settings link
+    const openFocusSettingsLink = document.getElementById('openFocusSettingsLink');
+    if (openFocusSettingsLink) {
+        openFocusSettingsLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await invoke('open_focus_settings');
+            } catch (error) {
+                console.error('Failed to open Focus settings:', error);
+                showToast('Failed to open Focus settings. Please open System Settings manually.', 'error');
+            }
+        });
+    }
+
     // Note: Installation now happens automatically on first launch
     // No manual install button needed
 }
