@@ -48,13 +48,15 @@
 
                     <!-- Uninstalled content (shown when uninstalled) -->
                     <div id="uninstalledContent" class="getting-started" style="display: none;">
-                        <h2>Required values were removed</h2>
+                        <h2>Required values are missing</h2>
                         <p class="getting-started-text">
-                            If you are reading this copy, that means that values required for this application's notifications are missing from <code>~/.claude/scripts/</code> and <code>~/.claude/settings.json</code>.
+                            If you are reading this copy, that means that values required for this application are missing from ~/.claude/scripts/ and ~/.claude/settings.json.
 
-                            <br><br>If you would like for these values to be restored then please click the button below.
+                            <br><br>If you would like for these values to be restored then please click the button below. 
                         </p>
-                        <button id="reinstallBannerBtn" class="btn-secondary" style="margin-top: 24px;">Restore notifications values</button>
+                        <button id="reinstallBannerBtn" class="btn-secondary" style="margin-top: 24px;">Restore required values</button>
+
+                        <br><br>If you would prefer to delete this application, you can do so by moving it to the "Trash" folder. For reference <a href="https://support.apple.com/en-us/102610" target="_blank" class="inline-link">here</a> is Apple's documentation on "How to delete or uninstall an app."
                     </div>
 
                     <!-- Privacy section (always shown) -->
@@ -351,14 +353,9 @@
                                     </p>
                                     <button id="installToggleBtn" class="btn-secondary" style="margin-top: 12px;">Remove values</button>
 
-                                    <div id="restartWarning" class="info-banner" style="margin-top: 16px; background: #fff3cd; border-color: #ffc107; display: none;">
-                                        <p style="margin: 0;"><strong>Note:</strong> You'll need to start a new Claude Code session for the changes to take effect. Your current session will continue showing hook errors until you restart.</p>
-                                        <p style="margin: 12px 0 0 0;">If a Claude Code event fires before you restart, you may see an error like: <code style="font-size: 12px;">Stop [bash /Users/.../.claude/scripts/smart-notify.sh stop] failed with non-blocking status code 127: No such file or directory</code>. This is expected and harmless—it simply means Claude Code is trying to call the notification script that was just removed.</p>
-                                    </div>
-
                                     <p class="faq-answer" style="margin-top: 24px;">
                                         <strong>Uninstall our desktop app</strong><br>
-                                        After removing all values related to this application from ~/.claude/scripts/ and ~/.claude/settings.json, you can delete this application by moving it the "Trash" folder. <a href="https://support.apple.com/en-us/102610" target="_blank" class="inline-link">Here</a> is Apple's documentation on "How to delete or uninstall an app."
+                                        If you would like to delete this application, you can do so by moving it to the "Trash" folder. For reference <a href="https://support.apple.com/en-us/102610" target="_blank" class="inline-link">here</a> is Apple's documentation on "How to delete or uninstall an app."
                                     </p>
                                 </div>
 
@@ -368,15 +365,15 @@
                                         <strong>Remove all values related to this application from ~/.claude/scripts/ and ~/.claude/settings.json</strong>
                                     </p>
                                     <p class="faq-answer" style="margin-top: 12px;">
-                                        If you are reading this copy, that means that values required for this application's notifications are missing from <code>~/.claude/scripts/</code> and <code>~/.claude/settings.json</code>.
+                                        If you are reading this copy, that means that values required for this application are missing from ~/.claude/scripts/ and ~/.claude/settings.json.
 
-                                        <br><br>If you would like for these values to be restored then please click the button below.
+                            <br><br>If you would like for these values to be restored then please click the button below. 
                                     </p>
                                     <button id="faqReinstallBtn" class="btn-secondary" style="margin-top: 24px;">Restore notifications values</button>
 
                                     <p class="faq-answer" style="margin-top: 24px;">
-                                        <strong>Step 2: Uninstall the desktop app</strong><br>
-                                        After the values that power this application's notifications have been removed from <code>~/.claude/scripts/</code> and <code>~/.claude/settings.json</code>, you can delete this desktop application by moving it to the Trash. <a href="https://support.apple.com/guide/mac-help/delete-files-and-folders-on-mac-mchlp1093/mac" target="_blank" class="inline-link">This Apple documentation</a> showcases how to do that.
+                                        <strong>Uninstall the desktop app</strong><br>
+                                        If you would like to delete this application, you can do so by moving it to the "Trash" folder. For reference <a href="https://support.apple.com/en-us/102610" target="_blank" class="inline-link">here</a> is Apple's documentation on "How to delete or uninstall an app."
                                     </p>
                                 </div>
                             </div>
