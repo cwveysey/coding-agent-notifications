@@ -38,6 +38,39 @@ debug_log() {
     fi
 }
 
+# Check if a specific event type is enabled in config
+is_event_enabled() {
+    local event_type="$1"
+    local config_file="$HOME/.claude/audio-notifier.yaml"
+
+    if [[ ! -f "$config_file" ]]; then
+        # If no config, assume enabled
+        return 0
+    fi
+
+    # Read the event_enabled value for this event type under global_settings
+    local enabled=$(awk '
+        /^[[:space:]]*event_enabled:[[:space:]]*$/ { in_event_enabled=1; next }
+        in_event_enabled && /^[[:space:]]*'"$event_type"':[[:space:]]*/ {
+            gsub(/^[[:space:]]*'"$event_type"':[[:space:]]*/, "");
+            gsub(/#.*/, "");
+            gsub(/[[:space:]]*$/, "");
+            print;
+            exit
+        }
+        in_event_enabled && /^[[:space:]]*[a-z_]+:[[:space:]]*$/ && !/^[[:space:]]*'"$event_type"':/ { in_event_enabled=0 }
+    ' "$config_file")
+
+    debug_log "Event enabled check for $event_type: ${enabled:-not found}"
+
+    # Default to enabled if not found
+    if [[ -z "$enabled" || "$enabled" == "true" ]]; then
+        return 0  # Enabled
+    else
+        return 1  # Disabled
+    fi
+}
+
 # Check if Do Not Disturb is active and should be respected
 check_do_not_disturb() {
     # Read config setting
@@ -203,6 +236,9 @@ send_notification() {
     # Ensure PROJECT_NAME is available for notification
     PROJECT_NAME="${PROJECT_NAME:-$detected_project}"
 
+    # Store full project path for activity log
+    local full_project_path="${PWD:-/tmp}"
+
     # ALWAYS log sound selection
     echo "[$(date '+%F %T')] Sound selected: $sound, SOUNDS_ENABLED=$SOUNDS_ENABLED, exists=$([ -f "$sound" ] && echo YES || echo NO)" >> "$HOME/.claude/hook-execution.log"
 
@@ -285,8 +321,8 @@ send_notification() {
     local log_file="${LOG_FILE:-$HOME/.claude/notifications.log}"
     echo "$(date '+%F %T') [$reason] ${message:0:100}" >> "$log_file"
 
-    # Log activity event to JSON
-    log_activity_event "$event_type" "$audio_played" "$visual_shown" "$message" "${PROJECT_NAME:-}"
+    # Log activity event to JSON (use full path for activity log)
+    log_activity_event "$event_type" "$audio_played" "$visual_shown" "$message" "${full_project_path:-}"
 }
 
 # Anti-spam check
@@ -321,6 +357,12 @@ check_spam() {
 # Handle Notification hook
 handle_notification_hook() {
     debug_log "Notification hook triggered"
+
+    # Check if notification event is enabled
+    if ! is_event_enabled "notification"; then
+        debug_log "Notification event is disabled, skipping"
+        return 0
+    fi
 
     # Read JSON input from stdin
     local input=$(cat)
@@ -372,6 +414,12 @@ handle_notification_hook() {
 handle_stop_hook() {
     debug_log "Stop hook triggered"
 
+    # Check if stop event is enabled
+    if ! is_event_enabled "stop"; then
+        debug_log "Stop event is disabled, skipping"
+        return 0
+    fi
+
     # Read JSON input from stdin
     local input=$(cat)
 
@@ -418,6 +466,12 @@ handle_stop_hook() {
 handle_post_tool_use_hook() {
     debug_log "PostToolUse hook triggered"
 
+    # Check if post_tool_use event is enabled
+    if ! is_event_enabled "post_tool_use"; then
+        debug_log "PostToolUse event is disabled, skipping"
+        return 0
+    fi
+
     # Read JSON input from stdin
     local input=$(cat)
 
@@ -439,6 +493,12 @@ handle_post_tool_use_hook() {
 handle_subagent_stop_hook() {
     debug_log "SubagentStop hook triggered"
 
+    # Check if subagent_stop event is enabled
+    if ! is_event_enabled "subagent_stop"; then
+        debug_log "SubagentStop event is disabled, skipping"
+        return 0
+    fi
+
     # Read JSON input from stdin
     local input=$(cat)
 
@@ -459,6 +519,12 @@ handle_subagent_stop_hook() {
 # Handle PreToolUse hook
 handle_pre_tool_use_hook() {
     debug_log "PreToolUse hook triggered"
+
+    # Check if pre_tool_use event is enabled
+    if ! is_event_enabled "pre_tool_use"; then
+        debug_log "PreToolUse event is disabled, skipping"
+        return 0
+    fi
 
     # Read JSON input from stdin
     local input=$(cat)
