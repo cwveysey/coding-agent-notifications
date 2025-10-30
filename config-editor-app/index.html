@@ -50,13 +50,14 @@
                     <div id="uninstalledContent" class="getting-started" style="display: none;">
                         <h2>Required values are missing</h2>
                         <p class="getting-started-text">
-                            If you are reading this copy, that means that values required for this application are missing from ~/.claude/scripts/ and ~/.claude/settings.json.
+                            If you are reading this, values required for this application are missing from ~/.claude/scripts/ and ~/.claude/settings.json.
 
-                            <br><br>If you would like for these values to be restored then please click the button below. 
+                            <br><br>If you would like these values to be restored, please click the button below.
                         </p>
                         <button id="reinstallBannerBtn" class="btn-secondary" style="margin-top: 24px;">Restore required values</button>
-
-                        <br><br>If you would prefer to delete this application, you can do so by moving it to the "Trash" folder. For reference <a href="https://support.apple.com/en-us/102610" target="_blank" class="inline-link">here</a> is Apple's documentation on "How to delete or uninstall an app."
+                        <p class="getting-started-text" style="margin-top: 24px;">
+                            If you would prefer to delete this application, you can do so by moving it to the Trash folder. For reference, <a href="https://support.apple.com/en-us/102610" target="_blank" class="inline-link">here</a> is Apple's documentation on "How to delete or uninstall an app."
+                        </p>
                     </div>
 
                     <!-- Privacy section (always shown) -->
@@ -252,7 +253,7 @@
                                         <td colspan="3" class="empty-state-cell">
                                             <div class="empty-state">
                                                 <p class="hint">No recent activity to display.</p>
-                                                <p class="hint" style="margin-top: 8px;">Events will appear here as Claude Code triggers notifications.</p>
+                                                <p class="hint" style="margin-top: 12px;">Events will appear here as Claude Code triggers notifications.</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -299,7 +300,7 @@
                                 <h3 class="faq-question">What problem does this tool solve?</h3>
                             </summary>
                             <div class="collapsible-content">
-                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
+                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 12px;">
                                     <li>Our tool helps ensure that you are alerted as early as possible whenever a coding agent might benefit from your input.</li>
                                     <li>Our tool frees you from having to actively monitor whether or not a coding agent requires your input.</li>
                                 </ul>
@@ -308,7 +309,7 @@
 
                         <details class="collapsible-section faq-item">
                             <summary class="collapsible-header">
-                                <h3 class="faq-question">How do Apple "Focuses" (e.g. "Do Not Disturb," Work, Sleep) affect this app's audio notifications?</h3>
+                                <h3 class="faq-question">How do Apple "Focuses" (e.g., "Do Not Disturb," Work, Sleep) affect this app's audio notifications?</h3>
                             </summary>
                             <div class="collapsible-content">
                                 <p class="faq-answer">
@@ -319,15 +320,15 @@
 
                         <details class="collapsible-section faq-item">
                             <summary class="collapsible-header">
-                                <h3 class="faq-question">How do Apple "Focuses" (e.g. "Do Not Disturb," Work, Sleep) affect this app's visual notifications?</h3>
+                                <h3 class="faq-question">How do Apple "Focuses" (e.g., "Do Not Disturb," Work, Sleep) affect this app's visual notifications?</h3>
                             </summary>
                             <div class="collapsible-content">
                                 <p class="faq-answer">
-                                    This application's visual notifications are delivered via <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>, a utility for delivering native macOS notifications. 
-                                    By default visual notifications are suppressed if a Focus mode is active. 
+                                    This application's visual notifications are delivered via <a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a>, a utility for delivering native macOS notifications.
+                                    By default, visual notifications are suppressed if a Focus mode is active.
                                     <br>
                                     <br>
-                                    Follow the instructions below if you would like for this application's visual notifications to deliver regardless of whether or not a Focus is active.
+                                    Follow the instructions below if you would like this application's visual notifications to display regardless of whether a Focus is active.
                                 </p>
                                 <ol class="faq-answer" style="margin-left: 20px; margin-top: 12px;">
                                     <li>Open <a href="#" class="inline-link" id="openFocusSettingsLink">Focus Settings.</a></li>
@@ -349,13 +350,13 @@
                                         <strong>Remove all values related to this application from ~/.claude/scripts/ and ~/.claude/settings.json</strong>
                                     </p>
                                     <p class="faq-answer" style="margin-top: 12px;">
-                                        Click the button below to remove all values related to this application from ~/.claude/scripts/ and ~/.claude/settings.json. Please note that active Claude Code sessions will need to be restarted if these values are removed. An error message will display if these values are removed and a hook event fires before a previously active Claude Code session has been restarted.
+                                        Click the button below to remove all values related to this application from ~/.claude/scripts/ and ~/.claude/settings.json. Please note that active Claude Code sessions will need to be restarted after these values are removed. An error message will display if these values are removed and a hook event fires before a previously active Claude Code session has been restarted.
                                     </p>
-                                    <button id="installToggleBtn" class="btn-secondary" style="margin-top: 12px;">Remove values</button>
+                                    <button id="installToggleBtn" class="btn-secondary" style="margin-top: 20px;">Remove values</button>
 
                                     <p class="faq-answer" style="margin-top: 24px;">
                                         <strong>Uninstall our desktop app</strong><br>
-                                        If you would like to delete this application, you can do so by moving it to the "Trash" folder. For reference <a href="https://support.apple.com/en-us/102610" target="_blank" class="inline-link">here</a> is Apple's documentation on "How to delete or uninstall an app."
+                                        If you would like to delete this application, you can do so by moving it to the Trash folder. For reference, <a href="https://support.apple.com/en-us/102610" target="_blank" class="inline-link">here</a> is Apple's documentation on "How to delete or uninstall an app."
                                     </p>
                                 </div>
 
@@ -365,15 +366,15 @@
                                         <strong>Remove all values related to this application from ~/.claude/scripts/ and ~/.claude/settings.json</strong>
                                     </p>
                                     <p class="faq-answer" style="margin-top: 12px;">
-                                        If you are reading this copy, that means that values required for this application are missing from ~/.claude/scripts/ and ~/.claude/settings.json.
+                                        If you are reading this, values required for this application are missing from ~/.claude/scripts/ and ~/.claude/settings.json.
 
-                            <br><br>If you would like for these values to be restored then please click the button below. 
+                            <br><br>If you would like these values to be restored, please click the button below.
                                     </p>
-                                    <button id="faqReinstallBtn" class="btn-secondary" style="margin-top: 24px;">Restore notifications values</button>
+                                    <button id="faqReinstallBtn" class="btn-secondary" style="margin-top: 20px;">Restore notification values</button>
 
                                     <p class="faq-answer" style="margin-top: 24px;">
                                         <strong>Uninstall the desktop app</strong><br>
-                                        If you would like to delete this application, you can do so by moving it to the "Trash" folder. For reference <a href="https://support.apple.com/en-us/102610" target="_blank" class="inline-link">here</a> is Apple's documentation on "How to delete or uninstall an app."
+                                        If you would like to delete this application, you can do so by moving it to the Trash folder. For reference, <a href="https://support.apple.com/en-us/102610" target="_blank" class="inline-link">here</a> is Apple's documentation on "How to delete or uninstall an app."
                                     </p>
                                 </div>
                             </div>
@@ -387,8 +388,8 @@
                                 <p class="faq-answer">
                                     Definitely. Please click the "Export diagnostics" button below, and email the generated file to <a href="mailto:cwveysey@gmail.com?subject=Audio%20Notifier%20Diagnostics" style="color: #0066cc;">cwveysey@gmail.com</a>.
                                 <br>
-                                <button id="exportDiagnosticsBtn" class="btn-secondary" style="margin-top: 16px;">Export diagnostics</button>
-                                <button id="exportLogBtn" class="btn-secondary" style="margin-top: 12px;">Export installation log</button>
+                                <button id="exportDiagnosticsBtn" class="btn-secondary" style="margin-top: 20px;">Export diagnostics</button>
+                                <button id="exportLogBtn" class="btn-secondary" style="margin-top: 20px;">Export installation log</button>
                             </div>
                         </details>
 
@@ -404,8 +405,8 @@
                                 <p class="faq-answer" style="margin-top: 12px;">
                                     <strong>Data that we collect</strong>
                                 </p>
-                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li>Event details (e.g. "app opened," "hook toggled," "sound changed," "settings saved").</li>
+                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 12px;">
+                                    <li>Event details (e.g., "app opened," "hook toggled," "sound changed," "settings saved").</li>
                                     <li>Device and platform details (macOS version, app version).</li>
                                     <li>Error messages and stack traces when crashes occur.</li>
                                 </ul>
@@ -413,7 +414,7 @@
                                 <p class="faq-answer" style="margin-top: 12px;">
                                     <strong>Data that we don't collect</strong>
                                 </p>
-                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
+                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 12px;">
                                     <li>Name, email, IP address.</li>
                                     <li>Code, file paths, file contents.</li>
                                     <li>Session recordings, screenshots.</li>
