@@ -21,17 +21,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupCloseHandler();
     renderUI();
     loadInstallationInfo();
-    // Fetch GitHub stats in background (non-blocking, for display only)
-    fetchGitHubStats().catch(err => console.warn('GitHub stats fetch failed:', err));
+    updateReinstallBanner();
 });
 
 // Check if installation is needed and auto-install
 async function checkInstallation() {
     try {
+        // Check if we've already run auto-install this session
+        if (window.autoInstallAttempted) {
+            return;
+        }
+        window.autoInstallAttempted = true;
+
         // Check if scripts are installed
         const soundsEnabled = await invoke('get_sounds_enabled');
 
         if (!soundsEnabled) {
+            // Check if user deliberately uninstalled - don't auto-reinstall
+            const wasUninstalled = await invoke('was_uninstalled');
+            if (wasUninstalled) {
+                console.log('User previously uninstalled - skipping auto-install');
+                return;
+            }
+
             // Auto-install on first launch
             const installSection = document.getElementById('installSection');
             if (installSection) {
@@ -94,16 +106,16 @@ async function loadConfig() {
                 event_enabled: {
                     notification: true,
                     stop: true,
-                    pre_tool_use: true,
-                    post_tool_use: true,
+                    pre_tool_use: false,
+                    post_tool_use: false,
                     subagent_stop: true
                 },
                 voice_enabled: {
-                    notification: false,
-                    stop: false,
+                    notification: true,
+                    stop: true,
                     pre_tool_use: false,
                     post_tool_use: false,
-                    subagent_stop: false
+                    subagent_stop: true
                 },
                 voice_template: '{event} event',
                 voice_provider: 'system',
@@ -294,9 +306,15 @@ function setupEventListeners() {
                 loadActivityLog();
             }
 
+            // Update reinstall banner when overview is selected
+            if (targetView === 'overview') {
+                updateReinstallBanner();
+            }
+
             // Load installation info when FAQ view is selected (for uninstall section)
             if (targetView === 'faq') {
                 loadInstallationInfo();
+                updateInstallToggleButton();
             }
         });
     });
@@ -514,41 +532,171 @@ function setupEventListeners() {
         }
     });
 
-    // Uninstall button
-    const uninstallBtn = document.getElementById('uninstallBtn');
-    if (uninstallBtn) {
-        uninstallBtn.addEventListener('click', async () => {
+    // Reinstall banner button
+    const reinstallBannerBtn = document.getElementById('reinstallBannerBtn');
+    if (reinstallBannerBtn) {
+        reinstallBannerBtn.addEventListener('click', async () => {
             try {
-                // Load manifest for confirmation dialog
-                const manifest = await invoke('get_installation_info');
-
-                const confirmMessage = `Are you sure you want to uninstall audio notifications?\n\nThis will:\n- Remove ${manifest.changes.hooks_added.length} hooks from Claude Code\n- Delete ${manifest.changes.files_created.length} files\n- Preserve your audio-notifier.yaml config\n${manifest.changes.existing_hooks_preserved.length > 0 ? `- Keep your existing hooks: ${manifest.changes.existing_hooks_preserved.join(', ')}` : ''}\n\nA backup will be created before uninstalling.`;
-
-                if (!confirm(confirmMessage)) {
+                if (!confirm('Reinstall audio notifications?')) {
                     return;
                 }
 
-                uninstallBtn.disabled = true;
-                uninstallBtn.textContent = 'Uninstalling...';
+                reinstallBannerBtn.disabled = true;
+                reinstallBannerBtn.textContent = 'Restoring...';
 
-                const result = await invoke('uninstall_hooks');
-                showToast('Uninstallation complete!', 'success');
+                await invoke('install_hooks');
 
-                // Show detailed result in a longer toast
+                showToast('Installation complete!', 'success');
+
+                // Show restart message
                 setTimeout(() => {
-                    alert(result);
+                    alert('Installation complete!\n\nIMPORTANT: You need to start a new Claude Code session for the hooks to take effect. Your current session will not have notifications enabled until you restart.');
                 }, 500);
 
-                // Reload installation info (will show "not available" now)
-                await loadInstallationInfo();
+                reinstallBannerBtn.disabled = false;
+                reinstallBannerBtn.textContent = 'Restore notifications values';
 
-                trackEvent('uninstall_complete');
+                await loadConfig();
+                renderUI();
+                await loadInstallationInfo();
+                await updateReinstallBanner();
+                await updateInstallToggleButton();
+                trackEvent('reinstall_from_banner');
             } catch (error) {
-                console.error('Uninstall failed:', error);
-                showToast('Uninstall failed: ' + error, 'error');
-                trackError(error, { context: 'uninstall' });
-                uninstallBtn.disabled = false;
-                uninstallBtn.textContent = 'Uninstall Audio Notifications';
+                console.error('Reinstall failed:', error);
+                showToast('Reinstall failed: ' + error, 'error');
+                trackError(error, { context: 'reinstall_banner' });
+                reinstallBannerBtn.disabled = false;
+                reinstallBannerBtn.textContent = 'Restore notifications values';
+            }
+        });
+    }
+
+    // FAQ reinstall button
+    const faqReinstallBtn = document.getElementById('faqReinstallBtn');
+    if (faqReinstallBtn) {
+        faqReinstallBtn.addEventListener('click', async () => {
+            try {
+                if (!confirm('Reinstall audio notifications?')) {
+                    return;
+                }
+
+                faqReinstallBtn.disabled = true;
+                faqReinstallBtn.textContent = 'Restoring...';
+
+                await invoke('install_hooks');
+
+                showToast('Installation complete!', 'success');
+
+                // Show restart message
+                setTimeout(() => {
+                    alert('Installation complete!\n\nIMPORTANT: You need to start a new Claude Code session for the hooks to take effect. Your current session will not have notifications enabled until you restart.');
+                }, 500);
+
+                faqReinstallBtn.disabled = false;
+                faqReinstallBtn.textContent = 'Restore notifications values';
+
+                await loadConfig();
+                renderUI();
+                await loadInstallationInfo();
+                await updateReinstallBanner();
+                await updateInstallToggleButton();
+                trackEvent('reinstall_from_faq');
+            } catch (error) {
+                console.error('Reinstall failed:', error);
+                showToast('Reinstall failed: ' + error, 'error');
+                trackError(error, { context: 'reinstall_faq' });
+                faqReinstallBtn.disabled = false;
+                faqReinstallBtn.textContent = 'Restore notifications values';
+            }
+        });
+    }
+
+    // Install/Uninstall toggle button
+    const installToggleBtn = document.getElementById('installToggleBtn');
+    if (installToggleBtn) {
+        // Update button state based on installation status
+        updateInstallToggleButton();
+
+        installToggleBtn.addEventListener('click', async () => {
+            try {
+                const soundsEnabled = await invoke('get_sounds_enabled');
+
+                if (soundsEnabled) {
+                    // UNINSTALL
+                    const manifest = await invoke('get_installation_info');
+
+                    const confirmMessage = `Are you sure you want to uninstall audio notifications?\n\nThis will:\n- Remove ${manifest.changes.hooks_added.length} hooks from Claude Code\n- Delete ${manifest.changes.files_created.length} files\n- Preserve your audio-notifier.yaml config\n${manifest.changes.existing_hooks_preserved.length > 0 ? `- Keep your existing hooks: ${manifest.changes.existing_hooks_preserved.join(', ')}` : ''}\n\nA backup will be created before uninstalling.`;
+
+                    if (!confirm(confirmMessage)) {
+                        return;
+                    }
+
+                    installToggleBtn.disabled = true;
+                    installToggleBtn.textContent = 'Removing...';
+
+                    const result = await invoke('uninstall_hooks');
+
+                    // Show restart warning
+                    const restartWarning = document.getElementById('restartWarning');
+                    if (restartWarning) {
+                        restartWarning.style.display = 'block';
+                    }
+
+                    showToast('Uninstallation complete!', 'success');
+
+                    // Show detailed result
+                    setTimeout(() => {
+                        alert(result);
+                    }, 500);
+
+                    // Update button to reinstall state
+                    installToggleBtn.disabled = false;
+                    installToggleBtn.textContent = 'Restore notifications values';
+
+                    await loadInstallationInfo();
+                    await updateReinstallBanner();
+                    trackEvent('uninstall_complete');
+                } else {
+                    // REINSTALL
+                    if (!confirm('Reinstall audio notifications?')) {
+                        return;
+                    }
+
+                    installToggleBtn.disabled = true;
+                    installToggleBtn.textContent = 'Restoring...';
+
+                    const result = await invoke('install_hooks');
+
+                    // Hide restart warning
+                    const restartWarning = document.getElementById('restartWarning');
+                    if (restartWarning) {
+                        restartWarning.style.display = 'none';
+                    }
+
+                    showToast('Installation complete!', 'success');
+
+                    // Show restart message
+                    setTimeout(() => {
+                        alert('Installation complete!\n\nIMPORTANT: You need to start a new Claude Code session for the hooks to take effect. Your current session will not have notifications enabled until you restart.');
+                    }, 500);
+
+                    // Update button to uninstall state
+                    installToggleBtn.disabled = false;
+                    installToggleBtn.textContent = 'Remove relevant values';
+
+                    await loadConfig();
+                    renderUI();
+                    await loadInstallationInfo();
+                    await updateReinstallBanner();
+                    trackEvent('reinstall_complete');
+                }
+            } catch (error) {
+                console.error('Install/Uninstall failed:', error);
+                showToast('Operation failed: ' + error, 'error');
+                trackError(error, { context: 'install_toggle' });
+                installToggleBtn.disabled = false;
+                await updateInstallToggleButton();
             }
         });
     }
@@ -581,44 +729,33 @@ function setupEventListeners() {
         });
     }
 
-    // Note: Installation now happens automatically on first launch
-    // No manual install button needed
-
-    // Dev reset button (only show in development)
-    const devPanel = document.getElementById('devPanel');
-    const devResetBtn = document.getElementById('devResetBtn');
-
-    // Hide dev panel in production builds
-    if (devPanel && !import.meta.env.DEV) {
-        devPanel.style.display = 'none';
-    }
-
-    if (devResetBtn && import.meta.env.DEV) {
-        devResetBtn.addEventListener('click', async () => {
-            if (!confirm('This will delete all installed files and reset to fresh install state. Continue?')) {
-                return;
-            }
-
-            devResetBtn.disabled = true;
-            devResetBtn.textContent = 'Resetting...';
-
+    // Export diagnostics button
+    const exportDiagnosticsBtn = document.getElementById('exportDiagnosticsBtn');
+    if (exportDiagnosticsBtn) {
+        exportDiagnosticsBtn.addEventListener('click', async () => {
             try {
-                await invoke('dev_reset_install');
-                showToast('Reset complete! Reloading...', 'success');
+                const diagnosticsJson = await invoke('export_diagnostics');
 
-                // Reload the app after a short delay
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
+                const filePath = await saveDialog({
+                    filters: [{ name: 'JSON', extensions: ['json'] }],
+                    defaultPath: `claude-notifications-diagnostics-${new Date().toISOString().split('T')[0]}.json`
+                });
+
+                if (filePath) {
+                    await writeTextFile(filePath, diagnosticsJson);
+                    showToast('Diagnostics exported successfully', 'success');
+                    trackEvent('export_diagnostics');
+                }
             } catch (error) {
-                console.error('Reset failed:', error);
-                showToast('Reset failed: ' + error, 'error');
-                devResetBtn.disabled = false;
-                devResetBtn.textContent = 'Reset to Fresh Install';
+                console.error('Export diagnostics failed:', error);
+                showToast('Failed to export diagnostics: ' + error, 'error');
+                trackError(error, { context: 'export_diagnostics' });
             }
         });
     }
 
+    // Note: Installation now happens automatically on first launch
+    // No manual install button needed
 }
 
 // ===== Rendering =====
@@ -1020,6 +1157,50 @@ function showToast(message, type = 'success', action = null) {
 
 // ===== Installation Info and Uninstall =====
 
+async function updateReinstallBanner() {
+    const installedContent = document.getElementById('installedContent');
+    const uninstalledContent = document.getElementById('uninstalledContent');
+    const faqInstalledContent = document.getElementById('faqInstalledContent');
+    const faqUninstalledContent = document.getElementById('faqUninstalledContent');
+
+    if (!installedContent || !uninstalledContent) return;
+
+    try {
+        const soundsEnabled = await invoke('get_sounds_enabled');
+        if (soundsEnabled) {
+            // Show installed content, hide uninstalled content
+            installedContent.style.display = 'block';
+            uninstalledContent.style.display = 'none';
+            if (faqInstalledContent) faqInstalledContent.style.display = 'block';
+            if (faqUninstalledContent) faqUninstalledContent.style.display = 'none';
+        } else {
+            // Show uninstalled content, hide installed content
+            installedContent.style.display = 'none';
+            uninstalledContent.style.display = 'block';
+            if (faqInstalledContent) faqInstalledContent.style.display = 'none';
+            if (faqUninstalledContent) faqUninstalledContent.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Failed to check installation status:', error);
+    }
+}
+
+async function updateInstallToggleButton() {
+    const installToggleBtn = document.getElementById('installToggleBtn');
+    if (!installToggleBtn) return;
+
+    try {
+        const soundsEnabled = await invoke('get_sounds_enabled');
+        if (soundsEnabled) {
+            installToggleBtn.textContent = 'Remove relevant values';
+        } else {
+            installToggleBtn.textContent = 'Restore notifications values';
+        }
+    } catch (error) {
+        console.error('Failed to check installation status:', error);
+    }
+}
+
 async function loadInstallationInfo() {
     const infoDiv = document.getElementById('installationInfo');
     if (!infoDiv) return;
@@ -1153,103 +1334,6 @@ async function loadActivityLog() {
                 </td>
             </tr>
         `;
-    }
-}
-
-// Fetch GitHub stats for alternative solutions
-// Note: Stats fetched for display purposes only - notification system remains fully local
-async function fetchGitHubStats() {
-    const repos = [
-        {
-            owner: 'wyattjoh',
-            name: 'claude-code-notification',
-            starsId: 'ccn-stars',
-            starsDateId: 'ccn-stars-date',
-            commitId: 'ccn-last-commit',
-            commitDateId: 'ccn-commit-date'
-        },
-        {
-            owner: 'daveschumaker',
-            name: 'homebrew-claude-sounds',
-            starsId: 'cs-stars',
-            starsDateId: 'cs-stars-date',
-            commitId: 'cs-last-commit',
-            commitDateId: 'cs-commit-date'
-        }
-    ];
-
-    for (const repo of repos) {
-        try {
-            // Check cache first (24 hour cache)
-            const cacheKey = `github-stats-${repo.owner}-${repo.name}`;
-            const cached = localStorage.getItem(cacheKey);
-
-            if (cached) {
-                const { data, timestamp } = JSON.parse(cached);
-                const age = Date.now() - timestamp;
-                const ONE_DAY = 24 * 60 * 60 * 1000;
-
-                if (age < ONE_DAY) {
-                    updateRepoStats(repo, data);
-                    continue;
-                }
-            }
-
-            // Fetch fresh data
-            const [repoResponse, commitsResponse] = await Promise.all([
-                fetch(`https://api.github.com/repos/${repo.owner}/${repo.name}`),
-                fetch(`https://api.github.com/repos/${repo.owner}/${repo.name}/commits?per_page=1`)
-            ]);
-
-            if (!repoResponse.ok || !commitsResponse.ok) {
-                console.warn(`Failed to fetch GitHub stats for ${repo.owner}/${repo.name}`);
-                continue;
-            }
-
-            const repoData = await repoResponse.json();
-            const commitsData = await commitsResponse.json();
-
-            const stats = {
-                stars: repoData.stargazers_count,
-                lastCommit: commitsData[0]?.commit?.author?.date || null
-            };
-
-            // Cache the results
-            localStorage.setItem(cacheKey, JSON.stringify({
-                data: stats,
-                timestamp: Date.now()
-            }));
-
-            updateRepoStats(repo, stats);
-        } catch (error) {
-            console.warn(`Error fetching GitHub stats for ${repo.owner}/${repo.name}:`, error);
-            // Silently fail - hardcoded values remain visible
-        }
-    }
-}
-
-function updateRepoStats(repo, stats) {
-    const starsEl = document.getElementById(repo.starsId);
-    const starsDateEl = document.getElementById(repo.starsDateId);
-    const commitEl = document.getElementById(repo.commitId);
-    const commitDateEl = document.getElementById(repo.commitDateId);
-
-    if (!starsEl || !starsDateEl || !commitEl || !commitDateEl) return;
-
-    const now = new Date();
-    const currentDateStr = now.toLocaleDateString();
-
-    // Update stars and stars date
-    if (stats.stars !== undefined) {
-        starsEl.textContent = stats.stars;
-        starsDateEl.textContent = currentDateStr;
-    }
-
-    // Update last commit date and "as of" date
-    if (stats.lastCommit) {
-        const commitDate = new Date(stats.lastCommit);
-        commitEl.textContent = commitDate.toLocaleDateString();
-        commitDateEl.textContent = currentDateStr;
     }
 }
 

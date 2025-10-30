@@ -29,28 +29,36 @@
             <main class="main">
                 <!-- Overview View -->
                 <div class="view active" data-view="overview">
-                    <!-- Dev Panel (temporary) -->
-                    <div id="devPanel" class="info-banner" style="background: #fff3cd; border-color: #ffc107; margin-bottom: 24px;">
-                        <h3 style="margin-top: 0;">⚠️ Developer Testing</h3>
-                        <p>Click the button below to reset to a fresh install state. This will delete all installed files and show the install banner.</p>
-                        <button id="devResetBtn" class="btn" style="background: #dc3545; color: white; margin-top: 8px;">Reset to Fresh Install</button>
-                    </div>
-
-                    <div class="getting-started">
+                    <!-- Getting started section (shown when installed) -->
+                    <div id="installedContent" class="getting-started">
                         <h2>Getting started</h2>
                         <p class="getting-started-text">
-                            If you are reading this copy, then you have already completed all steps required to receive notifications when designated coding agent events occur. All required configuration steps were completed by downloading this application. 
-                            
+  Notifications have been enabled for all future Claude Code sessions. Sessions that were started before this application was run for the first time will need to be restarted.
+   
                             <br><br>If you have any questions, encounter any issues, or would like to request an update, please <a href="mailto:cwveysey@gmail.com" class="inline-link">drop me a line via email</a>. Any and all feedback is of course so appreciated.
                         </p>
 
                         <h2 style="margin-top: 24px;">Next steps</h2>
                         <ul class="getting-started-text">
-                            <li>You will be notified when designated coding agent events occur.</li>
-                            <li>Review <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click(); requestAnimationFrame(() => { const details = document.getElementById('customization-details'); if (details) { details.open = true; details.scrollIntoView({block: 'start'}); } });">your customization options</a> (to e.g. turn alerts on and off on a per hook type basis, arrange for different audio to play on a per hook type basis).</li>
-                            <li>Review <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=faq]').click();">the FAQs</a> for answers to frequently asked questions.</li>
+                            <li>You will receive notifications for designated coding agent events.</li>
+                            <li>Review <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click(); requestAnimationFrame(() => { const details = document.getElementById('customization-details'); if (details) { details.open = true; details.scrollIntoView({block: 'start'}); } });">your customization options</a> (e.g. turn alerts on and off per event type, arrange for different audio to play per event type).</li>
+                            <li>Read <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=faq]').click();">the FAQs</a> for answers to frequently asked questions.</li>
                         </ul>
+                    </div>
 
+                    <!-- Uninstalled content (shown when uninstalled) -->
+                    <div id="uninstalledContent" class="getting-started" style="display: none;">
+                        <h2>Values required for notifications are missing</h2>
+                        <p class="getting-started-text">
+                            If you are reading this copy, that means that values required for this application's notifications are missing from <code>~/.claude/scripts/</code> and <code>~/.claude/settings.json</code>.
+
+                            <br><br>If you would like for these values to be restored then please click the button below.
+                        </p>
+                        <button id="reinstallBannerBtn" class="btn-secondary" style="margin-top: 24px;">Restore notifications values</button>
+                    </div>
+
+                    <!-- Privacy section (always shown) -->
+                    <div class="getting-started">
                         <h2 style="margin-top: 24px;">Privacy</h2>
                         <div class="card">
                             <div class="setting-row">
@@ -225,7 +233,7 @@
                     <div class="getting-started">
                         <h2>Activity log</h2>
                         <p class="getting-started-text">
-                            This view shows your most recent notification events (up to 50).
+                            This view shows up to 50 of the most recent coding agent events that have occurred since this application was installed.
                         </p>
                     </div>
 
@@ -329,62 +337,6 @@
 
                         <details class="collapsible-section faq-item">
                             <summary class="collapsible-header">
-                                <h3 class="faq-question">What are some alternative solutions?</h3>
-                            </summary>
-                            <div class="collapsible-content">
-                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li><strong>Build your own solution using Claude Code hooks</strong><br>I want to note that someone that is comfortable with script editing (or working with coding agents) could set up notifications for designated coding agent events without much time and effort. <a href="https://docs.claude.com/en/docs/claude-code/hooks" target="_blank" class="inline-link">This Claude Code hooks documentation</a>, as well as the GitHub repository associated with this application, should give you everything that you need to get started.</li>
-                                    <li style="margin-top: 12px;"><strong><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">claude-code-notification</a></strong>
-                                        <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
-                                            <li><strong>Description</strong><br>Official respository description: "A lightweight macOS desktop notification hook for Claude Code that displays native notifications with customizable system sounds when events occur during AI coding sessions."</li>
-                                            <li><strong>Misc</strong>
-                                                <ul style="margin-left: 20px; margin-top: 4px; list-style-type: disc;">
-                                                    <li><span id="ccn-stars">16</span> GitHub stars as of <span id="ccn-stars-date">10/27/2025</span>.</li>
-                                                    <li>As of <span id="ccn-commit-date">10/27/2025</span> the last commit to main was on <span id="ccn-last-commit">9/9/2025</span>.</li>
-                                                </ul>
-                                                <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
-                                                    <li>Authored by two Vercel employees (<a href="https://github.com/wyattjoh" target="_blank" class="inline-link">wyattjoh</a>, <a href="https://github.com/adrienthebo" target="_blank" class="inline-link">adrienthebo</a>).</li>
-                                                </ul>
-                                            </li>
-                                            <li><strong>Some of the differences between this solution and our solution</strong>
-                                                <ul style="margin-left: 20px; margin-top: 4px; list-style-type: disc;">
-                                                    <li><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">https://github.com/wyattjoh/claude-code-notification</a> offers cross-platform notifications (Windows, Linux, macOS), whereas our solution at this time exclusively supports macOS notifications.</li>
-                                                    <li><a href="https://github.com/wyattjoh/claude-code-notification" target="_blank" class="inline-link">https://github.com/wyattjoh/claude-code-notification</a> requires JSON editing for updating configuration values and notification preferences, whereas our tool allows for configuration values and notification preferences to be updated via a GUI.</li>
-                                                    <li>Our solution offers users control over how Apple "Focuses" affect their notifications.</li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li style="margin-top: 12px;"><strong><a href="https://github.com/daveschumaker/homebrew-claude-sounds" target="_blank" class="inline-link">claude-sounds</a></strong>
-                                        <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
-                                            <li><strong>Description</strong><br>Official repository description: "A simple CLI tool that plays random sound effects from a collection of audio files. Perfect as a notification hook for Claude Code or for general terminal fun!"</li>
-                                            <li><strong>Misc</strong>
-                                                <ul style="margin-left: 20px; margin-top: 4px; list-style-type: disc;">
-                                                    <li><span id="cs-stars">1</span> GitHub star as of <span id="cs-stars-date">10/27/2025</span>.</li>
-                                                    <li>As of <span id="cs-commit-date">10/27/2025</span> the last commit to main was on <span id="cs-last-commit">10/25/2025</span>.</li>
-                                                </ul>
-                                            </li>
-                                            <li><strong>Some of the differences between this solution and our solution</strong>
-                                                <ul style="margin-left: 20px; margin-top: 4px; list-style-type: disc;">
-                                                    <li><a href="https://github.com/daveschumaker/homebrew-claude-sounds" target="_blank" class="inline-link">claude-sounds</a> provides audio-only alerts, whereas our tool offers visual notifications in addition to audio alerts.</li>
-                                                    <li><a href="https://github.com/daveschumaker/homebrew-claude-sounds" target="_blank" class="inline-link">claude-sounds</a> requires JSON editing for updating configuration values and notification preferences, whereas our tool allows for configuration values and notification preferences to be updated via a GUI.</li>
-                                                    <li>Our solution offers users control over how Apple "Focuses" affect their notifications.</li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li style="margin-top: 12px;"><strong><a href="https://velvetshark.com/til/claude-code-sound-notification" target="_blank" class="inline-link">https://velvetshark.com/til/claude-code-sound-notification</a></strong>
-                                        <ul style="margin-left: 20px; margin-top: 4px; list-style-type: circle;">
-                                            <li><strong>Description</strong><br>Via <a href="https://velvetshark.com/til/claude-code-sound-notification" target="_blank" class="inline-link">a post on his personal site</a> developer Radek Sienkiewicz shares a terminal command that "tells Claude Code to use the terminal's built-in bell as its sound notification channel. After you run this, you'll hear a simple system beep whenever a long-running command completes."</li>
-                                            <li><strong>Some of the differences between this solution and our solution</strong><br>Via the "claude config set --global preferredNotifChannel terminal_bell" command, a system sound plays when the Notification hook event fires. Via our solution, configuration values and notification preferences can be updated via a GUI, alerts can be turned on and off on a per hook type basis, you can arrange for different audio to play on a per hook type basis, and you can control how Apple "Focuses" affect your notifications.</li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </details>
-
-                        <details class="collapsible-section faq-item">
-                            <summary class="collapsible-header">
                                 <h3 class="faq-question">How does this solution work from a technical standpoint?</h3>
                             </summary>
                             <div class="collapsible-content">
@@ -431,72 +383,6 @@
 
                         <details class="collapsible-section faq-item">
                             <summary class="collapsible-header">
-                                <h3 class="faq-question">How do I uninstall this application?</h3>
-                            </summary>
-                            <div class="collapsible-content">
-                                <p class="faq-answer">
-                                    <strong>Option 1: Use the uninstall button (recommended)</strong>
-                                </p>
-                                <div class="card" style="margin-top: 12px;">
-                                    <h3>Uninstall</h3>
-                                    <p>Remove notification hooks from Claude Code while preserving other customizations.</p>
-                                    <button id="uninstallBtn" class="btn">Uninstall Notifications</button>
-                                </div>
-                                <p class="faq-answer" style="margin-top: 12px;">
-                                    This removes our hooks and scripts while preserving any other Claude Code customizations you've made.
-                                </p>
-
-                                <div class="card" style="margin-top: 24px;">
-                                    <h3>Installation Details</h3>
-                                    <div id="installationInfo" style="margin-bottom: 16px;">
-                                        <p>Loading installation information...</p>
-                                    </div>
-                                    <button id="exportLogBtn" class="btn-secondary">Export Installation Log</button>
-                                </div>
-
-                                <p class="faq-answer" style="margin-top: 24px;">
-                                    <strong>Option 2: Manual uninstall</strong><br>
-                                    If you can't open the app, run:
-                                </p>
-                                <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin-top: 8px;"><code>bash ~/.claude/scripts/audio-notifier-uninstall.sh</code></pre>
-
-                                <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Option 3: Full restore from backup</strong><br>
-                                    To restore Claude Code to its exact state before installation:
-                                </p>
-                                <ol class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li>Locate your backup at <code>~/.claude/backups/settings-pre-audio-notifier-[timestamp].json</code></li>
-                                    <li>Replace <code>~/.claude/settings.json</code> with the backup</li>
-                                    <li>Delete <code>~/.claude/scripts/smart-notify.sh</code></li>
-                                    <li>Delete <code>~/.claude/audio-notifier.yaml</code></li>
-                                </ol>
-                                <p class="faq-answer" style="margin-top: 8px;">
-                                    Warning: This removes ALL changes made since installation, including any hooks you added manually.
-                                </p>
-
-                                <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Option 4: Selective removal with AI assistance</strong><br>
-                                    Click "Export Installation Log" above and share the downloaded file with an AI coding agent with the prompt: "Remove the hooks and files listed in this manifest from my Claude Code configuration, but preserve any other customizations I've made."
-                                </p>
-                            </div>
-                        </details>
-
-                        <details class="collapsible-section faq-item">
-                            <summary class="collapsible-header">
-                                <h3 class="faq-question">What third-party tools does this app use?</h3>
-                            </summary>
-                            <div class="collapsible-content">
-                                <ul class="faq-answer" style="margin-left: 20px; margin-top: 8px;">
-                                    <li><strong><a href="https://github.com/julienXX/terminal-notifier" target="_blank" class="inline-link">terminal-notifier</a></strong><br>macOS command-line tool for delivering user notifications to the macOS Notification Center.</li>
-                                    <li><strong><a href="https://docs.claude.com/en/docs/claude-code" target="_blank" class="inline-link">Claude Code</a></strong><br>The hooks system that enables these notifications to trigger at the right moments.</li>
-                                    <li><strong><a href="https://tauri.app/" target="_blank" class="inline-link">Tauri</a></strong><br>Framework used to build this desktop application.</li>
-                                    <li><strong><a href="https://posthog.com" target="_blank" class="inline-link">PostHog</a></strong><br>Anonymous usage analytics to help improve the app (opt-out available in Privacy settings).</li>
-                                </ul>
-                            </div>
-                        </details>
-
-                        <details class="collapsible-section faq-item">
-                            <summary class="collapsible-header">
                                 <h3 class="faq-question">Do Apple "Focuses" (e.g. "Do Not Disturb," Work, Sleep) silence this app's notifications?</h3>
                             </summary>
                             <div class="collapsible-content">
@@ -525,8 +411,70 @@
                                     <strong>Note:</strong> terminal-notifier may not appear in the app list until you've received at least one notification from it. Try triggering a notification first, then return to Focus settings to add it.
                                 </p>
                                 <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Use case:</strong> This is particularly useful if you're frequently on calls and need silent notifications. Disable audio notifications in the <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click();">Claude Code settings</a>, add terminal-notifier to your Focus allowed apps, and you'll receive silent visual banners without any audio interrupting your meetings.
+                                    <strong>Use case:</strong> This is particularly useful if you're frequently on calls and need silent notifications. Disable audio notifications via the <a href="#" class="inline-link" onclick="event.preventDefault(); document.querySelector('[data-view=claude-code]').click();">Claude Code tab</a>, add terminal-notifier to your Focus allowed apps, and you'll receive silent visual banners without any audio interrupting your meetings.
                                 </p>
+                            </div>
+                        </details>
+
+                        <details class="collapsible-section faq-item">
+                            <summary class="collapsible-header">
+                                <h3 class="faq-question">How do I uninstall this application?</h3>
+                            </summary>
+                            <div class="collapsible-content">
+                                <!-- Content when installed -->
+                                <div id="faqInstalledContent">
+                                    <p class="faq-answer">
+                                        <strong>Step 1: Remove relevant values from ~/.claude/scripts/ and ~/.claude/settings.json</strong>
+                                    </p>
+                                    <p class="faq-answer" style="margin-top: 12px;">
+                                        Click the button below to remove notifications-related values from <code>~/.claude/scripts/</code> and <code>~/.claude/settings.json</code>. Please note that all active Claude Code sessions will need to be restarted if these notifications values are removed.
+                                    </p>
+                                    <p class="faq-answer" style="margin-top: 12px;">
+                                        An error message will display if after these files are modified a hook event fires before a previously active Claude Code session has been restarted.
+                                    </p>
+                                    <button id="installToggleBtn" class="btn-secondary" style="margin-top: 12px;">Remove relevant values</button>
+
+                                    <div id="restartWarning" class="info-banner" style="margin-top: 16px; background: #fff3cd; border-color: #ffc107; display: none;">
+                                        <p style="margin: 0;"><strong>Note:</strong> You'll need to start a new Claude Code session for the changes to take effect. Your current session will continue showing hook errors until you restart.</p>
+                                        <p style="margin: 12px 0 0 0;">If a Claude Code event fires before you restart, you may see an error like: <code style="font-size: 12px;">Stop [bash /Users/.../.claude/scripts/smart-notify.sh stop] failed with non-blocking status code 127: No such file or directory</code>. This is expected and harmless—it simply means Claude Code is trying to call the notification script that was just removed.</p>
+                                    </div>
+
+                                    <p class="faq-answer" style="margin-top: 24px;">
+                                        <strong>Step 2: Uninstall the desktop app</strong><br>
+                                        After removing the notification hooks above, you can delete this desktop application by moving it to the Trash from your Applications folder.
+                                    </p>
+                                </div>
+
+                                <!-- Content when uninstalled -->
+                                <div id="faqUninstalledContent" style="display: none;">
+                                    <p class="faq-answer">
+                                        <strong><s>Step 1: Remove relevant values from <code>~/.claude/scripts/</code> and <code>~/.claude/settings.json</code></s></strong>
+                                    </p>
+                                    <p class="faq-answer" style="margin-top: 12px;">
+                                        If you are reading this copy, that means that values required for this application's notifications are missing from <code>~/.claude/scripts/</code> and <code>~/.claude/settings.json</code>.
+
+                                        <br><br>If you would like for these values to be restored then please click the button below.
+                                    </p>
+                                    <button id="faqReinstallBtn" class="btn-secondary" style="margin-top: 24px;">Restore notifications values</button>
+
+                                    <p class="faq-answer" style="margin-top: 24px;">
+                                        <strong>Step 2: Uninstall the desktop app</strong><br>
+                                        After the values that power this application's notifications have been removed from <code>~/.claude/scripts/</code> and <code>~/.claude/settings.json</code>, you can delete this desktop application by moving it to the Trash. <a href="https://support.apple.com/guide/mac-help/delete-files-and-folders-on-mac-mchlp1093/mac" target="_blank" class="inline-link">This Apple documentation</a> showcases how to do that.
+                                    </p>
+                                </div>
+                            </div>
+                        </details>
+
+                        <details class="collapsible-section faq-item">
+                            <summary class="collapsible-header">
+                                <h3 class="faq-question">Can the developer help troubleshoot an issue that I am experiencing?</h3>
+                            </summary>
+                            <div class="collapsible-content">
+                                <p class="faq-answer">
+                                    Definitely. Please click the "Export diagnostics" button below, and email the generated file to <a href="mailto:cwveysey@gmail.com?subject=Audio%20Notifier%20Diagnostics" style="color: #0066cc;">cwveysey@gmail.com</a>.
+                                <br>
+                                <button id="exportDiagnosticsBtn" class="btn-secondary" style="margin-top: 16px;">Export diagnostics</button>
+                                <button id="exportLogBtn" class="btn-secondary" style="margin-top: 12px;">Export installation log</button>
                             </div>
                         </details>
 
@@ -559,10 +507,6 @@
                                     <li>Session recordings or screenshots.</li>
                                     <li>Precise location data.</li>
                                 </ul>
-
-                                <p class="faq-answer" style="margin-top: 12px;">
-                                    <strong>Analytics provider</strong><br>We use <a href="https://posthog.com" target="_blank" class="inline-link">PostHog</a> for anonymous usage analytics.
-                                </p>
                             </div>
                         </details>
                     </div>

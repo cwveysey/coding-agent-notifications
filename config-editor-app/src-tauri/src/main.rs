@@ -3,11 +3,15 @@
 
 use serde::{Deserialize, Serialize};
 use sha2::{Sha256, Digest};
+use std::env;
 use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 use tauri::Manager;
 use chrono::Utc;
+
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
 
 // ===== Config Structures =====
 
@@ -66,8 +70,8 @@ fn default_event_enabled() -> EventEnabled {
     EventEnabled {
         notification: true,
         stop: true,
-        pre_tool_use: true,
-        post_tool_use: true,
+        pre_tool_use: false,
+        post_tool_use: false,
         subagent_stop: true,
     }
 }
@@ -76,8 +80,8 @@ fn default_event_voice_enabled() -> EventEnabled {
     EventEnabled {
         notification: true,
         stop: true,
-        pre_tool_use: true,
-        post_tool_use: true,
+        pre_tool_use: false,
+        post_tool_use: false,
         subagent_stop: true,
     }
 }
@@ -326,6 +330,15 @@ async fn set_sounds_enabled(enabled: bool) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+#[tauri::command]
+async fn was_uninstalled() -> Result<bool, String> {
+    let home = env::var("HOME")
+        .map_err(|_| "Failed to get HOME directory".to_string())?;
+    let claude_dir = PathBuf::from(&home).join(".claude");
+    let uninstalled_marker = claude_dir.join(".uninstalled");
+    Ok(uninstalled_marker.exists())
 }
 
 #[tauri::command]
@@ -607,6 +620,12 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
     let claude_dir = PathBuf::from(&home).join(".claude");
     let scripts_dir = claude_dir.join("scripts");
 
+    // Remove .uninstalled marker if it exists (user is reinstalling)
+    let uninstalled_marker = claude_dir.join(".uninstalled");
+    if uninstalled_marker.exists() {
+        fs::remove_file(&uninstalled_marker).ok(); // Ignore errors
+    }
+
     // Create directories
     fs::create_dir_all(&scripts_dir)
         .map_err(|e| format!("Failed to create .claude/scripts directory: {}", e))?;
@@ -623,7 +642,7 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
         return Err(format!("Bundled scripts not found at {:?}", bundled_scripts));
     }
 
-    // Copy each script file
+    // Copy each script file (force overwrite for upgrades)
     for entry in fs::read_dir(&bundled_scripts)
         .map_err(|e| format!("Failed to read bundled scripts: {}", e))? {
         let entry = entry.map_err(|e| format!("Failed to read script entry: {}", e))?;
@@ -631,6 +650,13 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
         if src.is_file() {
             let filename = src.file_name().ok_or("Invalid filename")?;
             let dest = scripts_dir.join(filename);
+
+            // Remove existing file first to ensure clean upgrade (preserves user config/sounds)
+            if dest.exists() {
+                fs::remove_file(&dest)
+                    .map_err(|e| format!("Failed to remove old {:?}: {}", filename, e))?;
+            }
+
             fs::copy(&src, &dest)
                 .map_err(|e| format!("Failed to copy {:?}: {}", filename, e))?;
 
@@ -662,6 +688,13 @@ async fn install_hooks(app_handle: tauri::AppHandle) -> Result<String, String> {
             if src.is_file() {
                 let filename = src.file_name().ok_or("Invalid voice filename")?;
                 let dest = voices_dir.join(filename);
+
+                // Remove existing voice file first to ensure upgrade
+                if dest.exists() {
+                    fs::remove_file(&dest)
+                        .map_err(|e| format!("Failed to remove old voice {:?}: {}", filename, e))?;
+                }
+
                 fs::copy(&src, &dest)
                     .map_err(|e| format!("Failed to copy voice {:?}: {}", filename, e))?;
             }
@@ -1203,7 +1236,12 @@ async fn uninstall_hooks() -> Result<String, String> {
             .map_err(|e| format!("Failed to remove terminal-notifier: {}", e))?;
     }
 
-    // Update manifest to mark as uninstalled
+    // Create .uninstalled marker to prevent auto-reinstall
+    let uninstalled_marker = claude_dir.join(".uninstalled");
+    fs::write(&uninstalled_marker, "")
+        .map_err(|e| format!("Failed to create uninstall marker: {}", e))?;
+
+    // Remove manifest
     let manifest_path = get_manifest_path();
     if manifest_path.exists() {
         fs::remove_file(&manifest_path)
@@ -1237,6 +1275,99 @@ async fn export_installation_log() -> Result<String, String> {
 async fn get_backup_path() -> Result<String, String> {
     let manifest = get_installation_info().await?;
     Ok(manifest.backup_path)
+}
+
+#[tauri::command]
+async fn export_diagnostics() -> Result<String, String> {
+    let home = std::env::var("HOME").map_err(|_| "Could not get HOME directory")?;
+    let claude_dir = PathBuf::from(&home).join(".claude");
+
+    let mut diagnostics = serde_json::json!({
+        "app_version": "1.0.0",
+        "collected_at": chrono::Utc::now().to_rfc3339(),
+    });
+
+    // Get macOS version
+    if let Ok(output) = Command::new("sw_vers").arg("-productVersion").output() {
+        if let Ok(version) = String::from_utf8(output.stdout) {
+            diagnostics["macos_version"] = serde_json::json!(version.trim());
+        }
+    }
+
+    // Check script installation
+    let scripts_dir = claude_dir.join("scripts");
+    let smart_notify = scripts_dir.join("smart-notify.sh");
+    diagnostics["scripts_installed"] = serde_json::json!({
+        "smart_notify_exists": smart_notify.exists(),
+        "smart_notify_executable": smart_notify.exists() &&
+            fs::metadata(&smart_notify).map(|m| m.permissions().mode() & 0o111 != 0).unwrap_or(false),
+    });
+
+    // Check terminal-notifier availability
+    let system_tn = Command::new("which").arg("terminal-notifier").output()
+        .map(|o| o.status.success()).unwrap_or(false);
+    let bundled_tn = claude_dir.join("terminal-notifier.app/Contents/MacOS/terminal-notifier");
+    diagnostics["terminal_notifier"] = serde_json::json!({
+        "system_installed": system_tn,
+        "bundled_exists": bundled_tn.exists(),
+    });
+
+    // Get hook configuration
+    let settings_file = claude_dir.join("settings.json");
+    if settings_file.exists() {
+        if let Ok(contents) = fs::read_to_string(&settings_file) {
+            if let Ok(settings) = serde_json::from_str::<serde_json::Value>(&contents) {
+                diagnostics["hooks_configured"] = settings.get("hooks").cloned().unwrap_or(serde_json::json!({}));
+            }
+        }
+    }
+
+    // Get recent activity log (last 10 entries)
+    let activity_log = claude_dir.join("activity-log.json");
+    if activity_log.exists() {
+        if let Ok(contents) = fs::read_to_string(&activity_log) {
+            if let Ok(events) = serde_json::from_str::<Vec<serde_json::Value>>(&contents) {
+                let recent: Vec<_> = events.into_iter().rev().take(10).collect();
+                diagnostics["recent_activity"] = serde_json::json!(recent);
+            }
+        }
+    }
+
+    // Get last 50 lines of hook execution log
+    let hook_log = claude_dir.join("hook-execution.log");
+    if hook_log.exists() {
+        if let Ok(contents) = fs::read_to_string(&hook_log) {
+            let lines: Vec<_> = contents.lines().rev().take(50).collect();
+            let lines: Vec<_> = lines.into_iter().rev().collect();
+            diagnostics["hook_execution_log"] = serde_json::json!(lines);
+        }
+    }
+
+    // Get config (sanitize API keys)
+    let config_file = claude_dir.join("audio-notifier.yaml");
+    if config_file.exists() {
+        if let Ok(contents) = fs::read_to_string(&config_file) {
+            // Simple sanitization - replace API key values
+            let sanitized = contents.lines()
+                .map(|line| {
+                    if line.contains("api_key:") || line.contains("fish_audio_api_key:") {
+                        if let Some(pos) = line.find(':') {
+                            format!("{}:  [REDACTED]", &line[..pos])
+                        } else {
+                            line.to_string()
+                        }
+                    } else {
+                        line.to_string()
+                    }
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+            diagnostics["config_yaml"] = serde_json::json!(sanitized);
+        }
+    }
+
+    serde_json::to_string_pretty(&diagnostics)
+        .map_err(|e| format!("Failed to serialize diagnostics: {}", e))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -1406,6 +1537,7 @@ fn main() {
             save_config,
             get_sounds_enabled,
             set_sounds_enabled,
+            was_uninstalled,
             preview_sound,
             preview_voice,
             pregenerate_basic_voices,
@@ -1420,6 +1552,7 @@ fn main() {
             export_installation_log,
             get_backup_path,
             get_activity_log,
+            export_diagnostics,
             dev_reset_install,
         ])
         .run(tauri::generate_context!())
