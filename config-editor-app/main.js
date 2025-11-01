@@ -554,7 +554,7 @@ function setupEventListeners() {
                 }, 500);
 
                 reinstallBannerBtn.disabled = false;
-                reinstallBannerBtn.textContent = 'Restore notifications values';
+                reinstallBannerBtn.textContent = 'Restore required values';
 
                 await loadConfig();
                 renderUI();
@@ -567,7 +567,7 @@ function setupEventListeners() {
                 showToast('Reinstall failed: ' + error, 'error');
                 trackError(error, { context: 'reinstall_banner' });
                 reinstallBannerBtn.disabled = false;
-                reinstallBannerBtn.textContent = 'Restore notifications values';
+                reinstallBannerBtn.textContent = 'Restore required values';
             }
         });
     }
@@ -594,7 +594,7 @@ function setupEventListeners() {
                 }, 500);
 
                 faqReinstallBtn.disabled = false;
-                faqReinstallBtn.textContent = 'Restore notifications values';
+                faqReinstallBtn.textContent = 'Restore required values';
 
                 await loadConfig();
                 renderUI();
@@ -607,7 +607,7 @@ function setupEventListeners() {
                 showToast('Reinstall failed: ' + error, 'error');
                 trackError(error, { context: 'reinstall_faq' });
                 faqReinstallBtn.disabled = false;
-                faqReinstallBtn.textContent = 'Restore notifications values';
+                faqReinstallBtn.textContent = 'Restore required values';
             }
         });
     }
@@ -652,7 +652,7 @@ function setupEventListeners() {
 
                     // Update button to reinstall state
                     installToggleBtn.disabled = false;
-                    installToggleBtn.textContent = 'Restore notifications values';
+                    installToggleBtn.textContent = 'Restore required values';
 
                     await loadInstallationInfo();
                     await updateReinstallBanner();
@@ -1208,7 +1208,7 @@ async function updateInstallToggleButton() {
         if (soundsEnabled) {
             installToggleBtn.textContent = 'Remove relevant values';
         } else {
-            installToggleBtn.textContent = 'Restore notifications values';
+            installToggleBtn.textContent = 'Restore required values';
         }
     } catch (error) {
         console.error('Failed to check installation status:', error);
