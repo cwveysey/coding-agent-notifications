@@ -56,7 +56,7 @@ Upload the DMG to:
 
 1. Download the DMG file
 2. Double-click to mount
-3. Drag "Coding agent notifications.app" to Applications
+3. Drag "Coding Agent Notifications.app" to Applications
 4. Launch the app
 5. The app will automatically install all components on first launch
 
@@ -178,7 +178,7 @@ To avoid Gatekeeper warnings:
 2. **Code sign the app:**
    ```bash
    codesign --deep --force --verify --verbose --sign "Developer ID Application: YOUR NAME" \
-     "config-editor-app/src-tauri/target/release/bundle/macos/Coding agent notifications.app"
+     "config-editor-app/src-tauri/target/release/bundle/macos/Coding Agent Notifications.app"
    ```
 
 3. **Notarize the DMG:**
@@ -199,7 +199,7 @@ To avoid Gatekeeper warnings:
 ### DMG Installation Issues
 
 **"App is damaged and can't be opened"**
-- User needs to run: `xattr -cr "/Applications/Coding agent notifications.app"`
+- User needs to run: `xattr -cr "/Applications/Coding Agent Notifications.app"`
 - Or code sign your app (see above)
 
 **App doesn't install on first launch**

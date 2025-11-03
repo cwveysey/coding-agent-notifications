@@ -200,7 +200,7 @@ coding-agent-notifications/
 
 **User's Computer After Installation:**
 ```
-/Applications/Coding agent notifications.app
+/Applications/Coding Agent Notifications.app
 ~/.claude/
   ├── scripts/
   ├── voices/global/

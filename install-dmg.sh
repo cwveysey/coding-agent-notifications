@@ -59,7 +59,7 @@ echo -e "${GREEN}║                 Installer Opened! 🎉                     
 echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo "Next steps:"
-echo "  1. Drag 'Coding agent notifications.app' to Applications"
+echo "  1. Drag 'Coding Agent Notifications.app' to Applications"
 echo "  2. Launch the app from Applications"
 echo "  3. The app will install all components automatically"
 echo "  4. Restart any active Claude Code sessions"

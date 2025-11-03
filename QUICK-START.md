@@ -173,7 +173,7 @@ config-editor-app/
         └── release/
             └── bundle/
                 └── macos/
-                    └── Coding agent notifications.app/
+                    └── Coding Agent Notifications.app/
                         └── Contents/
                             └── Resources/
                                 └── resources/
@@ -188,7 +188,7 @@ config-editor-app/
 
 Users need to run:
 ```bash
-xattr -cr "/Applications/Coding agent notifications.app"
+xattr -cr "/Applications/Coding Agent Notifications.app"
 ```
 
 **Solution:** Code sign your app (requires Apple Developer account)

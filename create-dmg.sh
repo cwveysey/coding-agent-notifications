@@ -15,7 +15,7 @@ echo -e "${BLUE}╚════════════════════�
 echo ""
 
 # Configuration
-APP_NAME="Coding agent notifications"
+APP_NAME="Coding Agent Notifications"
 APP_PATH="config-editor-app/src-tauri/target/release/bundle/macos/${APP_NAME}.app"
 DMG_NAME="Coding-Agent-Notifications-Installer"
 OUTPUT_DIR="dist"

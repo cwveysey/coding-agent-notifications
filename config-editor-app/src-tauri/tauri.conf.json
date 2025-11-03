@@ -1,5 +1,5 @@
 {
-  "productName": "Coding agent notifications",
+  "productName": "Coding Agent Notifications",
   "version": "1.0.0",
   "identifier": "com.cwveysey.audio-notifier-config",
   "build": {
@@ -24,13 +24,15 @@
     "shortDescription": "",
     "longDescription": "",
     "macOS": {
-      "minimumSystemVersion": "10.15"
+      "minimumSystemVersion": "10.15",
+      "signingIdentity": "Developer ID Application: Cooper Veysey (BBHGDF6J2P)",
+      "entitlements": null
     }
   },
   "app": {
     "windows": [
       {
-        "title": "Coding agent notifications",
+        "title": "Coding Agent Notifications",
         "width": 900,
         "height": 950,
         "resizable": true,
