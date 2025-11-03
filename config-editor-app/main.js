@@ -220,8 +220,7 @@ function processVoiceSelections(config) {
             } else if (value === 'voice:project') {
                 config.global_settings.voice_template = 'The {event} event was run for the {project} project';
             }
-            // Reset to a default sound file (voice will override)
-            config.global_settings.event_sounds[event] = '/System/Library/Sounds/Glass.aiff';
+            // Keep the voice: prefix so select-sound.sh can detect it
         } else {
             config.global_settings.voice_enabled[event] = false;
         }
@@ -233,8 +232,7 @@ function processVoiceSelections(config) {
             const value = project.event_sounds[event];
             if (value?.startsWith('voice:')) {
                 project.voice_enabled[event] = true;
-                // Reset to a default sound file
-                project.event_sounds[event] = '/System/Library/Sounds/Glass.aiff';
+                // Keep the voice: prefix so select-sound.sh can detect it
             } else {
                 project.voice_enabled[event] = false;
             }
