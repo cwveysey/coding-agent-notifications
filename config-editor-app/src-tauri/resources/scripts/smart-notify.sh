@@ -206,7 +206,7 @@ send_notification() {
 
     # Try to get git toplevel directory name
     if command -v git >/dev/null 2>&1; then
-        detected_project=$(cd "${PWD:-/tmp}" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null | xargs basename 2>/dev/null)
+        detected_project=$(cd "${PWD:-/tmp}" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null | xargs basename 2>/dev/null || true)
     fi
 
     # Fallback to current directory name
