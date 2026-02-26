@@ -86,9 +86,7 @@ async function loadConfig() {
         config = await invoke('load_config');
         savedConfig = JSON.parse(JSON.stringify(config)); // Deep copy
         updateSaveButton();
-        console.log('Config loaded:', config);
-        console.log('Sound library:', config.sound_library);
-        console.log('Event sounds:', config.global_settings.event_sounds);
+        // Config loaded successfully
     } catch (error) {
         console.error('Failed to load config:', error);
         // Use default config if loading fails
@@ -184,7 +182,7 @@ async function saveConfig() {
             try {
                 const result = await invoke('generate_voice_notifications', {
                     config,
-                    apiKey: null // TODO: Get from settings
+                    apiKey: config.global_settings.fish_audio_api_key || null
                 });
                 console.log(result);
                 showToast('Settings saved successfully');
@@ -320,97 +318,37 @@ function setupEventListeners() {
     // Save button
     document.getElementById('saveBtn').addEventListener('click', saveConfig);
 
-    document.getElementById('notificationSound').addEventListener('change', (e) => {
-        config.global_settings.event_sounds.notification = e.target.value;
-        markChanged();
-        trackEvent('sound_changed', { hook_type: 'notification', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
-    });
+    // Hook event listeners for sound selectors, visual toggles, and audio toggles
+    const hookTypes = [
+        { key: 'notification', idPrefix: 'notification' },
+        { key: 'stop', idPrefix: 'stop' },
+        { key: 'pre_tool_use', idPrefix: 'preToolUse' },
+        { key: 'post_tool_use', idPrefix: 'postToolUse' },
+        { key: 'subagent_stop', idPrefix: 'subagentStop' },
+    ];
 
-    document.getElementById('stopSound').addEventListener('change', (e) => {
-        config.global_settings.event_sounds.stop = e.target.value;
-        markChanged();
-        trackEvent('sound_changed', { hook_type: 'stop', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
-    });
+    for (const { key, idPrefix } of hookTypes) {
+        // Sound selector
+        document.getElementById(`${idPrefix}Sound`).addEventListener('change', (e) => {
+            config.global_settings.event_sounds[key] = e.target.value;
+            markChanged();
+            trackEvent('sound_changed', { hook_type: key, sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
+        });
 
-    document.getElementById('preToolUseSound').addEventListener('change', (e) => {
-        config.global_settings.event_sounds.pre_tool_use = e.target.value;
-        markChanged();
-        trackEvent('sound_changed', { hook_type: 'pre_tool_use', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
-    });
+        // Visual notification toggle
+        document.getElementById(`${idPrefix}Visual`).addEventListener('change', (e) => {
+            config.global_settings.event_enabled[key] = e.target.checked;
+            markChanged();
+            trackEvent('hook_toggled', { hook_type: key, visual: e.target.checked });
+        });
 
-    document.getElementById('postToolUseSound').addEventListener('change', (e) => {
-        config.global_settings.event_sounds.post_tool_use = e.target.value;
-        markChanged();
-        trackEvent('sound_changed', { hook_type: 'post_tool_use', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
-    });
-
-    document.getElementById('subagentStopSound').addEventListener('change', (e) => {
-        config.global_settings.event_sounds.subagent_stop = e.target.value;
-        markChanged();
-        trackEvent('sound_changed', { hook_type: 'subagent_stop', sound_type: e.target.value.startsWith('voice:') ? 'voice' : 'sound' });
-    });
-
-    // Visual notification toggles
-    document.getElementById('notificationVisual').addEventListener('change', (e) => {
-        config.global_settings.event_enabled.notification = e.target.checked;
-        markChanged();
-        trackEvent('hook_toggled', { hook_type: 'notification', visual: e.target.checked });
-    });
-
-    document.getElementById('stopVisual').addEventListener('change', (e) => {
-        config.global_settings.event_enabled.stop = e.target.checked;
-        markChanged();
-        trackEvent('hook_toggled', { hook_type: 'stop', visual: e.target.checked });
-    });
-
-    document.getElementById('preToolUseVisual').addEventListener('change', (e) => {
-        config.global_settings.event_enabled.pre_tool_use = e.target.checked;
-        markChanged();
-        trackEvent('hook_toggled', { hook_type: 'pre_tool_use', visual: e.target.checked });
-    });
-
-    document.getElementById('postToolUseVisual').addEventListener('change', (e) => {
-        config.global_settings.event_enabled.post_tool_use = e.target.checked;
-        markChanged();
-        trackEvent('hook_toggled', { hook_type: 'post_tool_use', visual: e.target.checked });
-    });
-
-    document.getElementById('subagentStopVisual').addEventListener('change', (e) => {
-        config.global_settings.event_enabled.subagent_stop = e.target.checked;
-        markChanged();
-        trackEvent('hook_toggled', { hook_type: 'subagent_stop', visual: e.target.checked });
-    });
-
-    // Audio notification toggles
-    document.getElementById('notificationAudio').addEventListener('change', (e) => {
-        config.global_settings.voice_enabled.notification = e.target.checked;
-        markChanged();
-        trackEvent('hook_toggled', { hook_type: 'notification', audio: e.target.checked });
-    });
-
-    document.getElementById('stopAudio').addEventListener('change', (e) => {
-        config.global_settings.voice_enabled.stop = e.target.checked;
-        markChanged();
-        trackEvent('hook_toggled', { hook_type: 'stop', audio: e.target.checked });
-    });
-
-    document.getElementById('preToolUseAudio').addEventListener('change', (e) => {
-        config.global_settings.voice_enabled.pre_tool_use = e.target.checked;
-        markChanged();
-        trackEvent('hook_toggled', { hook_type: 'pre_tool_use', audio: e.target.checked });
-    });
-
-    document.getElementById('postToolUseAudio').addEventListener('change', (e) => {
-        config.global_settings.voice_enabled.post_tool_use = e.target.checked;
-        markChanged();
-        trackEvent('hook_toggled', { hook_type: 'post_tool_use', audio: e.target.checked });
-    });
-
-    document.getElementById('subagentStopAudio').addEventListener('change', (e) => {
-        config.global_settings.voice_enabled.subagent_stop = e.target.checked;
-        markChanged();
-        trackEvent('hook_toggled', { hook_type: 'subagent_stop', audio: e.target.checked });
-    });
+        // Audio notification toggle
+        document.getElementById(`${idPrefix}Audio`).addEventListener('change', (e) => {
+            config.global_settings.voice_enabled[key] = e.target.checked;
+            markChanged();
+            trackEvent('hook_toggled', { hook_type: key, audio: e.target.checked });
+        });
+    }
 
     // Respect Do Not Disturb toggle
     document.getElementById('respectDND').addEventListener('change', (e) => {
@@ -530,84 +468,49 @@ function setupEventListeners() {
         }
     });
 
+    // Shared reinstall handler
+    async function handleReinstall(btn, source) {
+        try {
+            if (!confirm('Reinstall audio notifications?')) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Restoring...';
+
+            await invoke('install_hooks');
+            showToast('Installation complete!', 'success');
+
+            setTimeout(() => {
+                alert('Installation complete!\n\nIMPORTANT: You need to start a new Claude Code session for the hooks to take effect. Your current session will not have notifications enabled until you restart.');
+            }, 500);
+
+            btn.disabled = false;
+            btn.textContent = 'Restore required values';
+
+            await loadConfig();
+            renderUI();
+            await loadInstallationInfo();
+            await updateReinstallBanner();
+            await updateInstallToggleButton();
+            trackEvent(`reinstall_from_${source}`);
+        } catch (error) {
+            console.error('Reinstall failed:', error);
+            showToast('Reinstall failed: ' + error, 'error');
+            trackError(error, { context: `reinstall_${source}` });
+            btn.disabled = false;
+            btn.textContent = 'Restore required values';
+        }
+    }
+
     // Reinstall banner button
     const reinstallBannerBtn = document.getElementById('reinstallBannerBtn');
     if (reinstallBannerBtn) {
-        reinstallBannerBtn.addEventListener('click', async () => {
-            try {
-                if (!confirm('Reinstall audio notifications?')) {
-                    return;
-                }
-
-                reinstallBannerBtn.disabled = true;
-                reinstallBannerBtn.textContent = 'Restoring...';
-
-                await invoke('install_hooks');
-
-                showToast('Installation complete!', 'success');
-
-                // Show restart message
-                setTimeout(() => {
-                    alert('Installation complete!\n\nIMPORTANT: You need to start a new Claude Code session for the hooks to take effect. Your current session will not have notifications enabled until you restart.');
-                }, 500);
-
-                reinstallBannerBtn.disabled = false;
-                reinstallBannerBtn.textContent = 'Restore required values';
-
-                await loadConfig();
-                renderUI();
-                await loadInstallationInfo();
-                await updateReinstallBanner();
-                await updateInstallToggleButton();
-                trackEvent('reinstall_from_banner');
-            } catch (error) {
-                console.error('Reinstall failed:', error);
-                showToast('Reinstall failed: ' + error, 'error');
-                trackError(error, { context: 'reinstall_banner' });
-                reinstallBannerBtn.disabled = false;
-                reinstallBannerBtn.textContent = 'Restore required values';
-            }
-        });
+        reinstallBannerBtn.addEventListener('click', () => handleReinstall(reinstallBannerBtn, 'banner'));
     }
 
     // FAQ reinstall button
     const faqReinstallBtn = document.getElementById('faqReinstallBtn');
     if (faqReinstallBtn) {
-        faqReinstallBtn.addEventListener('click', async () => {
-            try {
-                if (!confirm('Reinstall audio notifications?')) {
-                    return;
-                }
-
-                faqReinstallBtn.disabled = true;
-                faqReinstallBtn.textContent = 'Restoring...';
-
-                await invoke('install_hooks');
-
-                showToast('Installation complete!', 'success');
-
-                // Show restart message
-                setTimeout(() => {
-                    alert('Installation complete!\n\nIMPORTANT: You need to start a new Claude Code session for the hooks to take effect. Your current session will not have notifications enabled until you restart.');
-                }, 500);
-
-                faqReinstallBtn.disabled = false;
-                faqReinstallBtn.textContent = 'Restore required values';
-
-                await loadConfig();
-                renderUI();
-                await loadInstallationInfo();
-                await updateReinstallBanner();
-                await updateInstallToggleButton();
-                trackEvent('reinstall_from_faq');
-            } catch (error) {
-                console.error('Reinstall failed:', error);
-                showToast('Reinstall failed: ' + error, 'error');
-                trackError(error, { context: 'reinstall_faq' });
-                faqReinstallBtn.disabled = false;
-                faqReinstallBtn.textContent = 'Restore required values';
-            }
-        });
+        faqReinstallBtn.addEventListener('click', () => handleReinstall(faqReinstallBtn, 'faq'));
     }
 
     // Install/Uninstall toggle button
@@ -886,9 +789,10 @@ function renderProjectList(containerId = 'projectList', addButtonId = 'addProjec
         const card = document.createElement('div');
         card.className = 'project-card';
 
+        const escapedPath = project.path.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         card.innerHTML = `
             <div class="project-header">
-                <div class="project-path" title="${project.path}">${project.path}</div>
+                <div class="project-path" title="${escapedPath}">${escapedPath}</div>
                 <input type="checkbox" class="toggle" ${project.enabled ? 'checked' : ''} data-index="${index}">
             </div>
             <div class="project-sounds">

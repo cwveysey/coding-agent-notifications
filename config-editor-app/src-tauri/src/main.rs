@@ -91,7 +91,7 @@ fn default_voice_template() -> String {
 }
 
 fn default_voice_provider() -> String {
-    "system".to_string()
+    "fish_audio".to_string()
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -167,23 +167,27 @@ struct InstallationChanges {
 
 // ===== Helper Functions =====
 
+fn get_home_dir() -> Result<String, String> {
+    std::env::var("HOME").map_err(|_| "Could not determine HOME directory".to_string())
+}
+
 fn get_config_path() -> PathBuf {
-    let home = std::env::var("HOME").unwrap();
+    let home = get_home_dir().unwrap_or_else(|_| "/tmp".to_string());
     PathBuf::from(home).join(".claude/audio-notifier.yaml")
 }
 
 fn get_sounds_enabled_path() -> PathBuf {
-    let home = std::env::var("HOME").unwrap();
+    let home = get_home_dir().unwrap_or_else(|_| "/tmp".to_string());
     PathBuf::from(home).join(".claude/.sounds-enabled")
 }
 
 fn get_custom_sounds_dir() -> PathBuf {
-    let home = std::env::var("HOME").unwrap();
+    let home = get_home_dir().unwrap_or_else(|_| "/tmp".to_string());
     PathBuf::from(home).join(".claude/sounds")
 }
 
 fn get_voice_cache_dir() -> PathBuf {
-    let home = std::env::var("HOME").unwrap();
+    let home = get_home_dir().unwrap_or_else(|_| "/tmp".to_string());
     PathBuf::from(home).join(".claude/voices")
 }
 
@@ -472,12 +476,12 @@ async fn preview_voice(text: String, api_key: Option<String>, app_handle: tauri:
 // ===== Installation Safety Functions =====
 
 fn get_manifest_path() -> PathBuf {
-    let home = std::env::var("HOME").unwrap();
+    let home = get_home_dir().unwrap_or_else(|_| "/tmp".to_string());
     PathBuf::from(home).join(".claude/audio-notifier-install.json")
 }
 
 fn get_backup_dir() -> PathBuf {
-    let home = std::env::var("HOME").unwrap();
+    let home = get_home_dir().unwrap_or_else(|_| "/tmp".to_string());
     PathBuf::from(home).join(".claude/backups")
 }
 
@@ -509,7 +513,9 @@ fn create_backup(settings_file: &PathBuf) -> Result<String, String> {
     fs::copy(settings_file, &backup_path)
         .map_err(|e| format!("Failed to create backup: {}", e))?;
 
-    Ok(backup_path.to_str().unwrap().to_string())
+    Ok(backup_path.to_str()
+        .ok_or_else(|| "Backup path contains invalid UTF-8".to_string())?
+        .to_string())
 }
 
 fn merge_hooks(existing_hooks: &serde_json::Value, our_hooks: serde_json::Value) -> serde_json::Value {
@@ -569,7 +575,7 @@ fn create_installation_manifest(
     let manifest = InstallationManifest {
         installed_at: Utc::now().to_rfc3339(),
         backup_path,
-        app_version: "1.0.0".to_string(),
+        app_version: env!("CARGO_PKG_VERSION").to_string(),
         changes: InstallationChanges {
             files_created,
             hooks_added,
@@ -899,7 +905,7 @@ async fn upload_sound(source_path: String) -> Result<String, String> {
 
 #[tauri::command]
 async fn get_recent_projects() -> Result<Vec<String>, String> {
-    let home = std::env::var("HOME").unwrap();
+    let home = get_home_dir()?;
     let log_path = PathBuf::from(&home).join(".claude/claude-output.log");
 
     if !log_path.exists() {
@@ -934,7 +940,7 @@ async fn get_recent_projects() -> Result<Vec<String>, String> {
 
 #[tauri::command]
 async fn open_log_file() -> Result<(), String> {
-    let home = std::env::var("HOME").unwrap();
+    let home = get_home_dir()?;
     let log_path = format!("{}/.claude/smart-notify-debug.log", home);
 
     #[cfg(target_os = "macos")]
@@ -1006,7 +1012,7 @@ async fn pregenerate_basic_voices(api_key: String) -> Result<String, String> {
             .map_err(|e| format!("Failed to write voice file: {}", e))?;
     }
 
-    Ok("Pre-generated 4 basic voice files".to_string())
+    Ok("Pre-generated 5 basic voice files".to_string())
 }
 
 #[tauri::command]
@@ -1283,7 +1289,7 @@ async fn export_diagnostics() -> Result<String, String> {
     let claude_dir = PathBuf::from(&home).join(".claude");
 
     let mut diagnostics = serde_json::json!({
-        "app_version": "1.0.0",
+        "app_version": env!("CARGO_PKG_VERSION"),
         "collected_at": chrono::Utc::now().to_rfc3339(),
     });
 
@@ -1461,7 +1467,9 @@ async fn dev_reset_install() -> Result<(), String> {
 
         if let Ok(mut settings) = serde_json::from_str::<serde_json::Value>(&contents) {
             if settings.get("hooks").is_some() {
-                settings.as_object_mut().unwrap().remove("hooks");
+                if let Some(obj) = settings.as_object_mut() {
+                    obj.remove("hooks");
+                }
                 let settings_str = serde_json::to_string_pretty(&settings)
                     .map_err(|e| format!("Failed to serialize settings: {}", e))?;
                 fs::write(&settings_file, settings_str)
@@ -1582,7 +1590,6 @@ fn main() {
             get_backup_path,
             get_activity_log,
             export_diagnostics,
-            dev_reset_install,
             open_focus_settings,
         ])
         .run(tauri::generate_context!())

@@ -1,6 +1,10 @@
 #!/bin/bash
 # Simple YAML config reader for audio-notifier.yaml
 # Usage: source read-config.sh
+#
+# Note: This is a minimal parser for our specific flat YAML structure.
+# It handles "key: value" lines with section tracking. It does NOT handle
+# multiline values, flow sequences, or complex YAML features.
 
 CONFIG_FILE="$HOME/.claude/audio-notifier.yaml"
 
@@ -27,16 +31,31 @@ LOG_FILE="$HOME/.claude/notifications.log"
 DEBUG=false
 DEBUG_FILE="$HOME/.claude/watcher-debug.log"
 
+CURRENT_SECTION=""
+
 # Read config if it exists
 if [[ -f "$CONFIG_FILE" ]]; then
-    # Simple YAML parsing (works for our flat structure)
-    while IFS=': ' read -r key value; do
-        # Remove leading/trailing whitespace and comments
-        key=$(echo "$key" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        value=$(echo "$value" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/#.*//')
+    while IFS= read -r line; do
+        # Strip comments and trailing whitespace
+        line="${line%%#*}"
+        # Skip empty lines
+        [[ -z "${line// }" ]] && continue
 
-        # Skip empty lines and section headers
-        [[ -z "$key" || "$key" =~ ^# ]] && continue
+        # Detect section headers (lines ending with ":" and no value after it)
+        if [[ "$line" =~ ^([a-z_]+):$ ]] || [[ "$line" =~ ^([a-z_]+):[[:space:]]*$ ]]; then
+            CURRENT_SECTION="${BASH_REMATCH[1]}"
+            continue
+        fi
+
+        # Parse "key: value" lines (split on first colon only)
+        if [[ "$line" =~ ^[[:space:]]*([a-z_]+):[[:space:]]+(.*) ]]; then
+            key="${BASH_REMATCH[1]}"
+            value="${BASH_REMATCH[2]}"
+            # Trim trailing whitespace from value
+            value="${value%"${value##*[![:space:]]}"}"
+        else
+            continue
+        fi
 
         # Map YAML keys to variables
         case "$key" in
@@ -67,14 +86,6 @@ if [[ -f "$CONFIG_FILE" ]]; then
             log_file) LOG_FILE="${value/#\~/$HOME}" ;;
             debug) DEBUG=$value ;;
             debug_file) DEBUG_FILE="${value/#\~/$HOME}" ;;
-
-            # Track which section we're in
-            sound) CURRENT_SECTION="sound" ;;
-            audio) CURRENT_SECTION="audio" ;;
-            terminal_notifier) CURRENT_SECTION="terminal_notifier" ;;
-            ntfy) CURRENT_SECTION="ntfy" ;;
-            inactivity) CURRENT_SECTION="inactivity" ;;
-            logging) CURRENT_SECTION="logging" ;;
         esac
     done < "$CONFIG_FILE"
 fi

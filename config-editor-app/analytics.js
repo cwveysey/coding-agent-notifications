@@ -47,7 +47,7 @@ export function trackEvent(eventName, properties = {}) {
         posthog.capture(eventName, {
             ...properties,
             platform: 'macos', // Since this is macOS only currently
-            app_version: '1.0.0', // TODO: Pull from package.json or tauri.conf.json
+            app_version: typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.0.0',
         });
     } catch (error) {
         console.error('Failed to track event:', error);
