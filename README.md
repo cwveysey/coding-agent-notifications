@@ -1,6 +1,19 @@
-# Claude Code Notifier
+# Coding Agent Notifications
 
-Smart audio and visual notifications for [Claude Code](https://claude.com/claude-code) - never miss when Claude needs your attention.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Platform: macOS](https://img.shields.io/badge/platform-macOS-blue)]()
+[![GitHub release](https://img.shields.io/github/v/release/cwveysey/coding-agent-notifications)](https://github.com/cwveysey/coding-agent-notifications/releases)
+
+Smart audio and visual notifications for [Claude Code](https://claude.com/claude-code) and other coding agents - never miss when your agent needs attention.
+
+## Requirements
+
+- macOS 13+
+- Bash 4.0+
+- [jq](https://jqlang.github.io/jq/) (JSON processing)
+- [Claude Code](https://claude.com/claude-code) with hooks support
+- Optional: [terminal-notifier](https://github.com/julienXX/terminal-notifier) (for visual notifications)
+- Optional: Swift compiler (for building the menu bar app from source)
 
 ## Features
 
@@ -251,36 +264,22 @@ Rebuild if needed:
 cd menu-bar-app && ./build.sh
 ```
 
-## Requirements
+## Privacy
 
-- macOS (for menu bar app)
-- Bash 4.0+
-- jq (JSON processing)
-- Claude Code with hooks support
-- Optional: terminal-notifier (for visual notifications)
-- Optional: Swift compiler (for building menu bar app)
+The config editor app includes optional, anonymous usage analytics (PostHog) to help improve the product. Analytics are disabled by default in development builds and can be fully opted out in the app settings. No personal data or notification content is ever collected.
 
 ## Contributing
 
-Contributions welcome! Please:
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+## Security
+
+For security concerns, see [SECURITY.md](SECURITY.md). Please report vulnerabilities via email, not public issues.
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT License - see [LICENSE](LICENSE) for details.
 
 ## Credits
 
-Built with [Claude Code](https://claude.com/claude-code) by [@cwveysey](https://github.com/cwveysey)
-
-## Related Projects
-
-- [GitHub Activity Summary Tool](https://github.com/cwveysey/github-activity-summary-tool) - Daily email summaries of your GitHub activity with AI-generated blog post and tweet suggestions
-
----
-
-**Never miss when Claude needs you again! 🔔**
+Built by [@cwveysey](https://github.com/cwveysey)

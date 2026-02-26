@@ -220,5 +220,5 @@ xattr -cr "/Applications/Coding Agent Notifications.app"
 For detailed information, see `DISTRIBUTION.md`
 
 For questions:
-- Email: cwveysey@gmail.com
+- Email: cooper@optimizationlabs.io
 - GitHub Issues: YOUR_REPO/issues

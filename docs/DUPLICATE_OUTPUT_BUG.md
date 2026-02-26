@@ -141,16 +141,9 @@ With only ONE Claude session running:
 
 ## Related Files
 
-- This repo: `/Users/cooperveysey/Desktop/Development/Side projects/audio-notifications-for-claude-code-activity/`
 - Scripts location: `~/.claude/scripts/`
 - Config: `~/.claude/audio-notifier.yaml`
 - Hooks config: `~/.config/claude/settings.json` or similar
-
-## Session Context
-
-Working on: Audio notifications for Claude Code project
-Task: Setting up and troubleshooting notification system
-Status: Porting code to dedicated repo at `/Users/cooperveysey/Desktop/Development/Side projects/audio-notifications-for-claude-code-activity/`
 
 ---
 

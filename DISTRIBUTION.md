@@ -253,5 +253,5 @@ After installation, users will have:
 
 Direct users to:
 - GitHub Issues: YOUR_GITHUB_REPO/issues
-- Email: cwveysey@gmail.com
+- Email: cooper@optimizationlabs.io
 - Documentation: YOUR_DOCS_URL

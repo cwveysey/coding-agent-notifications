@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-scripts:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check bash syntax
+        run: |
+          for f in scripts/*.sh install.sh; do
+            bash -n "$f"
+          done
+      - name: ShellCheck
+        run: |
+          brew install shellcheck
+          shellcheck scripts/*.sh install.sh || true
+
+  build-menu-bar:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Swift menu bar app
+        run: |
+          cd menu-bar-app
+          ./build.sh
